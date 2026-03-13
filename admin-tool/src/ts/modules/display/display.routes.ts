@@ -1,9 +1,16 @@
 import { Routes } from '@angular/router';
-import { DisplayComponent } from './display.component';
+import { DisplayHeaderComponent } from './display.header/display.header.component';
+import { DisplayDateTimeComponent } from './display.date.time/display.date.time.component';
 
 export const routes: Routes = [
   {
     path: 'display',
-    component: DisplayComponent,
+    component: DisplayHeaderComponent,
+    children: [
+      {
+        path: 'date-time',
+        component: DisplayDateTimeComponent,
+      }
+    ]
   },
 ];
