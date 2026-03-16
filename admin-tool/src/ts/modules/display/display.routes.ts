@@ -8,6 +8,11 @@ export const routes: Routes = [
     component: DisplayHeaderComponent,
     children: [
       {
+        path: '',
+        redirectTo: 'date-time',
+        pathMatch: 'full'
+      },
+      {
         path: 'date-time',
         component: DisplayDateTimeComponent,
       }

@@ -7,10 +7,6 @@ export interface DateTimeSettings{
   dateFormat: string;
   dateTimeFormat: string;
 }
-const mockSettings ={
-  dateFormat: 'DD-MMM-YYYY',
-  dateTimeFormat: 'DD-MMM-YYYY HH:mm:ss'
-}
 
 @Injectable({
   providedIn: 'root'
@@ -28,32 +24,37 @@ export class SettingsService {
  getDateTimeSettings(): Observable<DateTimeSettings>{
     return this.getSettings().pipe(
       map( res => ({
-        dateFormat: res.dateFormat,
-        dateTimeFormat: res.dateTimeFormat
+        dateFormat: res.date_format,
+        dateTimeFormat: res.reported_date_format
       }))
     );
    }
 
    updateDateTimeSettings(changes: DateTimeSettings): Observable<void>{
-    return this.updateSettings(changes);
+    return this.updateSettings({
+      date_format: changes.dateFormat,
+      reported_date_format: changes.dateTimeFormat
+    });
    }
 
 
 
 
   getSettings(): Observable<any>{
-    //return this.http.get('/api/v1/settings');
-    return of(mockSettings);
+    return this.http.get('/api/v1/settings' , {
+      withCredentials: true
+    });
   }
 
   updateSettings(updates, replace = false): Observable<void>{
-    // return this.http.put<void>('/api/v1/settings', updates, {
-    //   params: {replace: String(replace)},
-    //   headers: {'Content-Type': 'application/json'}
-    // });
-    console.log('updateSettings info: ', updates);
+    return this.http.put<void>('/api/v1/settings', updates, {
+      params: {replace: String(replace)},
+      headers: {'Content-Type': 'application/json'},
+      withCredentials: true
+    });
+    // console.log('updateSettings info: ', updates);
     //return throwError(() => new Error('Mock error'));
-    return of(undefined).pipe(delay(1500));
+    //return of(undefined).pipe(delay(1500));
   }
 
 
