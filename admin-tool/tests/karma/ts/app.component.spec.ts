@@ -6,6 +6,7 @@ import { AppComponent } from '../../../src/ts/app.component';
 import { MainLayoutComponent } from '@admin-tool-modules/shell/main-layout.component';
 import { HeaderComponent } from '@admin-tool-components/header/header.component';
 import { SidebarComponent } from '@admin-tool-components/sidebar/sidebar.component';
+import { HttpClientModule } from '@angular/common/http';
 
 describe('AppComponent', () => {
   let component: AppComponent;
@@ -16,6 +17,7 @@ describe('AppComponent', () => {
       .configureTestingModule({
         imports: [
           RouterTestingModule,
+          HttpClientModule,
           AppComponent,
           MainLayoutComponent,
           HeaderComponent,
