@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
-import { DisplayDateTimeComponent } from '@admin-tool-modules/display/display.date.time/display.date.time.component';
+import { DisplayDateTimeComponent } from '@admin-tool-modules/display/display-date-time/display-date-time.component';
 import { SettingsService } from '@admin-tool-services/settings.service';
 import moment from 'moment';
 
@@ -223,7 +223,7 @@ describe('DisplayDateTimeComponent', () => {
   });
 
   describe('setSettingsDate', () => {
-    it('should set loading true at start', async () => {
+    it('should set loading true at start', () => {
       component.setSettingsDate();
       expect(component.responseStatus.loading).to.be.true;
     });
@@ -231,7 +231,7 @@ describe('DisplayDateTimeComponent', () => {
     it('should call updateDateTimeSettings with correct values', async () => {
       component.dateFormatSelection = 'DD/MM/YYYY';
       component.dateTimeFormatSelection = 'MM/DD/YYYY HH:mm:ss';
-      component.setSettingsDate();
+      await component.setSettingsDate();
       expect(settingsService.updateDateTimeSettings.calledOnce).to.be.true;
       expect(
         settingsService.updateDateTimeSettings.calledWith({
@@ -276,7 +276,7 @@ describe('DisplayDateTimeComponent', () => {
       expect(compiled.querySelector('button[type="submit"]')).to.exist;
     });
 
-    it('should disable submit button when loading', async () => {
+    it('should disable submit button when loading', () => {
       component.responseStatus = { loading: true };
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;

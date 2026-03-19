@@ -2,7 +2,7 @@
 
 
 .custom-tabs {
-  margin-top: -50px;
+  margin-top: -3.125rem;
   border-bottom: 1px solid @nav-active-border;
   > li {
     > a {
@@ -13,7 +13,7 @@
       border-radius: 4px 4px 0 0;
       &:hover {
         background-color: @nav-active-bg;
-        border-color: @nav-active-border @nav-active-border transparent;
+
       }
     }
     &.active > a{
@@ -25,4 +25,11 @@
 
   }
 
+}
+
+@media(max-width: 768px){
+  .custom-tabs{
+    margin-top: 0px;
+    
+  }
 }
