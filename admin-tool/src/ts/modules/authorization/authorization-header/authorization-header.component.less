@@ -1,0 +1,31 @@
+@import (reference) "../../../../css/variables.less";
+ 
+.custom-tabs {
+  margin-top: 0.6rem;
+  border-bottom: 1px solid @nav-active-border;
+  > li {
+    > a {
+      color: #010101;
+      font: @font-family-main;
+      font-size: @font-size-base;
+      border: 1px solid transparent;
+      border-radius: 4px 4px 0 0;
+      &:hover {
+        background-color: @nav-active-bg;
+      }
+    }
+    &.active > a {
+      background-color: @nav-active-bg;
+      border: 1px solid @nav-active-border;
+      border-bottom-color: @nav-active-bg;
+      color: @gray-ultra-dark;
+    }
+  }
+}
+ 
+@media (max-width: 768px) {
+  .custom-tabs {
+    margin-top: 0px;
+  }
+}
+ 
