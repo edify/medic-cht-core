@@ -1,9 +1,11 @@
 import { TestBed } from '@angular/core/testing';
+
 import sinon from 'sinon';
 import { expect } from 'chai';
 import { of, throwError } from 'rxjs';
 
 import { HttpClient } from '@angular/common/http';
+
 import { SettingsService } from '@admin-tool-services/settings.service';
 
 describe('SettingsService', () => {
@@ -200,6 +202,71 @@ describe('SettingsService', () => {
           dateFormat: 'DD/MM/YYYY',
           dateTimeFormat: 'MM/DD/YYYY HH:mm:ss',
         });
+        expect.fail('should have thrown');
+      } catch (err: any) {
+        expect(err.status).to.equal(500);
+      }
+    });
+  });
+  describe('getRoles', () => {
+    it('should call getSettings', async () => {
+      http.get.returns(of({ roles: {} }));
+      await service.getRoles();
+      expect(http.get.calledWith('/api/v1/settings')).to.be.true;
+    });
+
+    it('should return roles from settings', async () => {
+      const mockRoles = {
+        chw: { name: 'usertype.chw', offline: true },
+        national_admin: { name: 'usertype.national_admin' },
+      };
+      http.get.returns(of({ roles: mockRoles }));
+      const result = await service.getRoles();
+      expect(result).to.deep.equal(mockRoles);
+    });
+
+    it('should return empty object when roles is undefined', async () => {
+      http.get.returns(of({}));
+      const result = await service.getRoles();
+      expect(result).to.deep.equal({});
+    });
+
+    it('should propagate error when getSettings fails', async () => {
+      http.get.returns(throwError(() => ({ status: 500 })));
+      try {
+        await service.getRoles();
+        expect.fail('should have thrown');
+      } catch (err: any) {
+        expect(err.status).to.equal(500);
+      }
+    });
+  });
+
+  describe('updateRoles', () => {
+    it('should call updateSettings with roles and replace=true', async () => {
+      http.put.returns(of(void 0));
+      const mockRoles = { chw: { name: 'usertype.chw', offline: true } };
+      await service.updateRoles(mockRoles);
+      expect(http.put.calledWith('/api/v1/settings')).to.be.true;
+    });
+
+    it('should send replace=true', async () => {
+      http.put.returns(of(void 0));
+      await service.updateRoles({ chw: { name: 'usertype.chw' } });
+      expect(http.put.args[0][2].params).to.deep.include({ replace: 'true' });
+    });
+
+    it('should send roles in the body', async () => {
+      http.put.returns(of(void 0));
+      const mockRoles = { chw: { name: 'usertype.chw', offline: true } };
+      await service.updateRoles(mockRoles);
+      expect(http.put.args[0][1]).to.deep.equal({ roles: mockRoles });
+    });
+
+    it('should propagate error when request fails', async () => {
+      http.put.returns(throwError(() => ({ status: 500 })));
+      try {
+        await service.updateRoles({ chw: { name: 'usertype.chw' } });
         expect.fail('should have thrown');
       } catch (err: any) {
         expect(err.status).to.equal(500);
