@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { expect } from 'chai';
 import sinon from 'sinon';
-
 import { DisplayDateTimeComponent } from '@admin-tool-modules/display/display-date-time/display-date-time.component';
 import { SettingsService } from '@admin-tool-services/settings.service';
 import moment from 'moment';
@@ -248,7 +247,7 @@ describe('DisplayDateTimeComponent', () => {
 
     it('should set success message after update', async () => {
       await component.setSettingsDate();
-      expect(component.responseStatus.msg).to.equal('Settings updated successfully');
+      expect(component.responseStatus.msg).to.equal('Saved');
     });
     it('should set error true when update fails', async () => {
       settingsService.updateDateTimeSettings.rejects(new Error('error'));
@@ -321,17 +320,17 @@ describe('DisplayDateTimeComponent', () => {
     });
 
     it('should show success message when success', () => {
-      component.responseStatus = { success: true, msg: 'Settings updated successfully' };
+      component.responseStatus = { success: true, msg: 'Saved' };
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.success')).to.exist;
     });
 
     it('should show correct success message', () => {
-      component.responseStatus = { success: true, msg: 'Settings updated successfully' };
+      component.responseStatus = { success: true, msg: 'Saved' };
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.querySelector('.success')!.textContent).to.include('Settings updated successfully');
+      expect(compiled.querySelector('.success')!.textContent).to.include('Saved');
     });
 
     it('should render 3 date format options', () => {

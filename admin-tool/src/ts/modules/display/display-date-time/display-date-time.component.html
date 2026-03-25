@@ -1,48 +1,52 @@
 <form class="custom-form">
   <div class="form-group">
-    <label class="date-label" translate>Date display format</label>
+    <label id="date-format-label" class="date-label" translate>Date display format</label>
     <div class="dropdown dropdown-date">
-      <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+      <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-labelledby="date-format-label">
         {{ dateFormatSelection }} <span class="caret"></span>
       </button>
       <ul class="dropdown-menu">
         @for (date of standardDateFormats; track $index) {
           <li>
-            <a (click)="onDateFormatSelected(date)">{{ date }}</a>
+            <button (click)="onDateFormatSelected(date)">{{ date }}</button>
           </li>
         }
       </ul>
     </div>
     <div class="help-block"></div>
     <p class="help-block">
-      <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank" translate>Moment.js format</a>
-      . <span translate>Eg:</span> {{ dateFormatExample }}
+      <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank" rel="noopener" translate>configuration.date.format.help</a>
+      . <span translate>For example</span> {{ dateFormatExample }}
     </p>
 
-    <label class="date-label second-label" translate>Datetime display format</label>
+    <label id="datetime-format-label" class="date-label second-label" translate>Datetime display format</label>
     <div class="dropdown dropdown-datetime">
-      <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+      <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-labelledby="datetime-format-label">
         {{ dateTimeFormatSelection }} <span class="caret"></span>
       </button>
       <ul class="dropdown-menu">
         @for (date of standardDatetimeFormats; track $index) {
           <li>
-            <a (click)="onDateTimeFormatSelected(date)">{{ date }}</a>
+            <button (click)="onDateTimeFormatSelected(date)">{{ date }}</button>
           </li>
         }
       </ul>
     </div>
     <div class="help-block"></div>
     <p class="help-block">
-      <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank" translate>Moment.js format</a>
-      . <span translate>Eg:</span> {{ dateTimeFormatExample }}
+      <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank" rel="noopener" translate>configuration.date.format.help</a>
+      . <span translate>For example</span> {{ dateTimeFormatExample }}
     </p>
 
     <div class="form-actions">
-      <button type="submit" class="btn btn-default button-submit"
+      <button 
+        type="submit" 
+        class="btn btn-default button-submit"
         (click)="setSettingsDate()"
         [disabled]="responseStatus.loading"
-        translate>Submit</button>
+        translate>
+        Submit
+      </button>
 
       @if (responseStatus.loading) {
         <div class="loader inline"></div>

@@ -11,6 +11,26 @@ export interface DateTimeSettings {
 }
 
 /**
+ * Represents the known properties of the CHT instance settings object.
+ * Only includes fields used by the admin tool — the full settings schema
+ * is open-ended and may contain additional properties.
+ *
+ * Used as Partial<CHTSettings> since not all fields are guaranteed
+ * to be present in every response.
+ *
+ * As new features are added to the admin tool, any settings properties
+ * they depend on should be added here.
+ */
+export interface CHTSettings {
+  date_format?: string;
+  reported_date_format?: string;
+  roles?: Record<string, { name: string; offline?: boolean }>;
+  permissions?: Record<string, string[]>;
+  languages?: { locale: string; enabled: boolean }[];
+  locale?: string;
+  locale_outgoing?: string;
+}
+/**
  * Service responsible for reading and writing CHT instance settings
  * via the /api/v1/settings endpoint.
  *
@@ -29,9 +49,9 @@ export class SettingsService {
    * and each domain-specific method is responsible for extracting
    * and typing the fields it needs.
    *
-   * @returns {Promise<any>} the complete settings object from /api/v1/settings
+   * @returns {Promise<Partial<CHTSettings>>} the complete settings object from /api/v1/settings
    */
-  async getSettings(): Promise<any> {
+  async getSettings(): Promise<Partial<CHTSettings>> {
     return firstValueFrom(
       this.http.get('/api/v1/settings', {
         withCredentials: true,
@@ -69,8 +89,8 @@ export class SettingsService {
   async getDateTimeSettings(): Promise<DateTimeSettings> {
     const res = await this.getSettings();
     return {
-      dateFormat: res.date_format,
-      dateTimeFormat: res.reported_date_format,
+      dateFormat: res.date_format ?? '',
+      dateTimeFormat: res.reported_date_format ?? '',
     };
   }
 

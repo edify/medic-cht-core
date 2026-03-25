@@ -2,6 +2,7 @@ import { SettingsService } from '@admin-tool-services/settings.service';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import moment from 'moment';
+import { ResponseStatus } from '../display-interfaces';
 
 /**
  * Component for configuring the date and datetime display formats
@@ -40,12 +41,7 @@ export class DisplayDateTimeComponent implements OnInit {
    * Tracks the state of the save operation.
    * Controls visibility of the loader, success, and error messages in the template.
    */
-  responseStatus: {
-    loading?: boolean;
-    success?: boolean;
-    error?: boolean;
-    msg?: string;
-  } = {};
+  responseStatus: ResponseStatus = {};
 
   constructor(private settingsService: SettingsService) {}
 
