@@ -1,0 +1,175 @@
+<div
+  class="modal fade"
+  [class.in]="visible"
+  [style.display]="visible ? 'block' : 'none'"
+  role="dialog"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <!-- Header -->
+      <div class="modal-header">
+        <button
+          type="button"
+          class="close"
+          (click)="cancel()"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Add User</h4>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+        <p *ngIf="errors.submit" class="alert alert-danger" role="alert">
+          {{ errors.submit }}
+        </p>
+
+        <!-- Username -->
+        <div class="form-group required" [class.has-error]="errors.username">
+          <label for="username">User Name</label>
+          <input
+            id="username"
+            type="text"
+            class="form-control"
+            [(ngModel)]="model.username"
+            autocomplete="off"
+          />
+          <span class="help-block" *ngIf="errors.username">{{
+            errors.username
+          }}</span>
+        </div>
+
+        <!-- Full Name -->
+        <div class="form-group">
+          <label for="fullname">Full Name</label>
+          <input
+            id="fullname"
+            type="text"
+            class="form-control"
+            [(ngModel)]="model.fullname"
+          />
+        </div>
+
+        <!-- Email -->
+        <div class="form-group" [class.has-error]="errors.email">
+          <label for="email">Email Address</label>
+          <input
+            id="email"
+            type="text"
+            class="form-control"
+            [(ngModel)]="model.email"
+          />
+          <span class="help-block" *ngIf="errors.email">{{
+            errors.email
+          }}</span>
+        </div>
+
+        <!-- Phone -->
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input
+            id="phone"
+            type="text"
+            class="form-control"
+            [(ngModel)]="model.phone"
+          />
+        </div>
+
+        <!-- Roles -->
+        <div class="form-group required" [class.has-error]="errors.roles">
+          <label>Role(s)</label>
+          <ul class="list-unstyled">
+            <li *ngFor="let role of availableRoles" class="checkbox">
+              <label>
+                <input
+                  type="checkbox"
+                  [checked]="model.roles.indexOf(role.key) !== -1"
+                  (click)="toggleRole(role.key)"
+                />
+                {{ role.label }}
+              </label>
+            </li>
+          </ul>
+          <span class="help-block" *ngIf="errors.roles">{{
+            errors.roles
+          }}</span>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group required" [class.has-error]="errors.password">
+          <label for="password">Password</label>
+          <div class="input-group">
+            <input
+              id="password"
+              [type]="model.showPassword ? 'text' : 'password'"
+              class="form-control"
+              [(ngModel)]="model.password"
+              autocomplete="new-password"
+            />
+            <span class="input-group-btn">
+              <button
+                type="button"
+                class="btn btn-default"
+                (click)="togglePassword()"
+              >
+                <i
+                  class="fa"
+                  [class.fa-eye]="!model.showPassword"
+                  [class.fa-eye-slash]="model.showPassword"
+                ></i>
+              </button>
+            </span>
+          </div>
+          <span class="help-block" *ngIf="errors.password">{{
+            errors.password
+          }}</span>
+        </div>
+
+        <!-- Confirm Password -->
+        <div
+          class="form-group required"
+          [class.has-error]="errors.passwordConfirm"
+        >
+          <label for="password-confirm">Confirm Password</label>
+          <input
+            id="password-confirm"
+            [type]="model.showPassword ? 'text' : 'password'"
+            class="form-control"
+            [(ngModel)]="model.passwordConfirm"
+            autocomplete="new-password"
+          />
+          <span class="help-block" *ngIf="errors.passwordConfirm">{{
+            errors.passwordConfirm
+          }}</span>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-default"
+          (click)="cancel()"
+          [disabled]="loading"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="submit()"
+          [disabled]="loading"
+        >
+          <span *ngIf="loading">
+            <i class="fa fa-spinner fa-spin"></i> Adding...
+          </span>
+          <span *ngIf="!loading">Add User</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay -->
+<div class="modal-backdrop fade in" *ngIf="visible"></div>

@@ -21,6 +21,15 @@ export class UsersListComponent implements OnInit {
   canConfigure = false;
   loading = false;
   error = false;
+  users: any[] = [];
+  showCreateModal = false;
+
+  private usersUpdatedSubscription!: Subscription;
+
+  constructor(
+    private authService: AuthService,
+    private usersService: UsersService,
+  ) {}
   users: Partial<User>[] = [];
 
   constructor(
@@ -35,6 +44,16 @@ export class UsersListComponent implements OnInit {
         this.loadUsers();
       }
     });
+
+    this.usersUpdatedSubscription = this.usersService.usersUpdated$.subscribe(
+      () => {
+        this.loadUsers();
+      },
+    );
+  }
+
+  ngOnDestroy() {
+    this.usersUpdatedSubscription.unsubscribe();
   }
 
   /**
@@ -69,6 +88,7 @@ export class UsersListComponent implements OnInit {
    * TODO: implement when the modal component is available.
    */
   addUser() {
+    this.showCreateModal = true;
     console.log("added user");
   }
 
