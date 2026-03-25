@@ -51,10 +51,10 @@
       @if (responseStatus.loading) {
         <div class="loader inline"></div>
       }
-      @if (responseStatus.error) {
+      @else if (responseStatus.state === 'error') {
         <span class="error">{{ responseStatus.msg }}</span>
       }
-      @if (responseStatus.success) {
+      @else if (responseStatus.state === 'success') {
         <span class="success">{{ responseStatus.msg }}</span>
       }
     </div>

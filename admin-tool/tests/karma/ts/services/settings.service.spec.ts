@@ -34,12 +34,6 @@ describe('SettingsService', () => {
       expect(http.get.calledWith('/api/v1/settings')).to.be.true;
     });
 
-    it('should send withCredentials true', async () => {
-      http.get.returns(of({}));
-      await service.getSettings();
-      expect(http.get.args[0][1]).to.deep.include({ withCredentials: true });
-    });
-
     it('should return settings object', async () => {
       const mockSettings = {
         date_format: 'DD/MM/YYYY',
@@ -81,12 +75,6 @@ describe('SettingsService', () => {
       http.put.returns(of(void 0));
       await service.updateSettings({ date_format: 'DD/MM/YYYY' });
       expect(http.put.calledWith('/api/v1/settings')).to.be.true;
-    });
-
-    it('should send withCredentials true', async () => {
-      http.put.returns(of(void 0));
-      await service.updateSettings({ date_format: 'DD/MM/YYYY' });
-      expect(http.put.args[0][2]).to.deep.include({ withCredentials: true });
     });
 
     it('should send Content-Type application/json header', async () => {

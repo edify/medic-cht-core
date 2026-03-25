@@ -242,7 +242,7 @@ describe('DisplayDateTimeComponent', () => {
 
     it('should set success true on success', async () => {
       await component.setSettingsDate();
-      expect(component.responseStatus.success).to.be.true;
+      expect(component.responseStatus.state).to.equal('success');
     });
 
     it('should set success message after update', async () => {
@@ -252,7 +252,7 @@ describe('DisplayDateTimeComponent', () => {
     it('should set error true when update fails', async () => {
       settingsService.updateDateTimeSettings.rejects(new Error('error'));
       await component.setSettingsDate();
-      expect(component.responseStatus.error).to.be.true;
+      expect(component.responseStatus.state).to.equal('error');
     });
 
     it('should set error message when update fails', async () => {
@@ -306,28 +306,28 @@ describe('DisplayDateTimeComponent', () => {
     });
 
     it('should show error message when error', () => {
-      component.responseStatus = { error: true, msg: 'Error updating settings' };
+      component.responseStatus = { state: 'error', msg: 'Error updating settings' };
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.error')).to.exist;
     });
 
     it('should show correct error message', () => {
-      component.responseStatus = { error: true, msg: 'Error updating settings' };
+      component.responseStatus = { state: 'error', msg: 'Error updating settings' };
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.error')!.textContent).to.include('Error updating settings');
     });
 
     it('should show success message when success', () => {
-      component.responseStatus = { success: true, msg: 'Saved' };
+      component.responseStatus = { state: 'success', msg: 'Saved' };
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.success')).to.exist;
     });
 
     it('should show correct success message', () => {
-      component.responseStatus = { success: true, msg: 'Saved' };
+      component.responseStatus = { state: 'success', msg: 'Saved' };
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.success')!.textContent).to.include('Saved');

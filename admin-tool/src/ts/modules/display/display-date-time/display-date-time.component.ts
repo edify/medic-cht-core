@@ -134,15 +134,15 @@ export class DisplayDateTimeComponent implements OnInit {
         dateTimeFormat: this.dateTimeFormatSelection,
       });
 
-      this.responseStatus = { success: true, msg: 'Saved' };
+      this.responseStatus = { state: 'success', msg: 'Saved' };
       setTimeout(() => {
-        if (this.responseStatus.success) {
+        if (this.responseStatus.state === 'success') {
           this.responseStatus = {};
         }
       }, 3000);
     } catch (error) {
       console.error('Error updating settings', error);
-      this.responseStatus = { error: true, msg: 'Error updating settings' };
+      this.responseStatus = { state: 'error', msg: 'Error updating settings' };
     }
   }
 }

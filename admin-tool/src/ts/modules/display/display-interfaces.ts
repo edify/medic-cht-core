@@ -4,7 +4,6 @@
  */
 export interface ResponseStatus {
   loading?: boolean;
-  success?: boolean;
-  error?: boolean;
+  state?: 'success' | 'error' | '';
   msg?: string;
 }

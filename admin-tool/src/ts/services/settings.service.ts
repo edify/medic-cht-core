@@ -52,11 +52,7 @@ export class SettingsService {
    * @returns {Promise<Partial<CHTSettings>>} the complete settings object from /api/v1/settings
    */
   async getSettings(): Promise<Partial<CHTSettings>> {
-    return firstValueFrom(
-      this.http.get('/api/v1/settings', {
-        withCredentials: true,
-      }),
-    );
+    return firstValueFrom(this.http.get('/api/v1/settings'));
   }
 
   /**
@@ -74,7 +70,6 @@ export class SettingsService {
       this.http.put<void>('/api/v1/settings', updates, {
         params: { replace: String(replace) },
         headers: { 'Content-Type': 'application/json' },
-        withCredentials: true,
       }),
     );
   }
