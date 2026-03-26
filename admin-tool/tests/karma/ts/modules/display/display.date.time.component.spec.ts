@@ -224,7 +224,7 @@ describe('DisplayDateTimeComponent', () => {
   describe('setSettingsDate', () => {
     it('should set loading true at start', () => {
       component.setSettingsDate();
-      expect(component.responseStatus.loading).to.be.true;
+      expect(component.responseStatus.state).to.equal('loading');
     });
 
     it('should call updateDateTimeSettings with correct values', async () => {
@@ -276,7 +276,7 @@ describe('DisplayDateTimeComponent', () => {
     });
 
     it('should disable submit button when loading', () => {
-      component.responseStatus = { loading: true };
+      component.responseStatus = { state: 'loading' };
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       const button = compiled.querySelector('button[type="submit"]') as HTMLButtonElement;
@@ -292,7 +292,7 @@ describe('DisplayDateTimeComponent', () => {
     });
 
     it('should show loader when loading', () => {
-      component.responseStatus = { loading: true };
+      component.responseStatus = { state: 'loading' };
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.loader')).to.exist;

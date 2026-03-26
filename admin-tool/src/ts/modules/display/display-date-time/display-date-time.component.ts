@@ -126,7 +126,7 @@ export class DisplayDateTimeComponent implements OnInit {
    * The success message clears automatically after 3 seconds.
    */
   async setSettingsDate(): Promise<void> {
-    this.responseStatus = { loading: true };
+    this.responseStatus = { state: 'loading' };
 
     try {
       await this.settingsService.updateDateTimeSettings({

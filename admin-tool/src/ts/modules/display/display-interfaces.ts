@@ -3,7 +3,6 @@
  * Controls visibility of the loader, success, and error messages in the template.
  */
 export interface ResponseStatus {
-  loading?: boolean;
-  state?: 'success' | 'error' | '';
+  state?: 'loading' | 'success' | 'error' | '';
   msg?: string;
 }

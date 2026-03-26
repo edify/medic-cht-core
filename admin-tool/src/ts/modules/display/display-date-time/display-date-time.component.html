@@ -43,19 +43,15 @@
         type="submit" 
         class="btn btn-default button-submit"
         (click)="setSettingsDate()"
-        [disabled]="responseStatus.loading"
+        [disabled]="responseStatus.state === 'loading'"
         translate>
         Submit
       </button>
 
-      @if (responseStatus.loading) {
+      @if (responseStatus.state === 'loading') {
         <div class="loader inline"></div>
-      }
-      @else if (responseStatus.state === 'error') {
-        <span class="error">{{ responseStatus.msg }}</span>
-      }
-      @else if (responseStatus.state === 'success') {
-        <span class="success">{{ responseStatus.msg }}</span>
+      } @else if (responseStatus.state) {
+        <span [class]="responseStatus.state">{{ responseStatus.msg }}</span>
       }
     </div>
   </div>
