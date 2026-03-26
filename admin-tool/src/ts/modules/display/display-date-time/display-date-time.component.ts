@@ -2,6 +2,7 @@ import { SettingsService } from '@admin-tool-services/settings.service';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import moment from 'moment';
+import { ResponseStatus } from '../display-interfaces';
 
 /**
  * Component for configuring the date and datetime display formats
@@ -40,12 +41,7 @@ export class DisplayDateTimeComponent implements OnInit {
    * Tracks the state of the save operation.
    * Controls visibility of the loader, success, and error messages in the template.
    */
-  responseStatus: {
-    loading?: boolean;
-    success?: boolean;
-    error?: boolean;
-    msg?: string;
-  } = {};
+  responseStatus: ResponseStatus = {};
 
   constructor(private settingsService: SettingsService) {}
 
@@ -130,7 +126,7 @@ export class DisplayDateTimeComponent implements OnInit {
    * The success message clears automatically after 3 seconds.
    */
   async setSettingsDate(): Promise<void> {
-    this.responseStatus = { loading: true };
+    this.responseStatus = { state: 'loading' };
 
     try {
       await this.settingsService.updateDateTimeSettings({
@@ -138,15 +134,15 @@ export class DisplayDateTimeComponent implements OnInit {
         dateTimeFormat: this.dateTimeFormatSelection,
       });
 
-      this.responseStatus = { success: true, msg: 'Saved' };
+      this.responseStatus = { state: 'success', msg: 'Saved' };
       setTimeout(() => {
-        if (this.responseStatus.success) {
+        if (this.responseStatus.state === 'success') {
           this.responseStatus = {};
         }
       }, 3000);
     } catch (error) {
       console.error('Error updating settings', error);
-      this.responseStatus = { error: true, msg: 'Error updating settings' };
+      this.responseStatus = { state: 'error', msg: 'Error updating settings' };
     }
   }
 }

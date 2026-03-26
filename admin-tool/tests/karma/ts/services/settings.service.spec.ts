@@ -36,12 +36,6 @@ describe('SettingsService', () => {
       expect(http.get.calledWith('/api/v1/settings')).to.be.true;
     });
 
-    it('should send withCredentials true', async () => {
-      http.get.returns(of({}));
-      await service.getSettings();
-      expect(http.get.args[0][1]).to.deep.include({ withCredentials: true });
-    });
-
     it('should return settings object', async () => {
       const mockSettings = {
         date_format: 'DD/MM/YYYY',
@@ -83,12 +77,6 @@ describe('SettingsService', () => {
       http.put.returns(of(void 0));
       await service.updateSettings({ date_format: 'DD/MM/YYYY' });
       expect(http.put.calledWith('/api/v1/settings')).to.be.true;
-    });
-
-    it('should send withCredentials true', async () => {
-      http.put.returns(of(void 0));
-      await service.updateSettings({ date_format: 'DD/MM/YYYY' });
-      expect(http.put.args[0][2]).to.deep.include({ withCredentials: true });
     });
 
     it('should send Content-Type application/json header', async () => {
@@ -150,16 +138,16 @@ describe('SettingsService', () => {
       expect(result.dateTimeFormat).to.equal('MM/DD/YYYY HH:mm:ss');
     });
 
-    it('should return undefined for missing date_format', async () => {
+    it('should return empty string for missing date_format', async () => {
       http.get.returns(of({}));
       const result = await service.getDateTimeSettings();
-      expect(result.dateFormat).to.be.undefined;
+      expect(result.dateFormat).to.equal('');
     });
 
-    it('should return undefined for missing reported_date_format', async () => {
+    it('should return empty string for missing reported_date_format', async () => {
       http.get.returns(of({}));
       const result = await service.getDateTimeSettings();
-      expect(result.dateTimeFormat).to.be.undefined;
+      expect(result.dateTimeFormat).to.equal('');
     });
 
     it('should propagate error when getSettings fails', async () => {

@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { expect } from 'chai';
 import sinon from 'sinon';
-
 import { DisplayDateTimeComponent } from '@admin-tool-modules/display/display-date-time/display-date-time.component';
 import { SettingsService } from '@admin-tool-services/settings.service';
 import moment from 'moment';
@@ -225,7 +224,7 @@ describe('DisplayDateTimeComponent', () => {
   describe('setSettingsDate', () => {
     it('should set loading true at start', () => {
       component.setSettingsDate();
-      expect(component.responseStatus.loading).to.be.true;
+      expect(component.responseStatus.state).to.equal('loading');
     });
 
     it('should call updateDateTimeSettings with correct values', async () => {
@@ -243,7 +242,7 @@ describe('DisplayDateTimeComponent', () => {
 
     it('should set success true on success', async () => {
       await component.setSettingsDate();
-      expect(component.responseStatus.success).to.be.true;
+      expect(component.responseStatus.state).to.equal('success');
     });
 
     it('should set success message after update', async () => {
@@ -253,7 +252,7 @@ describe('DisplayDateTimeComponent', () => {
     it('should set error true when update fails', async () => {
       settingsService.updateDateTimeSettings.rejects(new Error('error'));
       await component.setSettingsDate();
-      expect(component.responseStatus.error).to.be.true;
+      expect(component.responseStatus.state).to.equal('error');
     });
 
     it('should set error message when update fails', async () => {
@@ -277,7 +276,7 @@ describe('DisplayDateTimeComponent', () => {
     });
 
     it('should disable submit button when loading', () => {
-      component.responseStatus = { loading: true };
+      component.responseStatus = { state: 'loading' };
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       const button = compiled.querySelector('button[type="submit"]') as HTMLButtonElement;
@@ -293,7 +292,7 @@ describe('DisplayDateTimeComponent', () => {
     });
 
     it('should show loader when loading', () => {
-      component.responseStatus = { loading: true };
+      component.responseStatus = { state: 'loading' };
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.loader')).to.exist;
@@ -307,28 +306,28 @@ describe('DisplayDateTimeComponent', () => {
     });
 
     it('should show error message when error', () => {
-      component.responseStatus = { error: true, msg: 'Error updating settings' };
+      component.responseStatus = { state: 'error', msg: 'Error updating settings' };
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.error')).to.exist;
     });
 
     it('should show correct error message', () => {
-      component.responseStatus = { error: true, msg: 'Error updating settings' };
+      component.responseStatus = { state: 'error', msg: 'Error updating settings' };
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.error')!.textContent).to.include('Error updating settings');
     });
 
     it('should show success message when success', () => {
-      component.responseStatus = { success: true, msg: 'Saved' };
+      component.responseStatus = { state: 'success', msg: 'Saved' };
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.success')).to.exist;
     });
 
     it('should show correct success message', () => {
-      component.responseStatus = { success: true, msg: 'Saved' };
+      component.responseStatus = { state: 'success', msg: 'Saved' };
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.success')!.textContent).to.include('Saved');
