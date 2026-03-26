@@ -1,64 +1,76 @@
-<div *ngIf="canConfigure; else noAccess">
-  <legend>Users</legend>
+@if (canConfigure) {
+  <legend translate>Users</legend>
   <div class="btn-toolbar">
-    <a class="btn btn-primary" (click)="addUser()">Add User</a>
-    <a class="btn btn-primary" (click)="importUsers()">Import from file</a>
+    <button id="add-user" class="btn btn-primary" (click)="addUser()">
+      <span translate>users.manage.add_single_user</span>
+    </button>
+    <button id="add-users" class="btn btn-primary" (click)="importUsers()">
+      <span translate>users.manage.import_users</span>
+    </button>
   </div>
 
-  <div class="loader" *ngIf="loading"></div>
+  @if (loading) {
+    <div class="loader"></div>
+  }
 
-  <div *ngIf="!loading">
-    <p *ngIf="error" class="alert alert-danger" role="alert">
-      Error fetching users
-    </p>
+  @if (!loading) {
+    @if (error) {
+      <p class="alert alert-danger" role="alert" translate>
+        Error fetching users
+      </p>
+    }
 
-    <div class="container-fluid" *ngIf="!error">
-      <div class="row selection-heading">
-        <div class="col-xs-3">User Name</div>
-        <div class="col-xs-3">Full Name</div>
-        <div class="col-xs-3">Phone Number</div>
-        <div class="col-xs-1">Facility</div>
-        <div class="col-xs-1">Contact</div>
-        <div class="col-xs-1"></div>
-      </div>
-
-      <div *ngIf="users.length === 0" class="text-center empty-state">
-        <p>No users found.</p>
-      </div>
-
-      <div
-        class="row selection"
-        *ngFor="let user of users"
-        (click)="onRowClick(user)"
-        [class.inactive]="user.inactive"
-        [title]="user.inactive ? 'Deleted user' : ''"
-      >
-        <div class="col-xs-3">{{ user.username }}</div>
-        <div class="col-xs-3">{{ user.fullname }}</div>
-        <div class="col-xs-3">{{ user.phone }}</div>
-        <div class="col-xs-1">
-          <i class="fa fa-check" *ngIf="user.facility_id"></i>
+    @if (!error) {
+      <div class="container-fluid">
+        <div class="row selection-heading">
+          <div class="col-xs-3" translate>User Name</div>
+          <div class="col-xs-3" translate>Full Name</div>
+          <div class="col-xs-3" translate>Phone Number</div>
+          <div class="col-xs-1" translate>Facility</div>
+          <div class="col-xs-1" translate>Contact</div>
+          <div class="col-xs-1"></div>
         </div>
-        <div class="col-xs-1">
-          <i class="fa fa-check" *ngIf="user.contact_id"></i>
-        </div>
-        <div class="col-xs-1 delete">
-          <button
-            class="btn btn-sm btn-danger"
-            *ngIf="!user.inactive"
-            (click)="deleteUser(user, $event)"
-            aria-label="Delete user"
+
+        @if (users.length === 0) {
+          <div class="text-center empty-state">
+            <p translate>No users found.</p>
+          </div>
+        }
+
+        @for (user of users; track user.id) {
+          <div
+            class="row selection"
+            (click)="onRowClick(user)"
+            [class.inactive]="user.inactive"
+            [title]="user.inactive ? 'Deleted user' : ''"
           >
-            <i class="fa fa-trash-o"></i>
-          </button>
-        </div>
+            <div class="col-xs-3">{{ user.username }}</div>
+            <div class="col-xs-3">{{ user.fullname }}</div>
+            <div class="col-xs-3">{{ user.phone }}</div>
+            <div class="col-xs-1">
+              @if (user.facility_id) {
+                <i class="fa fa-check" aria-label="Has facility"></i>
+              }
+            </div>
+            <div class="col-xs-1">
+              @if (user.contact_id) {
+                <i class="fa fa-check" aria-label="Has contact"></i>
+              }
+            </div>
+            <div class="col-xs-1 delete">
+              @if (!user.inactive) {
+                <button
+                  class="btn btn-sm btn-danger"
+                  (click)="deleteUser(user, $event)"
+                  aria-label="Delete user"
+                >
+                  <i class="fa fa-trash-o"></i>
+                </button>
+              }
+            </div>
+          </div>
+        }
       </div>
-    </div>
-  </div>
-</div>
-
-<ng-template #noAccess>
-  <p class="alert alert-danger" role="alert">
-    No tienes permisos para ver esta sección.
-  </p>
-</ng-template>
+    }
+  }
+}

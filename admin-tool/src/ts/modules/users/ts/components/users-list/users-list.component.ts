@@ -1,7 +1,8 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '@admin-tool-services/auth.service';
 import { UsersService } from '@admin-tool-services/users.service';
+import { User } from '@admin-tool-modules/users/users-interfaces';
 
 /**
  * Displays and manages the list of system users.
@@ -17,13 +18,15 @@ import { UsersService } from '@admin-tool-services/users.service';
 })
 export class UsersListComponent implements OnInit {
 
-  private authService = inject(AuthService);
-  private usersService = inject(UsersService);
-
   canConfigure = false;
   loading = false;
   error = false;
-  users: any[] = [];
+  users: Partial<User>[] = [];
+
+  constructor(
+    private authService: AuthService,
+    private usersService: UsersService
+  ) {}
 
   ngOnInit() {
     this.authService.has('can_configure').then(result => {
@@ -44,7 +47,7 @@ export class UsersListComponent implements OnInit {
       this.users = await this.usersService.getUsers();
     } catch (err) {
       this.error = true;
-      console.error('Error cargando usuarios', err);
+      console.error('Error fetching users', err);
     } finally {
       this.loading = false;
     }
@@ -55,7 +58,7 @@ export class UsersListComponent implements OnInit {
    * Inactive users are ignored to prevent accidental edits on deleted accounts.
    * @param user the user object from the row that was clicked
    */
-  onRowClick(user: any) {
+  onRowClick(user: Partial<User>) {
     if (!user.inactive) {
       this.editUser(user);
     }
@@ -63,7 +66,7 @@ export class UsersListComponent implements OnInit {
 
   /**
    * Opens the Add User modal.
-   * To be implemented when the modal component is available.
+   * TODO: implement when the modal component is available.
    */
   addUser() {
     console.log('add user');
@@ -71,7 +74,7 @@ export class UsersListComponent implements OnInit {
 
   /**
    * Opens the Import Users modal for bulk CSV upload.
-   * To be implemented when the modal component is available.
+   * TODO: implement when the modal component is available.
    */
   importUsers() {
     console.log('import users');
@@ -80,20 +83,21 @@ export class UsersListComponent implements OnInit {
   /**
    * Opens the Delete User confirmation modal.
    * Stops event propagation to prevent triggering the row click handler.
+   * TODO: implement when the modal component is available.
    * @param user the user to be deleted
    * @param event the DOM click event
    */
-  deleteUser(user: any, event: Event) {
+  deleteUser(user: Partial<User>, event: Event) {
     event.stopPropagation();
-    console.log('borrar', user);
+    console.log('delete user', user);
   }
 
   /**
    * Opens the Edit User modal for the given user.
-   * To be implemented when the modal component is available.
+   * TODO: implement when the modal component is available.
    * @param user the user to be edited
    */
-  editUser(user: any) {
-    console.log('editar', user);
+  editUser(user: Partial<User>) {
+    console.log('edit user', user);
   }
 }

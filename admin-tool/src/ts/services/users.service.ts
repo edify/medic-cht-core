@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { User } from '@admin-tool-modules/users/users-interfaces';  
+
 
 /**
  * Handles all HTTP communication with the users API endpoint.
@@ -18,9 +20,9 @@ export class UsersService {
    * The browser automatically attaches the session cookie via `withCredentials`.
    * @returns a promise that resolves to an array of user objects
    */
-  async getUsers(): Promise<any[]> {
-    return firstValueFrom(
-      this.http.get<any[]>('/api/v2/users', { withCredentials: true })
-    );
-  }
+ async getUsers(): Promise<Partial<User>[]> {
+  return firstValueFrom(
+    this.http.get<Partial<User>[]>('/api/v2/users')
+  );
+}
 }

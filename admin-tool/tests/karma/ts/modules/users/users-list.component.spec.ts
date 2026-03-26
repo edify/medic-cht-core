@@ -6,8 +6,8 @@ import { AuthService } from '@admin-tool-services/auth.service';
 import { UsersService } from '@admin-tool-services/users.service';
 
 const mockUser = (overrides = {}) => ({
-  id: 1,
-  name: 'b_wayne',
+  id: '1',
+  username: 'b_wayne',
   fullname: 'Bruce Wayne',
   phone: '555-0101',
   facility_id: 'f1',
@@ -71,9 +71,8 @@ describe('UsersListComponent', () => {
 
       fixture.detectChanges();
       await fixture.whenStable();
-
       expect(component.users.length).to.equal(1);
-      expect(component.users[0].name).to.equal('b_wayne');
+      expect(component.users[0].username).to.equal('b_wayne');
     });
   });
 

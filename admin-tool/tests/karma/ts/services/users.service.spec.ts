@@ -28,13 +28,13 @@ describe('UsersService', () => {
     expect(service).to.exist;
   });
 
-  it('should call the correct endpoint with withCredentials', async () => {
-    http.get.returns(of([]));
+it('should call the correct endpoint', async () => {
+  http.get.returns(of([]));
 
-    await service.getUsers();
+  await service.getUsers();
 
-    expect(http.get.calledWith('/api/v2/users', { withCredentials: true })).to.equal(true);
-  });
+  expect(http.get.calledWith('/api/v2/users')).to.equal(true);
+});
 
   it('should return list of users', async () => {
     const mockUsers = [
