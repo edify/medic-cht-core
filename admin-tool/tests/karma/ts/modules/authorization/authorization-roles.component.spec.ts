@@ -1,10 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
 import { expect } from 'chai';
 import sinon from 'sinon';
-
 import { AuthorizationRolesComponent } from '../../../../../src/ts/modules/authorization/authorization-roles/authorization-roles.component';
-
 import { SettingsService } from '@admin-tool-services/settings.service';
 
 describe('AuthorizationRolesComponent', () => {

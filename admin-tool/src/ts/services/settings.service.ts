@@ -25,7 +25,7 @@ export interface DateTimeSettings {
 export interface CHTSettings {
   date_format?: string;
   reported_date_format?: string;
-  roles?: Record<string, { name: string; offline?: boolean }>;
+  roles?: RolesMap;
   permissions?: Record<string, string[]>;
   languages?: { locale: string; enabled: boolean }[];
   locale?: string;

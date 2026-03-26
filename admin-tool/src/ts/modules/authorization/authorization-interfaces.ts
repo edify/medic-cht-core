@@ -43,8 +43,6 @@ export interface RoleValidation {
  * Controls visibility of loaders, success, and error messages in templates.
  */
 export interface ResponseStatus {
-  loading?: boolean;
-  success?: boolean;
-  error?: boolean;
+  state?: 'loading' | 'success' | 'error' | '';
   msg?: string;
 }

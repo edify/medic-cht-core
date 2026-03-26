@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Role, ResponseStatus } from '../authorization-interfaces';
 import { SettingsService } from '@admin-tool-services/settings.service';
 
@@ -16,7 +16,7 @@ import { SettingsService } from '@admin-tool-services/settings.service';
   templateUrl: './authorization-roles.component.html',
   styleUrl: './authorization-roles.component.less',
 })
-export class AuthorizationRolesComponent {
+export class AuthorizationRolesComponent implements OnInit {
   /** List of roles mapped from settings.roles for template iteration */
   roles: { key: string; value: Role }[] = [];
 

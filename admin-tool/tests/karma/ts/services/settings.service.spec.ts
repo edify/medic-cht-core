@@ -1,11 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-
 import sinon from 'sinon';
 import { expect } from 'chai';
 import { of, throwError } from 'rxjs';
-
 import { HttpClient } from '@angular/common/http';
-
 import { SettingsService } from '@admin-tool-services/settings.service';
 
 describe('SettingsService', () => {

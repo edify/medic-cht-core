@@ -1,3 +1,4 @@
+import { AuthDirective } from '@admin-tool-directives/auth.directive';
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
@@ -11,7 +12,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
  */
 @Component({
   selector: 'authorization-header',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, AuthDirective],
   templateUrl: './authorization-header.component.html',
   styleUrl: './authorization-header.component.less',
 })
