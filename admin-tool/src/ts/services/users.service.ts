@@ -1,7 +1,7 @@
-import { Injectable, inject } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import { firstValueFrom } from "rxjs";
-import { User } from "@admin-tool-modules/users/users-interfaces";
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { User } from '@admin-tool-modules/users/users-interfaces';
 
 /**
  * Handles all HTTP communication with the users API endpoint.
@@ -9,7 +9,7 @@ import { User } from "@admin-tool-modules/users/users-interfaces";
  * so no manual authentication headers are required.
  */
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class UsersService {
   private http = inject(HttpClient);
@@ -20,6 +20,6 @@ export class UsersService {
    * @returns a promise that resolves to an array of user objects
    */
   async getUsers(): Promise<Partial<User>[]> {
-    return firstValueFrom(this.http.get<Partial<User>[]>("/api/v2/users"));
+    return firstValueFrom(this.http.get<Partial<User>[]>('/api/v2/users'));
   }
 }

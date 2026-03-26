@@ -1,11 +1,11 @@
-import { TestBed } from "@angular/core/testing";
-import { HttpClient } from "@angular/common/http";
-import { of, throwError } from "rxjs";
-import { expect } from "chai";
-import sinon from "sinon";
-import { UsersService } from "@admin-tool-services/users.service";
+import { TestBed } from '@angular/core/testing';
+import { HttpClient } from '@angular/common/http';
+import { of, throwError } from 'rxjs';
+import { expect } from 'chai';
+import sinon from 'sinon';
+import { UsersService } from '@admin-tool-services/users.service';
 
-describe("UsersService", () => {
+describe('UsersService', () => {
   let service: UsersService;
   let http: any;
 
@@ -21,22 +21,22 @@ describe("UsersService", () => {
 
   afterEach(() => sinon.restore());
 
-  it("should be created", () => {
+  it('should be created', () => {
     expect(service).to.exist;
   });
 
-  it("should call the correct endpoint", async () => {
+  it('should call the correct endpoint', async () => {
     http.get.returns(of([]));
 
     await service.getUsers();
 
-    expect(http.get.calledWith("/api/v2/users")).to.equal(true);
+    expect(http.get.calledWith('/api/v2/users')).to.equal(true);
   });
 
-  it("should return list of users", async () => {
+  it('should return list of users', async () => {
     const mockUsers = [
-      { id: 1, name: "b_wayne", fullname: "Bruce Wayne" },
-      { id: 2, name: "t_stark", fullname: "Tony Stark" },
+      { id: 1, name: 'b_wayne', fullname: 'Bruce Wayne' },
+      { id: 2, name: 't_stark', fullname: 'Tony Stark' },
     ];
     http.get.returns(of(mockUsers));
 
@@ -45,23 +45,23 @@ describe("UsersService", () => {
     expect(result).to.deep.equal(mockUsers);
   });
 
-  it("should return empty array when no users exist", async () => {
+  it('should return empty array when no users exist', async () => {
     http.get.returns(of([]));
 
     const result = await service.getUsers();
 
-    expect(result).to.be.an("array");
+    expect(result).to.be.an('array');
     expect(result.length).to.equal(0);
   });
 
-  it("should throw when the request fails", async () => {
-    http.get.returns(throwError(() => new Error("Network error")));
+  it('should throw when the request fails', async () => {
+    http.get.returns(throwError(() => new Error('Network error')));
 
     try {
       await service.getUsers();
-      expect.fail("should have thrown");
+      expect.fail('should have thrown');
     } catch (err: any) {
-      expect(err.message).to.equal("Network error");
+      expect(err.message).to.equal('Network error');
     }
   });
 });
