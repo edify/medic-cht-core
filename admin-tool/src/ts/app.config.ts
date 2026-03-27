@@ -2,21 +2,21 @@ import {
   ApplicationConfig,
   importProvidersFrom,
   APP_INITIALIZER,
-} from "@angular/core";
-import { RouterModule } from "@angular/router";
+} from '@angular/core';
+import { RouterModule } from '@angular/router';
 import {
   provideHttpClient,
   HttpInterceptorFn,
   withInterceptors,
-} from "@angular/common/http";
-import { provideAnimations } from "@angular/platform-browser/animations";
-import { BrowserModule } from "@angular/platform-browser";
-import { TranslateModule } from "@ngx-translate/core";
-import { CookieService } from "ngx-cookie-service";
+} from '@angular/common/http';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { BrowserModule } from '@angular/platform-browser';
+import { TranslateModule } from '@ngx-translate/core';
+import { CookieService } from 'ngx-cookie-service';
 
-import { AppRoutingModule } from "./app-routing.module";
-import { SessionService } from "@admin-tool-services/session.service";
-import { AppRouteGuardProvider } from "@admin-tool-providers/app-route.guard.provider";
+import { AppRoutingModule } from './app-routing.module';
+import { SessionService } from '@admin-tool-services/session.service';
+import { AppRouteGuardProvider } from '@admin-tool-providers/app-route.guard.provider';
 
 const credentialsInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req.clone({ withCredentials: true }));
