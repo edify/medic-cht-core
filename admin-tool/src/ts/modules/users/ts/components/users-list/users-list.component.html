@@ -11,16 +11,12 @@
 
   @if (loading) {
     <div class="loader"></div>
-  }
-
-  @if (!loading) {
+  } @else {
     @if (error) {
       <p class="alert alert-danger" role="alert" translate>
         Error fetching users
       </p>
-    }
-
-    @if (!error) {
+    } @else {
       <div class="container-fluid">
         <div class="row selection-heading">
           <div class="col-xs-3" translate>User Name</div>
@@ -35,40 +31,46 @@
           <div class="text-center empty-state">
             <p translate>No users found.</p>
           </div>
-        }
-
-        @for (user of users; track user.id) {
-          <div
-            class="row selection"
-            (click)="onRowClick(user)"
-            [class.inactive]="user.inactive"
-            [title]="user.inactive ? 'Deleted user' : ''"
-          >
-            <div class="col-xs-3">{{ user.username }}</div>
-            <div class="col-xs-3">{{ user.fullname }}</div>
-            <div class="col-xs-3">{{ user.phone }}</div>
-            <div class="col-xs-1">
+        } @else {
+          @for (user of users; track user.id) {
+            <div
+              class="row selection"
+              (click)="onRowClick(user)"
+              [class.inactive]="user.inactive"
+              [title]="user.inactive ? 'Deleted user' : ''"
+            >
+              <div class="col-xs-3">{{ user.username }}</div>
+              <div class="col-xs-3">{{ user.fullname }}</div>
+              <div class="col-xs-3">{{ user.phone }}</div>
               @if (user.facility_id) {
-                <i class="fa fa-check" aria-label="Has facility"></i>
+                <div class="col-xs-1">
+                  <i class="fa fa-check" aria-label="Has facility"></i>
+                </div>
+              } @else {
+                <div class="col-xs-1"></div>
               }
-            </div>
-            <div class="col-xs-1">
               @if (user.contact_id) {
-                <i class="fa fa-check" aria-label="Has contact"></i>
+                <div class="col-xs-1">
+                  <i class="fa fa-check" aria-label="Has contact"></i>
+                </div>
+              } @else {
+                <div class="col-xs-1"></div>
               }
-            </div>
-            <div class="col-xs-1 delete">
               @if (!user.inactive) {
-                <button
-                  class="btn btn-sm btn-danger"
-                  (click)="deleteUser(user, $event)"
-                  aria-label="Delete user"
-                >
-                  <i class="fa fa-trash-o"></i>
-                </button>
+                <div class="col-xs-1 delete">
+                  <button
+                    class="btn btn-sm btn-danger"
+                    (click)="deleteUser(user, $event)"
+                    aria-label="Delete user"
+                  >
+                    <i class="fa fa-trash-o"></i>
+                  </button>
+                </div>
+              } @else {
+                <div class="col-xs-1"></div>
               }
             </div>
-          </div>
+          }
         }
       </div>
     }
