@@ -26,10 +26,10 @@ describe('SettingsService', () => {
       subscribe: sinon.stub().callsFake((options) => {
         changesCallback = options.filter
           ? (change) => {
-              if (options.filter(change)) {
-                options.callback(change);
-              }
+            if (options.filter(change)) {
+              options.callback(change);
             }
+          }
           : options.callback;
         return { unsubscribe: sinon.stub() };
       }),
