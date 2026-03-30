@@ -1,8 +1,8 @@
-import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { AuthService } from "@admin-tool-services/auth.service";
-import { UsersService } from "@admin-tool-services/users.service";
-import { User } from "@admin-tool-modules/users/users-interfaces";
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { AuthService } from '@admin-tool-services/auth.service';
+import { UsersService } from '@admin-tool-services/users.service';
+import { User } from '@admin-tool-modules/users/users-interfaces';
 
 /**
  * Displays and manages the list of system users.
@@ -10,11 +10,11 @@ import { User } from "@admin-tool-modules/users/users-interfaces";
  * Fetches users from the API on initialization and provides hooks for create, edit, and delete actions.
  */
 @Component({
-  selector: "users-list",
+  selector: 'users-list',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: "./users-list.component.html",
-  styleUrl: "./users-list.component.less",
+  templateUrl: './users-list.component.html',
+  styleUrl: './users-list.component.less',
 })
 export class UsersListComponent implements OnInit {
   canConfigure = false;
@@ -28,7 +28,7 @@ export class UsersListComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.authService.has("can_configure").then((result) => {
+    this.authService.has('can_configure').then((result) => {
       this.canConfigure = result;
       if (result) {
         this.loadUsers();
@@ -46,7 +46,7 @@ export class UsersListComponent implements OnInit {
       this.users = await this.usersService.getUsers();
     } catch (err) {
       this.error = true;
-      console.error("Error fetching users", err);
+      console.error('Error fetching users', err);
     } finally {
       this.loading = false;
     }
@@ -68,7 +68,7 @@ export class UsersListComponent implements OnInit {
    * TODO: implement when the modal component is available.
    */
   addUser() {
-    console.log("added user");
+    console.log('added user');
   }
 
   /**
@@ -76,7 +76,7 @@ export class UsersListComponent implements OnInit {
    * TODO: implement when the modal component is available.
    */
   importUsers() {
-    console.log("import users");
+    console.log('import users');
   }
 
   /**
@@ -88,7 +88,7 @@ export class UsersListComponent implements OnInit {
    */
   deleteUser(user: Partial<User>, event: Event) {
     event.stopPropagation();
-    console.log("delete user", user);
+    console.log('delete user', user);
   }
 
   /**
@@ -97,6 +97,6 @@ export class UsersListComponent implements OnInit {
    * @param user the user to be edited
    */
   editUser(user: Partial<User>) {
-    console.log("edit user", user);
+    console.log('edit user', user);
   }
 }

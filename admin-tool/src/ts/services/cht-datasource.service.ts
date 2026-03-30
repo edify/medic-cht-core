@@ -1,16 +1,16 @@
-import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import {
   DataContext,
   getDatasource,
   getRemoteDataContext,
-} from "@medic/cht-datasource";
-import { firstValueFrom } from "rxjs";
+} from '@medic/cht-datasource';
+import { firstValueFrom } from 'rxjs';
 
-import { SessionService } from "@admin-tool-services/session.service";
+import { SessionService } from '@admin-tool-services/session.service';
 
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class CHTDatasourceService {
   private initialized: Promise<void> | null = null;
@@ -25,7 +25,7 @@ export class CHTDatasourceService {
 
   private async init() {
     this.userCtx = this.sessionService.userCtx();
-    const settings = await firstValueFrom(this.http.get("/api/v1/settings"));
+    const settings = await firstValueFrom(this.http.get('/api/v1/settings'));
     this.settings = settings;
     this.dataContext = getRemoteDataContext();
   }
