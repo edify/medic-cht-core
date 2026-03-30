@@ -1,6 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { DOC_IDS } from '@medic/constants';
+
+import { DbService } from '@admin-tool-services/db.service';
+import { ChangesService } from '@admin-tool-services/changes.service';
 
 /**
  * Interface representing the date and datetime display format settings.
@@ -41,18 +45,35 @@ export interface CHTSettings {
   providedIn: 'root',
 })
 export class SettingsService {
-  constructor(private http: HttpClient) {}
+  private readonly SETTINGS_ID = DOC_IDS.SETTINGS;
+  private cachedSettings: Promise<Partial<CHTSettings>> | null = null;
 
-  /**
-   * Fetches the full settings object from the API.
-   * Returns a raw object since the settings schema is open-ended
-   * and each domain-specific method is responsible for extracting
-   * and typing the fields it needs.
-   *
-   * @returns {Promise<Partial<CHTSettings>>} the complete settings object from /api/v1/settings
-   */
-  async getSettings(): Promise<Partial<CHTSettings>> {
-    return firstValueFrom(this.http.get('/api/v1/settings'));
+  constructor(
+    private http: HttpClient,
+    private db: DbService,
+    private changesService: ChangesService,
+  ) {
+    this.changesService.subscribe({
+      key: 'settings',
+      filter: (change) => change.id === this.SETTINGS_ID,
+      callback: () => {
+        this.cachedSettings = null;
+      },
+    });
+  }
+
+  get(): Promise<Partial<CHTSettings>> {
+    if (!this.cachedSettings) {
+      this.cachedSettings = this.db
+        .get()
+        .get(this.SETTINGS_ID)
+        .then((doc: any) => doc.settings)
+        .catch((err) => {
+          this.cachedSettings = null;
+          return Promise.reject(err);
+        });
+    }
+    return this.cachedSettings!;
   }
 
   /**
@@ -82,7 +103,7 @@ export class SettingsService {
    * @returns {Promise<DateTimeSettings>}
    */
   async getDateTimeSettings(): Promise<DateTimeSettings> {
-    const res = await this.getSettings();
+    const res = await this.get();
     return {
       dateFormat: res.date_format ?? '',
       dateTimeFormat: res.reported_date_format ?? '',
