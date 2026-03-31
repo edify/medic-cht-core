@@ -1,15 +1,15 @@
-import { Injectable } from "@angular/core";
+import { Injectable } from '@angular/core';
 import {
   DataContext,
   getDatasource,
   getRemoteDataContext,
-} from "@medic/cht-datasource";
+} from '@medic/cht-datasource';
 
-import { SessionService } from "@admin-tool-services/session.service";
-import { SettingsService } from "@admin-tool-services/settings.service";
+import { SessionService } from '@admin-tool-services/session.service';
+import { SettingsService } from '@admin-tool-services/settings.service';
 
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class CHTDatasourceService {
   private initialized: Promise<void> | null = null;
