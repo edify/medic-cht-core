@@ -16,7 +16,6 @@ import { routes as backupRoutes } from '@admin-tool-modules/backup/backup.routes
 
 import { AppRoutingModule } from '../../../src/ts/app-routing.module';
 import { UsersComponent } from '@admin-tool-modules/users/users.component';
-//prettier-ignore
 import { 
   AuthorizationHeaderComponent 
 } from '@admin-tool-modules/authorization/authorization-header/authorization-header.component';

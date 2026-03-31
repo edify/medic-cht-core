@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Role, ResponseStatus } from '../authorization-interfaces';
+import { Role } from '../authorization-interfaces';
+import { ResponseStatus } from '../../global-modules-interfaces';
 import { SettingsService } from '@admin-tool-services/settings.service';
 
 /**

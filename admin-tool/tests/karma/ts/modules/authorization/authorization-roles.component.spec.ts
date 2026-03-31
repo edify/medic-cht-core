@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { expect } from 'chai';
 import sinon from 'sinon';
-//prettier-ignore
 import { 
   AuthorizationRolesComponent 
 } from '@admin-tool-modules/authorization/authorization-roles/authorization-roles.component';

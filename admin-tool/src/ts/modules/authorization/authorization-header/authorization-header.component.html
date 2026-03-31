@@ -1,10 +1,11 @@
-<ul class="nav nav-tabs custom-tabs">
-  <li class="nav-item" routerLinkActive="active" [mmAuth]="'can_configure'">
-    <a routerLink="/authorization/permissions">Permissions</a>
-  </li>
-  <li class="nav-item" routerLinkActive="active" [mmAuth]="'can_configure'">
-    <a routerLink="/authorization/roles">Roles</a>
-  </li>
-</ul>
+<nav aria-label="Authorization Navigation">
+  <ul class="nav nav-tabs custom-tabs">
+    <li class="nav-item" routerLinkActive="active" routerLink="/authorization/permissions" [mmAuth]="'can_configure'">
+      <a translate>configuration.permissions</a>
+    </li>
+    <li class="nav-item" routerLinkActive="active" routerLink="/authorization/roles" [mmAuth]="'can_configure'">
+      <a translate>configuration.roles</a>
+    </li>
+  </ul>
+</nav>
 <router-outlet></router-outlet>
- 

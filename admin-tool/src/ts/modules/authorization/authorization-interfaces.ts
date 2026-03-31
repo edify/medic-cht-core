@@ -37,12 +37,3 @@ export interface RoleValidation {
   key?: string;
   name?: string;
 }
-
-/**
- * Tracks the state of save operations across authorization components.
- * Controls visibility of loaders, success, and error messages in templates.
- */
-export interface ResponseStatus {
-  state?: 'loading' | 'success' | 'error' | '';
-  msg?: string;
-}
