@@ -3,6 +3,7 @@ import { NewRole, Role, RolesMap, RoleValidation } from '../authorization-interf
 import { ResponseStatus } from '../../global-modules-interfaces';
 import { SettingsService } from '@admin-tool-services/settings.service';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 
 /**
  * Component for managing the roles configured in the CHT instance.
@@ -14,7 +15,7 @@ import { FormsModule } from '@angular/forms';
  */
 @Component({
   selector: 'authorization-roles',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './authorization-roles.component.html',
   styleUrl: './authorization-roles.component.less',
 })
