@@ -28,8 +28,13 @@ export class AuthorizationRolesComponent implements OnInit {
   /** Tracks the state of save operations for add and delete actions */
   responseStatus: ResponseStatus = {};
 
+  /** Form model for the new role being added */
   newRole: NewRole = {};
+
+  /** Validation errors for the new role form */
   roleValidation: RoleValidation = {};
+
+  /** Controls visibility of the inline loader during add operation */ 
   isAddingRole = false;
 
   constructor(private settingsService: SettingsService) {}
@@ -51,6 +56,13 @@ export class AuthorizationRolesComponent implements OnInit {
     }
   }
 
+  /**
+   * Validates the new role form fields.
+   * Sets roleValidation errors if key or name are empty.
+   * TODO: implement translation for error messages
+   *
+   * @returns {boolean} true if the form is valid, false otherwise
+   */
   private validateRole(): boolean {
     this.roleValidation = {};
 
@@ -66,6 +78,13 @@ export class AuthorizationRolesComponent implements OnInit {
     return !Object.keys(this.roleValidation).length;
   }
   
+  /**
+   * Adds a new role to the settings.
+   * Clones existing roles, appends the new one, and saves via updateRoles.
+   * Clears the form on success and shows an error message on failure.
+   *
+   * @returns {Promise<void>}
+   */
   async addRole(): Promise<void> {
     this.isAddingRole = true;
     this.responseStatus = {};
@@ -99,6 +118,14 @@ export class AuthorizationRolesComponent implements OnInit {
     }
   }
 
+  /**
+   * Deletes a role from the settings by its key.
+   * Clones existing roles excluding the deleted key and saves via updateRoles.
+   * Shows an error message on failure.
+   *
+   * @param {string} key - the key of the role to delete
+   * @returns {Promise<void>}
+   */
   async deleteRole(key: string): Promise<void> {
     this.responseStatus = { state: 'loading' };
 
