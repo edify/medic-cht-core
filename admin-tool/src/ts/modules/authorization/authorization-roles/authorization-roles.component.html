@@ -2,6 +2,51 @@
   <div class="loader"></div>
 } @else {
   <div class="tab-content container-fluid">
+    <legend translate>configuration.roles.add</legend>
+
+    <div class="form-group required" [class.has-error]="roleValidation.key">
+      <label for="key" translate>configuration.role</label>
+      <input id="key" class="form-control medium" [(ngModel)]="newRole.key" />
+      @if (roleValidation.key) {
+        <p class="help-block">{{ roleValidation.key }}</p>
+      }
+    </div>
+
+    <div class="form-group required" [class.has-error]="roleValidation.name">
+      <label for="name" translate>translation.key</label>
+      <input id="name" class="form-control medium" [(ngModel)]="newRole.name" />
+      @if (roleValidation.name) {
+        <p class="help-block">{{ roleValidation.name }}</p>
+      }
+    </div>
+
+    <div class="form-group">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="offline" [(ngModel)]="newRole.offline" />
+          <span translate>configuration.role.offline</span>
+        </label>
+      </div>
+      <p class="help-block" translate>configuration.role.offline.warning</p>
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="submit"
+        class="btn btn-primary"
+        (click)="addRole()"
+        [disabled]="responseStatus.state === 'loading'">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+        <span translate>Submit</span>
+      </button>
+      @if (responseStatus.state === 'loading' && isAddingRole) {
+        <div class="loader inline"></div>
+      } @else if (responseStatus.state === 'error') {
+        <p class="error">{{ responseStatus.msg }}</p>
+      }
+    </div>
+  </div>
+  <div class="tab-content container-fluid">
     <legend translate>configuration.roles</legend>
     <div class="row selection-heading">
       <div class="col-xs-2" translate>configuration.role</div>
@@ -24,8 +69,11 @@
           }
         </div>
         <div class="col-xs-1 delete">
-          <!-- <button class="btn btn-sm btn-danger" (click)="deleteRole(role.key)">  TODO: Implement delete role functionality-->
-          <button class="btn btn-sm btn-danger" aria-label="Delete role">
+          <button
+            class="btn btn-sm btn-danger"
+            aria-label="Delete role"
+            (click)="deleteRole(role.key)"
+            [disabled]="responseStatus.state === 'loading'">
             <i class="fa fa-trash-o" aria-hidden="true"></i>
           </button>
         </div>
