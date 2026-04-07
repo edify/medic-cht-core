@@ -37,3 +37,17 @@ export interface RoleValidation {
   key?: string;
   name?: string;
 }
+
+export type PermissionsMap = Record<string, string[]>;
+
+export interface PermissionRole {
+  key: string;
+  name: string;
+  enabled: boolean;
+}
+
+export interface PermissionRow {
+  key: string;
+  roles: PermissionRole[];
+}
+

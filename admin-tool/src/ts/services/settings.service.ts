@@ -1,4 +1,4 @@
-import { RolesMap } from '@admin-tool-modules/authorization/authorization-interfaces';
+import { RolesMap, PermissionsMap } from '@admin-tool-modules/authorization/authorization-interfaces';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
@@ -30,7 +30,7 @@ export interface CHTSettings {
   date_format?: string;
   reported_date_format?: string;
   roles?: RolesMap;
-  permissions?: Record<string, string[]>;
+  permissions?: PermissionsMap;
   languages?: { locale: string; enabled: boolean }[];
   locale?: string;
   locale_outgoing?: string;
@@ -146,4 +146,14 @@ export class SettingsService {
   async updateRoles(roles: RolesMap): Promise<void> {
     return this.updateSettings({ roles }, true);
   }
+
+  async getPermissions(): Promise<PermissionsMap> {
+    const res = await this.get();
+    return res.permissions || {};
+  }
+
+  async updatePermissions(permissions: PermissionsMap): Promise<void> {
+    return this.updateSettings({ permissions }, true);
+  }
+
 }
