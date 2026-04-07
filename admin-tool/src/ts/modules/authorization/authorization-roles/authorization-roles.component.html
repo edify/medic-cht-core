@@ -42,7 +42,7 @@
       @if (responseStatus.state === 'loading' && isAddingRole) {
         <div class="loader inline"></div>
       } @else if (responseStatus.state === 'error') {
-        <p class="error">{{ responseStatus.msg }}</p>
+        <p class="error">{{ responseStatus.msg! | translate }}</p>
       }
     </div>
   </div>

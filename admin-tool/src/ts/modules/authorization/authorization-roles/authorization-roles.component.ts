@@ -4,6 +4,7 @@ import { ResponseStatus } from '../../global-modules-interfaces';
 import { SettingsService } from '@admin-tool-services/settings.service';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
 
 /**
  * Component for managing the roles configured in the CHT instance.
@@ -38,7 +39,7 @@ export class AuthorizationRolesComponent implements OnInit {
   /** Controls visibility of the inline loader during add operation */ 
   isAddingRole = false;
 
-  constructor(private settingsService: SettingsService) {}
+  constructor(private settingsService: SettingsService, private translate: TranslateService) {}
 
   /**
    * Fetches settings.roles on init and maps the result into an array
@@ -60,20 +61,22 @@ export class AuthorizationRolesComponent implements OnInit {
   /**
    * Validates the new role form fields.
    * Sets roleValidation errors if key or name are empty.
-   * TODO: implement translation for error messages
    *
    * @returns {boolean} true if the form is valid, false otherwise
    */
   private validateRole(): boolean {
     this.roleValidation = {};
 
-    // TODO: implement translation for error messages
     if (!this.newRole.key) {
-      this.roleValidation.key = 'field is required';
+      this.roleValidation.key = this.translate.instant('field is required', {
+        field: this.translate.instant('configuration.role')
+      });
     }
 
     if (!this.newRole.name) {
-      this.roleValidation.name = 'field is required';
+      this.roleValidation.name = this.translate.instant('field is required', {
+        field: this.translate.instant('translation.key')
+      });
     }
 
     return !Object.keys(this.roleValidation).length;
