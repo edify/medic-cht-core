@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'authorization-permissions',
-  imports: [FormsModule,TranslatePipe],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './authorization-permissions.component.html',
   styleUrl: './authorization-permissions.component.less'
 })
@@ -24,7 +24,7 @@ export class AuthorizationPermissionsComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     this.loadingPageStatus = true;
     
-    try{
+    try {
       const rolesMap = await this.settingsService.getRoles();
       const permissionsMap = await this.settingsService.getPermissions();
       this.permissions = this.buildPermissions(rolesMap, permissionsMap);
