@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { TranslateModule } from '@ngx-translate/core';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { 
@@ -21,7 +22,7 @@ describe('AuthorizationRolesComponent', () => {
     };
 
     return TestBed.configureTestingModule({
-      imports: [AuthorizationRolesComponent],
+      imports: [AuthorizationRolesComponent, TranslateModule.forRoot()],
       providers: [{ provide: SettingsService, useValue: settingsService }],
     })
       .compileComponents()
@@ -278,7 +279,7 @@ describe('AuthorizationRolesComponent', () => {
       component.responseStatus = { state: 'loading' };
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
-      const deleteButtons = compiled.querySelectorAll('.delete button') as NodeListOf<HTMLButtonElement>;
+      const deleteButtons = compiled.querySelectorAll<HTMLButtonElement>('.delete button');
       deleteButtons.forEach(button => expect(button.disabled).to.be.true);
     });
 

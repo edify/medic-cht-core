@@ -106,7 +106,7 @@ export class AuthorizationRolesComponent implements OnInit {
       offline: this.newRole.offline,
     };
 
-    try{
+    try {
       await this.settingsService.updateRoles(changes);
       this.roles = Object.entries(changes).map(([key, value]) => ({ key, value }));
       this.newRole = {};
