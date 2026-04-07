@@ -10,12 +10,12 @@ import { AuthService } from '@admin-tool-services/auth.service';
 
 const TRANSLATIONS = {
   'admin.display': 'Display',
-  'Users': 'Users',
+  Users: 'Users',
   'configuration.authorization': 'Authorization',
   'configuration.sms': 'SMS',
-  'Forms': 'Forms',
+  Forms: 'Forms',
   'analytics.targets': 'Targets',
-  'images': 'Images',
+  images: 'Images',
   'admin.message.queue': 'Message Queue',
   'instance.upgrade': 'Upgrade',
   'import.export': 'Export',
