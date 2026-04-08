@@ -7,7 +7,10 @@
         <div class="row">
           <div class="col-xs-4">
             <strong>{{ permission.key }}</strong>
-            <p>{{ ('permission.description.' + permission.key) | translate }}</p>
+            @let description = ('permission.description.' + permission.key) | translate;
+            @if (description !== 'permission.description.' + permission.key) {
+              <p>{{ description }}</p>
+            }
           </div>
           <div class="col-xs-8">
             @for (role of permission.roles; track role.key) {
@@ -29,7 +32,7 @@
       <button
         type="submit"
         class="btn btn-primary"
-        (click)="submit()"
+        (click)="setPermissions()"
         [disabled]="responseStatus.state === 'loading'">
         <span>{{ 'Submit' | translate }}</span>
       </button>

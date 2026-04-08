@@ -55,8 +55,24 @@ export class AuthorizationPermissionsComponent implements OnInit {
     return permissionsBuilt;
   }
 
-  //TODO: Implement submit
-  async submit(){}
+  async setPermissions(){
+    this.responseStatus = { state: 'loading' };
+    
+    const permissionsToSet: PermissionsMap = {};
+
+    this.permissions.forEach(permission => {
+      permissionsToSet[permission.key] = permission.roles
+        .filter(role => role.enabled)
+        .map(role => role.key);
+    });
+    try {
+      await this.settingsService.updatePermissions(permissionsToSet);
+      this.responseStatus = {}
+    } catch (error) {
+      console.error('Error saving permissions', error);
+      this.responseStatus = { state: 'error', msg: 'Error saving settings' };
+    }
+  }
 
 
 }

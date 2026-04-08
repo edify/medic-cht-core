@@ -288,4 +288,62 @@ describe('SettingsService', () => {
       }
     });
   });
+  describe('getPermissions', () => {
+    it('should return permissions from settings', async () => {
+      const mockPermissions = {
+        can_configure: ['program_officer', 'crfo'],
+        can_edit: ['chw', 'national_admin'],
+      };
+      dbService.get().get.resolves({ settings: { permissions: mockPermissions } });
+      const result = await service.getPermissions();
+      expect(result).to.deep.equal(mockPermissions);
+    });
+
+    it('should return empty object when permissions is undefined', async () => {
+      dbService.get().get.resolves({ settings: {} });
+      const result = await service.getPermissions();
+      expect(result).to.deep.equal({});
+    });
+
+    it('should propagate error when get fails', async () => {
+      dbService.get().get.rejects({ status: 500 });
+      try {
+        await service.getPermissions();
+        expect.fail('should have thrown');
+      } catch (err: any) {
+        expect(err.status).to.equal(500);
+      }
+    });
+  });
+  describe('updatePermissions', () => {
+    it('should call updateSettings with permissions and replace=true', async () => {
+      http.put.returns(of(void 0));
+      const mockPermissions = { can_configure: ['program_officer'] };
+      await service.updatePermissions(mockPermissions);
+      expect(http.put.calledWith('/api/v1/settings')).to.be.true;
+    });
+
+    it('should send replace=true', async () => {
+      http.put.returns(of(void 0));
+      await service.updatePermissions({ can_configure: ['program_officer'] });
+      expect(http.put.args[0][2].params).to.deep.include({ replace: 'true' });
+    });
+
+    it('should send permissions in the body', async () => {
+      http.put.returns(of(void 0));
+      const mockPermissions = { can_configure: ['program_officer'] };
+      await service.updatePermissions(mockPermissions);
+      expect(http.put.args[0][1]).to.deep.equal({ permissions: mockPermissions });
+    });
+
+    it('should propagate error when request fails', async () => {
+      http.put.returns(throwError(() => ({ status: 500 })));
+      try {
+        await service.updatePermissions({ can_configure: ['program_officer'] });
+        expect.fail('should have thrown');
+      } catch (err: any) {
+        expect(err.status).to.equal(500);
+      }
+    });
+  });
 });
