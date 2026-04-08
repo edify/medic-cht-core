@@ -1,10 +1,11 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { CommonModule } from "@angular/common";
+import { Subscription } from "rxjs";
 import { TranslatePipe } from "@ngx-translate/core";
 import { AuthService } from "@admin-tool-services/auth.service";
 import { UsersService } from "@admin-tool-services/users.service";
 import { User } from "@admin-tool-modules/users/users-interfaces";
-
+import { CreateUserComponent } from "../create-user/create-user.component";
 /**
  * Displays and manages the list of system users.
  * Requires `can_configure` permission to access — unauthorized users see an error message.
@@ -13,24 +14,18 @@ import { User } from "@admin-tool-modules/users/users-interfaces";
 @Component({
   selector: "users-list",
   standalone: true,
-  imports: [CommonModule, TranslatePipe],
+  imports: [CommonModule, CreateUserComponent, TranslatePipe],
   templateUrl: "./users-list.component.html",
   styleUrl: "./users-list.component.less",
 })
-export class UsersListComponent implements OnInit {
+export class UsersListComponent implements OnInit, OnDestroy {
   canConfigure = false;
   loading = false;
   error = false;
-  users: any[] = [];
+  users: Partial<User>[] = [];
   showCreateModal = false;
 
   private usersUpdatedSubscription!: Subscription;
-
-  constructor(
-    private authService: AuthService,
-    private usersService: UsersService,
-  ) {}
-  users: Partial<User>[] = [];
 
   constructor(
     private authService: AuthService,
@@ -85,11 +80,9 @@ export class UsersListComponent implements OnInit {
 
   /**
    * Opens the Add User modal.
-   * TODO: implement when the modal component is available.
    */
   addUser() {
     this.showCreateModal = true;
-    console.log("added user");
   }
 
   /**

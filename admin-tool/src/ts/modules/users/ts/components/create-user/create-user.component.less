@@ -1,4 +1,4 @@
-@border-color: #ddd;
+@import 'variables';
 
 .modal {
   &.in {
@@ -6,49 +6,51 @@
   }
 
   .modal-header {
-    border-bottom: 1px solid @border-color;
+    border-bottom: 0.0625rem solid @gray-light;
 
     .modal-title {
-      font-size: 18px;
+      font-size: @font-large;
       font-weight: bold;
     }
 
     .close {
-      font-size: 20px;
+      font-size: 1.25rem;
       cursor: pointer;
     }
   }
 
   .modal-body {
-    padding: 20px;
+    padding: 1.25rem;
+    max-height: 70vh;
+    overflow-y: auto;
 
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 0.9375rem;
 
       label {
         font-weight: bold;
-        margin-bottom: 5px;
+        margin-bottom: 0.3125rem;
         display: block;
       }
 
       &.required label::after {
         content: ' *';
-        color: #e74c3c;
+        color: @red;
       }
 
       &.has-error {
         .form-control {
-          border-color: #e74c3c;
+          border-color: @red;
         }
 
         .help-block {
-          color: #e74c3c;
+          color: @red;
         }
       }
 
       .help-block {
-        font-size: 12px;
-        margin-top: 4px;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
         display: block;
       }
 
@@ -56,14 +58,14 @@
         margin: 0;
 
         .checkbox {
-          margin: 5px 0;
+          margin: 0.3125rem 0;
 
           label {
             font-weight: normal;
             cursor: pointer;
 
             input[type='checkbox'] {
-              margin-right: 6px;
+              margin-right: 0.375rem;
             }
           }
         }
@@ -71,10 +73,10 @@
 
       .input-group {
         .btn-default {
-          border-color: @border-color;
+          border-color: @gray-light;
 
           &:hover {
-            background-color: #f5f5f5;
+            background-color: @gray-ultra-lighter;
           }
         }
       }
@@ -82,11 +84,11 @@
   }
 
   .modal-footer {
-    border-top: 1px solid @border-color;
+    border-top: 0.0625rem solid @gray-light;
     text-align: right;
 
     .btn {
-      margin-left: 5px;
+      margin-left: 0.3125rem;
     }
   }
 }

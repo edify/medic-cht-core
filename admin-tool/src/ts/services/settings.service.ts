@@ -3,9 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { DOC_IDS } from '@medic/constants';
-
-import { DbService } from '@admin-tool-services/db.service';
-import { ChangesService } from '@admin-tool-services/changes.service';
+import { DbService } from "@admin-tool-services/db.service";
+import { ChangesService } from "@admin-tool-services/changes.service";
 
 /**
  * Interface representing the date and datetime display format settings.
@@ -34,6 +33,8 @@ export interface CHTSettings {
   languages?: { locale: string; enabled: boolean }[];
   locale?: string;
   locale_outgoing?: string;
+  token_login?: { enabled: boolean };
+  oidc_provider?: string;
 }
 /**
  * Service responsible for reading and writing CHT instance settings
@@ -43,7 +44,7 @@ export interface CHTSettings {
  * is forwarded automatically.
  */
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class SettingsService {
   private readonly SETTINGS_ID = DOC_IDS.SETTINGS;
@@ -55,7 +56,7 @@ export class SettingsService {
     private changesService: ChangesService,
   ) {
     this.changesService.subscribe({
-      key: 'settings',
+      key: "settings",
       filter: (change) => change.id === this.SETTINGS_ID,
       callback: () => {
         this.cachedSettings = null;
@@ -87,11 +88,14 @@ export class SettingsService {
    * @param {boolean} replace - if true, replaces all settings instead of merging. Defaults to false.
    * @returns {Promise<void>}
    */
-  async updateSettings(updates: Record<string, any>, replace = false): Promise<void> {
+  async updateSettings(
+    updates: Record<string, any>,
+    replace = false,
+  ): Promise<void> {
     return firstValueFrom(
-      this.http.put<void>('/api/v1/settings', updates, {
+      this.http.put<void>("/api/v1/settings", updates, {
         params: { replace: String(replace) },
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }),
     );
   }
@@ -106,8 +110,8 @@ export class SettingsService {
   async getDateTimeSettings(): Promise<DateTimeSettings> {
     const res = await this.get();
     return {
-      dateFormat: res.date_format ?? '',
-      dateTimeFormat: res.reported_date_format ?? '',
+      dateFormat: res.date_format ?? "",
+      dateTimeFormat: res.reported_date_format ?? "",
     };
   }
 

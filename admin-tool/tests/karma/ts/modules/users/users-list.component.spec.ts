@@ -5,6 +5,7 @@ import { TranslateModule } from "@ngx-translate/core";
 import { UsersListComponent } from "@admin-tool-modules/users/ts/components/users-list/users-list.component";
 import { AuthService } from "@admin-tool-services/auth.service";
 import { UsersService } from "@admin-tool-services/users.service";
+import { provideHttpClient } from "@angular/common/http";
 
 const mockUser = (overrides = {}) => ({
   id: "1",
