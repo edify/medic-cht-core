@@ -147,11 +147,24 @@ export class SettingsService {
     return this.updateSettings({ roles }, true);
   }
 
+  /**
+   * Retrieves the full permissions map from settings.
+   * Returns an empty object if no permissions are defined.
+   *
+   * @returns {Promise<PermissionsMap>}
+   */
   async getPermissions(): Promise<PermissionsMap> {
     const res = await this.get();
     return res.permissions || {};
   }
 
+  /**
+   * Persists the full permissions map to the API.
+   * Uses replace=true to fully overwrite the permissions object in settings.
+   *
+   * @param {PermissionsMap} permissions - the complete permissions map to save
+   * @returns {Promise<void>}
+   */
   async updatePermissions(permissions: PermissionsMap): Promise<void> {
     return this.updateSettings({ permissions }, true);
   }
