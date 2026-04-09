@@ -1,26 +1,17 @@
-import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  OnInit,
-  OnChanges,
-  SimpleChanges,
-  ViewChild,
-  ElementRef,
-} from "@angular/core";
-import { FormsModule } from "@angular/forms";
-import { HttpClient } from "@angular/common/http";
-import { firstValueFrom } from "rxjs";
-import { CreateUserService } from "@admin-tool-services/create-user.service";
-import { Select2SearchService } from "@admin-tool-services/select2search.service";
-import { SettingsService } from "@admin-tool-services/settings.service";
-import { UsersService } from "@admin-tool-services/users.service";
-import { CreateUserErrors } from "@admin-tool-modules/users/users-interfaces";
-import { TranslateModule } from "@ngx-translate/core";
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, ViewChild, ElementRef } 
+  from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { CreateUserService } from '@admin-tool-services/create-user.service';
+import { Select2SearchService } from '@admin-tool-services/select2search.service';
+import { SettingsService } from '@admin-tool-services/settings.service';
+import { UsersService } from '@admin-tool-services/users.service';
+import { CreateUserErrors } from '@admin-tool-modules/users/users-interfaces';
+import { TranslateModule } from '@ngx-translate/core';
 
-const passwordTester = require("simple-password-tester");
-const phoneNumber = require("@medic/phone-number");
+const passwordTester = require('simple-password-tester');
+const phoneNumber = require('@medic/phone-number');
 const PASSWORD_MINIMUM_LENGTH = 8;
 const PASSWORD_MINIMUM_SCORE = 50;
 
@@ -30,20 +21,20 @@ const PASSWORD_MINIMUM_SCORE = 50;
  * Emits `closed` when the modal is dismissed and `userCreated` when a user is created successfully.
  */
 @Component({
-  selector: "create-user",
+  selector: 'create-user',
   standalone: true,
   imports: [FormsModule, TranslateModule],
-  templateUrl: "./create-user.component.html",
-  styleUrl: "./create-user.component.less",
+  templateUrl: './create-user.component.html',
+  styleUrl: './create-user.component.less'
 })
 export class CreateUserComponent implements OnInit, OnChanges {
+
   @Input() visible = false;
   @Output() closed = new EventEmitter<void>();
   @Output() userCreated = new EventEmitter<void>();
 
-  @ViewChild("facilitySelect")
-  facilitySelectRef!: ElementRef<HTMLSelectElement>;
-  @ViewChild("contactSelect") contactSelectRef!: ElementRef<HTMLSelectElement>;
+  @ViewChild('facilitySelect') facilitySelectRef!: ElementRef<HTMLSelectElement>;
+  @ViewChild('contactSelect') contactSelectRef!: ElementRef<HTMLSelectElement>;
 
   loading = false;
   errors: CreateUserErrors = {};
@@ -55,22 +46,21 @@ export class CreateUserComponent implements OnInit, OnChanges {
   allowSSOLogin = false;
 
   model = {
-    username: "",
-    fullname: "",
-    email: "",
-    phone: "",
+    username: '',
+    fullname: '',
+    email: '',
+    phone: '',
     roles: [] as string[],
     place: null as string | null,
     contact: null as string | null,
     token_login: false,
-    oidc_username: "",
-    password: "",
-    passwordConfirm: "",
+    oidc_username: '',
+    password: '',
+    passwordConfirm: '',
     showPassword: false,
   };
 
-  private settingsRoles: Record<string, { name: string; offline?: boolean }> =
-    {};
+  private settingsRoles: Record<string, { name: string; offline?: boolean }> = {};
   private cachedSettings: any = null;
 
   constructor(
@@ -90,7 +80,7 @@ export class CreateUserComponent implements OnInit, OnChanges {
    * Uses ngOnChanges so Select2 is only wired up after the DOM is rendered.
    */
   ngOnChanges(changes: SimpleChanges) {
-    if (changes["visible"]?.currentValue === true) {
+    if (changes['visible']?.currentValue === true) {
       // Defer to next tick so the modal DOM is fully rendered before Select2 init
       setTimeout(() => this.initSelect2(), 0);
     }
@@ -106,12 +96,12 @@ export class CreateUserComponent implements OnInit, OnChanges {
       this.cachedSettings = await this.settingsService.get();
       this.settingsRoles = this.cachedSettings.roles ?? {};
       this.availableRoles = Object.entries(this.settingsRoles)
-        .filter(([key]) => key !== "_admin")
+        .filter(([key]) => key !== '_admin')
         .map(([key, role]: [string, any]) => ({ key, label: role.name }));
       this.allowTokenLogin = !!this.cachedSettings.token_login?.enabled;
       this.allowSSOLogin = !!this.cachedSettings.oidc_provider;
     } catch (err) {
-      console.error("Error loading settings", err);
+      console.error('Error loading settings', err);
     }
   }
 
@@ -121,14 +111,10 @@ export class CreateUserComponent implements OnInit, OnChanges {
    */
   private async initSelect2() {
     if (this.facilitySelectRef?.nativeElement) {
-      await this.select2SearchService.initPlaceSelect(
-        this.facilitySelectRef.nativeElement,
-      );
+      await this.select2SearchService.initPlaceSelect(this.facilitySelectRef.nativeElement);
     }
     if (this.contactSelectRef?.nativeElement) {
-      await this.select2SearchService.initPersonSelect(
-        this.contactSelectRef.nativeElement,
-      );
+      await this.select2SearchService.initPersonSelect(this.contactSelectRef.nativeElement);
     }
   }
 
@@ -140,12 +126,16 @@ export class CreateUserComponent implements OnInit, OnChanges {
   private computeFields() {
     if (this.facilitySelectRef?.nativeElement) {
       const val = $(this.facilitySelectRef.nativeElement).val();
-      this.model.place =
-        Array.isArray(val) && val.length === 0 ? null : (val as string);
+      // Only use the value if it's a string or array of strings, not a jQuery object
+      if (typeof val === 'string' || Array.isArray(val)) {
+        this.model.place = Array.isArray(val) && val.length === 0 ? null : val as string;
+      }
     }
     if (this.contactSelectRef?.nativeElement) {
       const val = $(this.contactSelectRef.nativeElement).val();
-      this.model.contact = (val as string) || null;
+      if (typeof val === 'string') {
+        this.model.contact = val || null;
+      }
     }
   }
 
@@ -154,9 +144,7 @@ export class CreateUserComponent implements OnInit, OnChanges {
    * Offline roles require a facility and associated contact.
    */
   private isOfflineUser(): boolean {
-    return this.model.roles.some(
-      (role) => this.settingsRoles[role]?.offline === true,
-    );
+    return this.model.roles.some(role => this.settingsRoles[role]?.offline === true);
   }
 
   /**
@@ -164,10 +152,8 @@ export class CreateUserComponent implements OnInit, OnChanges {
    * Password is not required when Token Login or SSO login is active.
    */
   get passwordHidden(): boolean {
-    return (
-      (this.allowTokenLogin && this.model.token_login) ||
-      (this.allowSSOLogin && !!this.model.oidc_username)
-    );
+    return (this.allowTokenLogin && this.model.token_login) ||
+           (this.allowSSOLogin && !!this.model.oidc_username);
   }
 
   /**
@@ -211,55 +197,55 @@ export class CreateUserComponent implements OnInit, OnChanges {
     const usernameRegex = /^[a-z0-9_-]+$/;
 
     if (!this.model.username) {
-      this.errors.username = "field.required";
+      this.errors.username = 'field.required';
     } else if (!usernameRegex.test(this.model.username)) {
-      this.errors.username = "username.invalid";
+      this.errors.username = 'username.invalid';
     }
 
     if (this.model.email && !/^[^\s@]+@[^\s@]+$/.test(this.model.email)) {
-      this.errors.email = "email.invalid";
+      this.errors.email = 'email.invalid';
     }
 
     if (!this.model.roles.length) {
-      this.errors.roles = "field.required";
+      this.errors.roles = 'field.required';
     }
 
     // Phone is required when Token Login is enabled
     if (this.model.token_login) {
       if (!this.model.phone) {
-        this.errors.phone = "field.required";
+        this.errors.phone = 'field.required';
       } else if (!phoneNumber.validate(this.cachedSettings, this.model.phone)) {
-        this.errors.phone = "configuration.enable.token.login.phone";
+        this.errors.phone = 'configuration.enable.token.login.phone';
       }
     }
 
     if (this.isOfflineUser()) {
       // Offline roles require both facility and associated contact
       if (!this.model.place) {
-        this.errors.place = "field.required";
+        this.errors.place = 'field.required';
       }
       if (!this.model.contact) {
-        this.errors.contact = "field.required";
+        this.errors.contact = 'field.required';
       }
     } else if (this.model.contact && !this.model.place) {
       // Online role: if a contact is selected, a facility is still required
-      this.errors.place = "field.required";
+      this.errors.place = 'field.required';
     }
 
     // Password validation is skipped when Token Login or SSO is active
     if (!this.passwordHidden) {
       if (!this.model.password) {
-        this.errors.password = "field.required";
+        this.errors.password = 'field.required';
       } else if (this.model.password.length < PASSWORD_MINIMUM_LENGTH) {
-        this.errors.password = "password.length.minimum";
+        this.errors.password = 'password.length.minimum';
       } else if (passwordTester(this.model.password) < PASSWORD_MINIMUM_SCORE) {
-        this.errors.password = "password.weak";
+        this.errors.password = 'password.weak';
       }
 
       if (!this.model.passwordConfirm) {
-        this.errors.passwordConfirm = "field.required";
+        this.errors.passwordConfirm = 'field.required';
       } else if (this.model.password !== this.model.passwordConfirm) {
-        this.errors.passwordConfirm = "Passwords must match";
+        this.errors.passwordConfirm = 'Passwords must match';
       }
     }
 
@@ -276,16 +262,11 @@ export class CreateUserComponent implements OnInit, OnChanges {
       return true;
     }
 
-    const placeIds = Array.isArray(this.model.place)
-      ? this.model.place
-      : [this.model.place];
-    const valid = await this.select2SearchService.isContactInPlace(
-      this.model.contact,
-      placeIds,
-    );
+    const placeIds = Array.isArray(this.model.place) ? this.model.place : [this.model.place];
+    const valid = await this.select2SearchService.isContactInPlace(this.model.contact, placeIds);
 
     if (!valid) {
-      this.errors.contact = "configuration.user.place.contact";
+      this.errors.contact = 'configuration.user.place.contact';
     }
 
     return valid;
@@ -309,15 +290,14 @@ export class CreateUserComponent implements OnInit, OnChanges {
         contact_id: this.model.contact,
       };
       const resp: any = await firstValueFrom(
-        this.http.get("/api/v1/users-info", { params }),
+        this.http.get('/api/v1/users-info', { params })
       );
       if (resp?.warn) {
-        this.errors.replicationLimit =
-          "configuration.user.replication.limit.exceeded";
+        this.errors.replicationLimit = 'configuration.user.replication.limit.exceeded';
         return false;
       }
     } catch (err) {
-      console.error("Error checking replication limit", err);
+      console.error('Error checking replication limit', err);
     }
 
     return true;
@@ -328,17 +308,17 @@ export class CreateUserComponent implements OnInit, OnChanges {
    */
   private reset() {
     this.model = {
-      username: "",
-      fullname: "",
-      email: "",
-      phone: "",
+      username: '',
+      fullname: '',
+      email: '',
+      phone: '',
       roles: [],
       place: null,
       contact: null,
       token_login: false,
-      oidc_username: "",
-      password: "",
-      passwordConfirm: "",
+      oidc_username: '',
+      password: '',
+      passwordConfirm: '',
       showPassword: false,
     };
     this.errors = {};
@@ -346,10 +326,14 @@ export class CreateUserComponent implements OnInit, OnChanges {
     this.isOfflineRole = false;
 
     if (this.facilitySelectRef?.nativeElement) {
-      $(this.facilitySelectRef.nativeElement).val([]).trigger("change");
+      const $facility = $(this.facilitySelectRef.nativeElement);
+      $facility.val([]);
+      $facility.trigger('change');
     }
     if (this.contactSelectRef?.nativeElement) {
-      $(this.contactSelectRef.nativeElement).val("").trigger("change");
+      const $contact = $(this.contactSelectRef.nativeElement);
+      $contact.val('');
+      $contact.trigger('change');
     }
   }
 
@@ -397,7 +381,7 @@ export class CreateUserComponent implements OnInit, OnChanges {
       this.userCreated.emit();
       this.closed.emit();
     } catch (err: any) {
-      this.errors.submit = err?.error?.message || "users.create.error";
+      this.errors.submit = err?.error?.message || 'users.create.error';
     } finally {
       this.loading = false;
     }

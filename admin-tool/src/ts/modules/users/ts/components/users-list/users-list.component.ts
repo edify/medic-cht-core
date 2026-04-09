@@ -1,22 +1,22 @@
-import { Component, OnInit, OnDestroy } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { Subscription } from "rxjs";
-import { TranslatePipe } from "@ngx-translate/core";
-import { AuthService } from "@admin-tool-services/auth.service";
-import { UsersService } from "@admin-tool-services/users.service";
-import { User } from "@admin-tool-modules/users/users-interfaces";
-import { CreateUserComponent } from "../create-user/create-user.component";
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
+import { TranslatePipe } from '@ngx-translate/core';
+import { AuthService } from '@admin-tool-services/auth.service';
+import { UsersService } from '@admin-tool-services/users.service';
+import { User } from '@admin-tool-modules/users/users-interfaces';
+import { CreateUserComponent } from '../create-user/create-user.component';
 /**
  * Displays and manages the list of system users.
  * Requires `can_configure` permission to access — unauthorized users see an error message.
  * Fetches users from the API on initialization and provides hooks for create, edit, and delete actions.
  */
 @Component({
-  selector: "users-list",
+  selector: 'users-list',
   standalone: true,
   imports: [CommonModule, CreateUserComponent, TranslatePipe],
-  templateUrl: "./users-list.component.html",
-  styleUrl: "./users-list.component.less",
+  templateUrl: './users-list.component.html',
+  styleUrl: './users-list.component.less',
 })
 export class UsersListComponent implements OnInit, OnDestroy {
   canConfigure = false;
@@ -33,7 +33,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.authService.has("can_configure").then((result) => {
+    this.authService.has('can_configure').then((result) => {
       this.canConfigure = result;
       if (result) {
         this.loadUsers();
@@ -48,7 +48,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.usersUpdatedSubscription.unsubscribe();
+    this.usersUpdatedSubscription?.unsubscribe();
   }
 
   /**
@@ -61,7 +61,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
       this.users = await this.usersService.getUsers();
     } catch (err) {
       this.error = true;
-      console.error("Error fetching users", err);
+      console.error('Error fetching users', err);
     } finally {
       this.loading = false;
     }
@@ -90,7 +90,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
    * TODO: implement when the modal component is available.
    */
   importUsers() {
-    console.log("import users");
+    console.log('import users');
   }
 
   /**
@@ -102,7 +102,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
    */
   deleteUser(user: Partial<User>, event: Event) {
     event.stopPropagation();
-    console.log("delete user", user);
+    console.log('delete user', user);
   }
 
   /**
@@ -111,6 +111,6 @@ export class UsersListComponent implements OnInit, OnDestroy {
    * @param user the user to be edited
    */
   editUser(user: Partial<User>) {
-    console.log("edit user", user);
+    console.log('edit user', user);
   }
 }
