@@ -1,7 +1,7 @@
-import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import { firstValueFrom, BehaviorSubject } from "rxjs";
-import { User } from "@admin-tool-modules/users/users-interfaces";
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom, BehaviorSubject } from 'rxjs';
+import { User } from '@admin-tool-modules/users/users-interfaces';
 
 /**
  * Handles all HTTP communication with the users API endpoints.
@@ -10,7 +10,7 @@ import { User } from "@admin-tool-modules/users/users-interfaces";
  * so no manual authentication headers are required.
  */
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class UsersService {
   private usersUpdatedSubject = new BehaviorSubject<void>(undefined);
@@ -28,7 +28,7 @@ export class UsersService {
    * @returns a promise that resolves to an array of user objects
    */
   async getUsers(): Promise<Partial<User>[]> {
-    return firstValueFrom(this.http.get<Partial<User>[]>("/api/v2/users"));
+    return firstValueFrom(this.http.get<Partial<User>[]>('/api/v2/users'));
   }
 
   /**

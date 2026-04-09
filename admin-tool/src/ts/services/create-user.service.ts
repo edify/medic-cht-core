@@ -24,7 +24,7 @@ export class CreateUserService {
         withCredentials: true,
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json'
         }
       })
     );

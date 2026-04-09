@@ -44,7 +44,7 @@ export interface CHTSettings {
  * is forwarded automatically.
  */
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class SettingsService {
   private readonly SETTINGS_ID = DOC_IDS.SETTINGS;
@@ -56,7 +56,7 @@ export class SettingsService {
     private changesService: ChangesService,
   ) {
     this.changesService.subscribe({
-      key: "settings",
+      key: 'settings',
       filter: (change) => change.id === this.SETTINGS_ID,
       callback: () => {
         this.cachedSettings = null;
@@ -93,9 +93,9 @@ export class SettingsService {
     replace = false,
   ): Promise<void> {
     return firstValueFrom(
-      this.http.put<void>("/api/v1/settings", updates, {
+      this.http.put<void>('/api/v1/settings', updates, {
         params: { replace: String(replace) },
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       }),
     );
   }
@@ -110,8 +110,8 @@ export class SettingsService {
   async getDateTimeSettings(): Promise<DateTimeSettings> {
     const res = await this.get();
     return {
-      dateFormat: res.date_format ?? "",
-      dateTimeFormat: res.reported_date_format ?? "",
+      dateFormat: res.date_format ?? '',
+      dateTimeFormat: res.reported_date_format ?? '',
     };
   }
 

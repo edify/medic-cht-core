@@ -1,16 +1,16 @@
-import { ComponentFixture, TestBed, waitForAsync } from "@angular/core/testing";
-import { expect } from "chai";
-import sinon from "sinon";
-import { provideHttpClient } from "@angular/common/http";
-import { provideHttpClientTesting } from "@angular/common/http/testing";
-import { TranslateModule } from "@ngx-translate/core";
-import { UsersComponent } from "@admin-tool-modules/users/users.component";
-import { AuthService } from "@admin-tool-services/auth.service";
-import { UsersService } from "@admin-tool-services/users.service";
-import { SettingsService } from "@admin-tool-services/settings.service";
-import { ChangesService } from "@admin-tool-services/changes.service";
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { expect } from 'chai';
+import sinon from 'sinon';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { TranslateModule } from '@ngx-translate/core';
+import { UsersComponent } from '@admin-tool-modules/users/users.component';
+import { AuthService } from '@admin-tool-services/auth.service';
+import { UsersService } from '@admin-tool-services/users.service';
+import { SettingsService } from '@admin-tool-services/settings.service';
+import { ChangesService } from '@admin-tool-services/changes.service';
 
-describe("UsersComponent", () => {
+describe('UsersComponent', () => {
   let component: UsersComponent;
   let fixture: ComponentFixture<UsersComponent>;
 
@@ -53,12 +53,12 @@ describe("UsersComponent", () => {
 
   afterEach(() => sinon.restore());
 
-  it("should create the users component", () => {
+  it('should create the users component', () => {
     expect(component).to.exist;
   });
 
-  it("should render the users-list component", () => {
+  it('should render the users-list component', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector("users-list")).to.exist;
+    expect(compiled.querySelector('users-list')).to.exist;
   });
 });

@@ -96,7 +96,9 @@ describe('CreateUserComponent', () => {
 
   afterEach(() => {
     // Flush any pending HTTP requests (e.g. replication limit check)
-    try { httpMock.verify(); } catch { /* ignore */ }
+    try {
+      httpMock.verify(); 
+    } catch { /* ignore */ }
     sinon.restore();
     delete (window as any).$;
   });
@@ -485,7 +487,7 @@ describe('CreateUserComponent', () => {
       expect(component.passwordHidden).to.equal(true);
     });
 
-    it('should hide password fields when SSO login is active', async () => {
+    it('should hide password fields when SSO login is active', () => {
       component.allowSSOLogin = true;
       component.model.oidc_username = 'bruce@wayne.com';
 

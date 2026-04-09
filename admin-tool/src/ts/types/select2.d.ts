@@ -21,10 +21,10 @@ declare global {
 
   interface JQuery {
     select2(options?: Select2Options): JQuery;
-    select2(method: "data"): any[];
-    select2(method: "data", value: any[]): JQuery;
-    select2(method: "destroy" | "open" | "close"): JQuery;
-    select2(method: "val"): string | string[];
+    select2(method: 'data'): any[];
+    select2(method: 'data', value: any[]): JQuery;
+    select2(method: 'destroy' | 'open' | 'close'): JQuery;
+    select2(method: 'val'): string | string[];
   }
 }
 
