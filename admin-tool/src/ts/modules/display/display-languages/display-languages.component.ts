@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { LanguageDoc, LanguageModel } from '../display-interfaces';
 import { ResponseStatus } from '@admin-tool-modules/global-modules-interfaces';
 import { TranslatePipe } from '@ngx-translate/core';
+import { DisplayLanguagesEditComponent } from './display-languages-edit/display-languages-edit.component';
 
 /**
  * Component for managing language documents in the CHT instance.
@@ -16,7 +17,7 @@ import { TranslatePipe } from '@ngx-translate/core';
  */
 @Component({
   selector: 'display-languages',
-  imports: [TranslatePipe],
+  imports: [TranslatePipe, DisplayLanguagesEditComponent],
   templateUrl: './display-languages.component.html',
   styleUrl: './display-languages.component.less'
 })
@@ -30,6 +31,9 @@ export class DisplayLanguagesComponent implements OnInit {
 
   /** Tracks the state of save/edit/delete operations */
   responseStatus: ResponseStatus = {};
+
+  showEditModal = false;
+  selectedDoc: LanguageDoc | null = null;
 
   constructor(private languageService: LanguagesService){}
 
@@ -60,7 +64,8 @@ export class DisplayLanguagesComponent implements OnInit {
 
   //TODO: Implement editLanguage
   async editLanguage(doc: LanguageDoc): Promise<void> {
-
+    this.selectedDoc = doc;
+    this.showEditModal = true;
   }
 
   //TODO: Implement uploadLanguage
@@ -75,6 +80,7 @@ export class DisplayLanguagesComponent implements OnInit {
 
   //TODO: Implement addLanguage
   async addLanguage(): Promise<void> {
-    
+    this.selectedDoc = null;
+    this.showEditModal = true;
   }
 }

@@ -24,3 +24,8 @@ export interface LanguageModel {
   enabled: boolean;
   missing: number;
 }
+
+export interface LanguageValidation {
+  code?: string;
+  name?: string;
+}

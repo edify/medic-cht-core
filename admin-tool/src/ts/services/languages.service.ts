@@ -72,12 +72,37 @@ export class LanguagesService {
     return total - docKeys.length;
   }
   
-  //TODO: Implement saveLanguage
+
   async saveLanguage(doc: LanguageDoc): Promise<void> {
+    if (!doc._id) {
+      doc._id = 'messages-' + doc.code;
+    }
+    await this.db.get().put(doc);
   }
 
-  //TODO: Implement deleteLanguage
   async deleteLanguage(doc: LanguageDoc): Promise<void> {
+    await this.db.get().remove(doc);
   }
+
+  private async setLanguageStatus(doc: LanguageDoc, enabled: boolean): Promise<void> {
+    const settings = await this.settingsService.get();
+    const languages = settings.languages || [];
+    let language = languages.find(l => l.locale === doc.code);
+    if (!language) {
+      language = { locale: doc.code, enabled };
+      languages.push(language);
+    }
+    language.enabled = enabled;
+    await this.settingsService.updateSettings({ languages });
+  }
+
+  async enableLanguage(doc: LanguageDoc): Promise<void> {
+    await this.setLanguageStatus(doc, true);
+  }
+
+  async disableLanguage(doc: LanguageDoc): Promise<void> {
+    await this.setLanguageStatus(doc, false);
+  }
+
 
 }

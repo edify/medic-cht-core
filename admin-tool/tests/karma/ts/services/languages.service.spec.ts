@@ -36,6 +36,8 @@ describe('LanguagesService', () => {
         allDocs: sinon.stub().resolves({
           rows: mockDocs.map(doc => ({ doc })),
         }),
+        put: sinon.stub().resolves(),
+        remove: sinon.stub().resolves(),
       }),
     };
 
@@ -46,6 +48,7 @@ describe('LanguagesService', () => {
           { locale: 'es', enabled: false },
         ],
       }),
+      updateSettings: sinon.stub().resolves(),
     };
 
     TestBed.configureTestingModule({
@@ -147,6 +150,123 @@ describe('LanguagesService', () => {
       const emptyDoc = { generic: {}, code: 'xx', name: 'Test', type: 'translations', _id: 'messages-xx' };
       const result = service['countMissingTranslations'](emptyDoc as any, 3);
       expect(result).to.equal(3);
+    });
+  });
+  describe('saveLanguage', () => {
+    it('should assign _id when doc has no _id', async () => {
+      const doc = { code: 'fr', name: 'Français', type: 'translations', generic: {} } as any;
+      await service.saveLanguage(doc);
+      expect(doc._id).to.equal('messages-fr');
+    });
+
+    it('should not overwrite _id when doc already has _id', async () => {
+      const doc = { _id: 'messages-fr', code: 'fr', name: 'Français', type: 'translations', generic: {} } as any;
+      await service.saveLanguage(doc);
+      expect(doc._id).to.equal('messages-fr');
+    });
+
+    it('should call db.get().put with the doc', async () => {
+      const doc = { _id: 'messages-fr', code: 'fr', name: 'Français', type: 'translations', generic: {} } as any;
+      await service.saveLanguage(doc);
+      expect(dbService.get().put.calledWith(doc)).to.be.true;
+    });
+
+    it('should propagate error if put fails', async () => {
+      dbService.get().put.rejects(new Error('error'));
+      const doc = { _id: 'messages-fr', code: 'fr', name: 'Français', type: 'translations', generic: {} } as any;
+      const result = service.saveLanguage(doc);
+      await result.catch(err => expect(err.message).to.equal('error'));
+    });
+  });
+  describe('deleteLanguage', () => {
+    it('should call db.get().remove with the doc', async () => {
+      const doc = { _id: 'messages-fr', _rev: '1-abc', code: 'fr', name: 'Français', type: 'translations', generic: {} } as any;
+      await service.deleteLanguage(doc);
+      expect(dbService.get().remove.calledWith(doc)).to.be.true;
+    });
+
+    it('should propagate error if remove fails', async () => {
+      dbService.get().remove.rejects(new Error('error'));
+      const doc = { _id: 'messages-fr', _rev: '1-abc', code: 'fr', name: 'Français', type: 'translations', generic: {} } as any;
+      const result = service.deleteLanguage(doc);
+      await result.catch(err => expect(err.message).to.equal('error'));
+    });
+  });
+  describe('enableLanguage', () => {
+    it('should handle empty settings.languages', async () => {
+      settingsService.get.resolves({});
+      const doc = { code: 'en' } as any;
+      await service.enableLanguage(doc);
+      const languages = settingsService.updateSettings.args[0][0].languages;
+      expect(languages).to.have.length(1);
+      expect(languages[0].locale).to.equal('en');
+      expect(languages[0].enabled).to.be.true;
+    });
+
+    it('should call updateSettings with enabled true for existing language', async () => {
+      const doc = { code: 'es' } as any;
+      await service.enableLanguage(doc);
+      const languages = settingsService.updateSettings.args[0][0].languages;
+      const es = languages.find(language => language.locale === 'es');
+      expect(es.enabled).to.be.true;
+    });
+
+    it('should create new entry if language not in settings', async () => {
+      const doc = { code: 'fr' } as any;
+      await service.enableLanguage(doc);
+      const languages = settingsService.updateSettings.args[0][0].languages;
+      const fr = languages.find(language => language.locale === 'fr');
+      expect(fr).to.exist;
+      expect(fr.enabled).to.be.true;
+    });
+
+    it('should call updateSettings without replace', async () => {
+      const doc = { code: 'en' } as any;
+      await service.enableLanguage(doc);
+      expect(settingsService.updateSettings.calledOnce).to.be.true;
+      expect(settingsService.updateSettings.args[0][1]).to.be.undefined;
+    });
+
+    it('should propagate error if updateSettings fails', async () => {
+      settingsService.updateSettings.rejects(new Error('error'));
+      const doc = { code: 'en' } as any;
+      const result = service.enableLanguage(doc);
+      await result.catch(err => expect(err.message).to.equal('error'));
+    });
+  });
+  describe('disableLanguage', () => {
+    it('should handle empty settings.languages', async () => {
+      settingsService.get.resolves({});
+      const doc = { code: 'en' } as any;
+      await service.disableLanguage(doc);
+      const languages = settingsService.updateSettings.args[0][0].languages;
+      expect(languages).to.have.length(1);
+      expect(languages[0].locale).to.equal('en');
+      expect(languages[0].enabled).to.be.false;
+    });
+
+    it('should call updateSettings with enabled false for existing language', async () => {
+      const doc = { code: 'en' } as any;
+      await service.disableLanguage(doc);
+      const languages = settingsService.updateSettings.args[0][0].languages;
+      const en = languages.find(language => language.locale === 'en');
+      expect(en.enabled).to.be.false;
+    });
+
+    it('should create new entry if language not in settings', async () => {
+      const doc = { code: 'fr' } as any;
+      await service.disableLanguage(doc);
+      const languages = settingsService.updateSettings.args[0][0].languages;
+      const fr = languages.find(language => language.locale === 'fr');
+      expect(fr).to.exist;
+      expect(fr.enabled).to.be.false;
+    });
+
+    it('should propagate error if updateSettings fails', async () => {
+      settingsService.updateSettings.rejects(new Error('error'));
+      const doc = { code: 'en' } as any;
+      const result = service.disableLanguage(doc);
+      await result.catch(err => expect(err.message).to.equal('error'));
     });
   });
 });

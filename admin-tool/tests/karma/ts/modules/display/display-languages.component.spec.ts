@@ -87,6 +87,31 @@ describe('DisplayLanguagesComponent', () => {
       expect(consoleStub.calledOnce).to.be.true;
     });
   });
+  describe('editLanguage', () => {
+    it('should set selectedDoc with the doc', async () => {
+      const doc = mockLanguages[0].doc as any;
+      await component.editLanguage(doc);
+      expect(component.selectedDoc).to.equal(doc);
+    });
+
+    it('should set showEditModal to true', async () => {
+      const doc = mockLanguages[0].doc as any;
+      await component.editLanguage(doc);
+      expect(component.showEditModal).to.be.true;
+    });
+  });
+
+  describe('addLanguage', () => {
+    it('should set selectedDoc to null', async () => {
+      await component.addLanguage();
+      expect(component.selectedDoc).to.be.null;
+    });
+
+    it('should set showEditModal to true', async () => {
+      await component.addLanguage();
+      expect(component.showEditModal).to.be.true;
+    });
+  });
   describe('DOM', () => {
     it('should show loader when loadingPageStatus is true', () => {
       component.loadingPageStatus = true;
