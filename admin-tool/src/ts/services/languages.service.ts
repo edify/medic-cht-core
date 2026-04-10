@@ -38,7 +38,9 @@ export class LanguagesService {
     const languages = result.rows.map(row => {
       const doc = row.doc as LanguageDoc;
       const languageSetting = settings.languages?.find(language => language.locale === doc.code);
-      const enabled = languageSetting ? languageSetting.enabled !== false : true;
+      const enabled = settings.languages?.length 
+        ? languageSetting ? languageSetting.enabled !== false : false
+        : true;
       const missing = this.countMissingTranslations(doc, totalTranslations);
       return { doc, enabled, missing };
     });
@@ -87,14 +89,18 @@ export class LanguagesService {
   }
 
   /**
-   * Removes a language document from CouchDB.
+   * Removes a language document from CouchDB and cleans up its entry from settings.languages.
    * The document must have both _id and _rev for CouchDB to accept the removal.
+   * After removal, filters out the language locale from settings.languages to keep settings in sync.
    *
    * @param {LanguageDoc} doc - the language document to remove
    * @returns {Promise<void>}
    */
   async deleteLanguage(doc: LanguageDoc): Promise<void> {
     await this.db.get().remove(doc);
+    const settings = await this.settingsService.get();
+    const languages = (settings.languages || []).filter(language => language.locale !== doc.code);
+    await this.settingsService.updateSettings({ languages });
   }
 
   /**

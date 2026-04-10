@@ -123,6 +123,15 @@ describe('LanguagesService', () => {
       const result = service.getLanguages();
       await result.catch(err => expect(err.message).to.equal('error'));
     });
+
+    it('should set enabled false when language is not in settings but other languages exist', async () => {
+      settingsService.get.resolves({
+        languages: [{ locale: 'fr', enabled: true }],
+      });
+      const result = await service.getLanguages();
+      const en = result.find(language => language.doc.code === 'en');
+      expect(en!.enabled).to.be.false;
+    });
   });
   describe('countTotalTranslations', () => {
     it('should count unique keys across all docs', () => {
@@ -192,16 +201,29 @@ describe('LanguagesService', () => {
       expect(dbService.get().remove.calledWith(doc)).to.be.true;
     });
 
+    it('should remove the language entry from settings after delete', async () => {
+      const doc = mockDocs[0] as any;
+      await service.deleteLanguage(doc);
+      const languages = settingsService.updateSettings.args[0][0].languages;
+      expect(languages.find(language => language.locale === 'en')).to.not.exist;
+    });
+
+    it('should keep other language entries in settings after delete', async () => {
+      const doc = mockDocs[0] as any;
+      await service.deleteLanguage(doc);
+      const languages = settingsService.updateSettings.args[0][0].languages;
+      expect(languages.find(language => language.locale === 'es')).to.exist;
+    });
+
+    it('should call updateSettings after remove', async () => {
+      const doc = mockDocs[0] as any;
+      await service.deleteLanguage(doc);
+      expect(settingsService.updateSettings.calledOnce).to.be.true;
+    });
+
     it('should propagate error if remove fails', async () => {
       dbService.get().remove.rejects(new Error('error'));
-      const doc = {
-        _id: 'messages-fr',
-        _rev: '1-abc',
-        code: 'fr',
-        name: 'Français',
-        type: 'translations',
-        generic: {}
-      } as any;
+      const doc = mockDocs[0] as any;
       const result = service.deleteLanguage(doc);
       await result.catch(err => expect(err.message).to.equal('error'));
     });

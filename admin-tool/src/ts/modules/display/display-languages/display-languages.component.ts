@@ -4,6 +4,7 @@ import { LanguageDoc, LanguageModel } from '../display-interfaces';
 import { ResponseStatus } from '@admin-tool-modules/global-modules-interfaces';
 import { TranslatePipe } from '@ngx-translate/core';
 import { DisplayLanguagesEditComponent } from './display-languages-edit/display-languages-edit.component';
+import { DisplayLanguagesDeleteComponent } from './display-languages-delete/display-languages-delete.component';
 
 /**
  * Component for managing language documents in the CHT instance.
@@ -17,7 +18,7 @@ import { DisplayLanguagesEditComponent } from './display-languages-edit/display-
  */
 @Component({
   selector: 'display-languages',
-  imports: [TranslatePipe, DisplayLanguagesEditComponent],
+  imports: [TranslatePipe, DisplayLanguagesEditComponent, DisplayLanguagesDeleteComponent],
   templateUrl: './display-languages.component.html',
   styleUrl: './display-languages.component.less'
 })
@@ -38,6 +39,12 @@ export class DisplayLanguagesComponent implements OnInit {
   /** Language document to edit, or null when adding a new language */
   selectedDoc: LanguageDoc | null = null;
 
+  /** Controls visibility of the delete confirmation modal */
+  showDeleteModal = false;
+
+  /** Language document to delete */
+  deleteDoc: LanguageDoc | null = null;
+
   constructor(private languageService: LanguagesService){}
 
   /**
@@ -55,14 +62,34 @@ export class DisplayLanguagesComponent implements OnInit {
     }
   }
 
-  //TODO: Implement disableLanguage
+  /**
+   * Disables a language by updating its enabled state in settings.languages.
+   * Reloads the language list after success.
+   *
+   * @param {LanguageDoc} doc - the language document to disable
+   */
   async disableLanguage(doc: LanguageDoc): Promise<void> {
-
+    try {
+      await this.languageService.disableLanguage(doc);
+      await this.ngOnInit();
+    } catch (error) {
+      console.error('Error disabling language', error);
+    }
   }
 
-  //TODO: Implement enableLanguage
+  /**
+   * Enables a language by updating its enabled state in settings.languages.
+   * Reloads the language list after success.
+   *
+   * @param {LanguageDoc} doc - the language document to enable
+   */
   async enableLanguage(doc: LanguageDoc): Promise<void> {
-
+    try {
+      await this.languageService.enableLanguage(doc);
+      await this.ngOnInit();
+    } catch (error) {
+      console.error('Error enabling language', error);
+    }
   }
 
 
@@ -81,9 +108,14 @@ export class DisplayLanguagesComponent implements OnInit {
 
   }
 
-  //TODO: Implement deleteLanguage
+  /**
+   * Opens the delete confirmation modal with the selected language document.
+   *
+   * @param {LanguageDoc} doc - the language document to delete
+   */
   async deleteLanguage(doc: LanguageDoc): Promise<void> {
-
+    this.deleteDoc = doc;
+    this.showDeleteModal = true;
   }
 
   /**

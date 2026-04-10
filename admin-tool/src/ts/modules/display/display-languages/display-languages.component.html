@@ -87,4 +87,11 @@
     (saved)="ngOnInit()"
   >
   </display-languages-edit>
+  <display-languages-delete
+    [visible]="showDeleteModal"
+    [doc]="deleteDoc"
+    (closed)="showDeleteModal = false"
+    (confirmed)="ngOnInit()"
+  >
+  </display-languages-delete>
 </div>

@@ -26,6 +26,8 @@ describe('DisplayLanguagesComponent', () => {
   beforeEach(waitForAsync(() => {
     languagesService = {
       getLanguages: sinon.stub().resolves(mockLanguages),
+      enableLanguage: sinon.stub().resolves(),
+      disableLanguage: sinon.stub().resolves(),
     };
 
     return TestBed.configureTestingModule({
@@ -112,6 +114,61 @@ describe('DisplayLanguagesComponent', () => {
       expect(component.showEditModal).to.be.true;
     });
   });
+  describe('enableLanguage', () => {
+    it('should call languagesService.enableLanguage with the doc', async () => {
+      const doc = mockLanguages[0].doc as any;
+      await component.enableLanguage(doc);
+      expect(languagesService.enableLanguage.calledWith(doc)).to.be.true;
+    });
+
+    it('should reload languages after success', async () => {
+      const doc = mockLanguages[0].doc as any;
+      await component.enableLanguage(doc);
+      expect(languagesService.getLanguages.callCount).to.be.greaterThan(1);
+    });
+
+    it('should handle error if enableLanguage fails', async () => {
+      const consoleStub = sinon.stub(console, 'error');
+      languagesService.enableLanguage.rejects(new Error('error'));
+      const doc = mockLanguages[0].doc as any;
+      await component.enableLanguage(doc);
+      expect(consoleStub.calledOnce).to.be.true;
+    });
+  });
+  describe('disableLanguage', () => {
+    it('should call languagesService.disableLanguage with the doc', async () => {
+      const doc = mockLanguages[0].doc as any;
+      await component.disableLanguage(doc);
+      expect(languagesService.disableLanguage.calledWith(doc)).to.be.true;
+    });
+
+    it('should reload languages after success', async () => {
+      const doc = mockLanguages[0].doc as any;
+      await component.disableLanguage(doc);
+      expect(languagesService.getLanguages.callCount).to.be.greaterThan(1);
+    });
+
+    it('should handle error if disableLanguage fails', async () => {
+      const consoleStub = sinon.stub(console, 'error');
+      languagesService.disableLanguage.rejects(new Error('error'));
+      const doc = mockLanguages[0].doc as any;
+      await component.disableLanguage(doc);
+      expect(consoleStub.calledOnce).to.be.true;
+    });
+  });
+  describe('deleteLanguage', () => {
+    it('should set deleteDoc with the doc', async () => {
+      const doc = mockLanguages[0].doc as any;
+      await component.deleteLanguage(doc);
+      expect(component.deleteDoc).to.equal(doc);
+    });
+
+    it('should set showDeleteModal to true', async () => {
+      const doc = mockLanguages[0].doc as any;
+      await component.deleteLanguage(doc);
+      expect(component.showDeleteModal).to.be.true;
+    });
+  });
   describe('DOM', () => {
     it('should show loader when loadingPageStatus is true', () => {
       component.loadingPageStatus = true;
@@ -156,6 +213,22 @@ describe('DisplayLanguagesComponent', () => {
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.btn-primary')).to.exist;
+    });
+    
+    it('should show disable button when language is enabled', async () => {
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const panels = compiled.querySelectorAll('.panel-collapse');
+      expect(panels[0].querySelector('.fa-ban')).to.exist;
+    });
+
+    it('should show enable button when language is disabled', async () => {
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const panels = compiled.querySelectorAll('.panel-collapse');
+      expect(panels[1].querySelector('.fa-circle-o')).to.exist;
     });
   });
 });
