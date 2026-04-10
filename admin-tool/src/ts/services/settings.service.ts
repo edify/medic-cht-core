@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { DOC_IDS } from '@medic/constants';
-import { DbService } from "@admin-tool-services/db.service";
-import { ChangesService } from "@admin-tool-services/changes.service";
+import { DbService } from '@admin-tool-services/db.service';
+import { ChangesService } from '@admin-tool-services/changes.service';
 
 /**
  * Interface representing the date and datetime display format settings.

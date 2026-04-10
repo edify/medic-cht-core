@@ -224,7 +224,9 @@ export class CreateUserComponent implements OnInit, OnChanges {
    * Phone is required and must be valid when Token Login is enabled.
    */
   private validatePhone() {
-    if (!this.model.token_login) return;
+    if (!this.model.token_login) {
+      return;
+    }
 
     if (!this.model.phone) {
       this.errors.phone = 'field.required';
@@ -240,8 +242,12 @@ export class CreateUserComponent implements OnInit, OnChanges {
    */
   private validateFacilityAndContact() {
     if (this.isOfflineUser()) {
-      if (!this.model.place) this.errors.place = 'field.required';
-      if (!this.model.contact) this.errors.contact = 'field.required';
+      if (!this.model.place) {
+        this.errors.place = 'field.required';
+      }
+      if (!this.model.contact) {
+        this.errors.contact = 'field.required';
+      }
     } else if (this.model.contact && !this.model.place) {
       this.errors.place = 'field.required';
     }
@@ -252,7 +258,9 @@ export class CreateUserComponent implements OnInit, OnChanges {
    * Skipped entirely when Token Login or SSO is active.
    */
   private validatePassword() {
-    if (this.passwordHidden) return;
+    if (this.passwordHidden) {
+      return;
+    }
 
     if (!this.model.password) {
       this.errors.password = 'field.required';
@@ -290,12 +298,16 @@ export class CreateUserComponent implements OnInit, OnChanges {
    * @returns true if valid or not applicable
    */
   private async validateContactInPlace(): Promise<boolean> {
-    if (!this.isOfflineUser() || !this.model.contact || !this.model.place) return true;
+    if (!this.isOfflineUser() || !this.model.contact || !this.model.place) {
+      return true;
+    }
 
     const placeIds = Array.isArray(this.model.place) ? this.model.place : [this.model.place];
     const valid = await this.select2SearchService.isContactInPlace(this.model.contact, placeIds);
 
-    if (!valid) this.errors.contact = 'configuration.user.place.contact';
+    if (!valid) {
+      this.errors.contact = 'configuration.user.place.contact';
+    }
 
     return valid;
   }
@@ -307,7 +319,9 @@ export class CreateUserComponent implements OnInit, OnChanges {
    * @returns true if within limit or not applicable, false if limit exceeded
    */
   private async validateReplicationLimit(): Promise<boolean> {
-    if (!this.isOfflineUser()) return true;
+    if (!this.isOfflineUser()) {
+      return true;
+    }
 
     try {
       const params: any = {
@@ -359,14 +373,20 @@ export class CreateUserComponent implements OnInit, OnChanges {
   async submit() {
     this.computeFields();
 
-    if (!this.validate()) return;
+    if (!this.validate()) {
+      return;
+    }
 
     const contactValid = await this.validateContactInPlace();
-    if (!contactValid) return;
+    if (!contactValid) {
+      return;
+    }
 
     // Replication limit is a warning — show it and stop, let the user confirm by submitting again
     const withinLimit = await this.validateReplicationLimit();
-    if (!withinLimit) return;
+    if (!withinLimit) {
+      return;
+    }
 
     this.loading = true;
     this.errors = {};
