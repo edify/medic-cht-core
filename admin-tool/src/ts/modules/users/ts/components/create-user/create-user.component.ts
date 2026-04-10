@@ -1,19 +1,37 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, ViewChild, ElementRef } 
-  from '@angular/core';
+import {
+  Component, Input, Output, EventEmitter,
+  OnInit, OnChanges, SimpleChanges,
+  ViewChild, ElementRef
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { TranslatePipe } from '@ngx-translate/core';
 import { CreateUserService } from '@admin-tool-services/create-user.service';
 import { Select2SearchService } from '@admin-tool-services/select2search.service';
 import { SettingsService } from '@admin-tool-services/settings.service';
 import { UsersService } from '@admin-tool-services/users.service';
 import { CreateUserErrors } from '@admin-tool-modules/users/users-interfaces';
-import { TranslateModule } from '@ngx-translate/core';
 
 const passwordTester = require('simple-password-tester');
 const phoneNumber = require('@medic/phone-number');
 const PASSWORD_MINIMUM_LENGTH = 8;
 const PASSWORD_MINIMUM_SCORE = 50;
+
+const getInitialModel = () => ({
+  username: '',
+  fullname: '',
+  email: '',
+  phone: '',
+  roles: [] as string[],
+  place: null as string | null,
+  contact: null as string | null,
+  token_login: false,
+  oidc_username: '',
+  password: '',
+  passwordConfirm: '',
+  showPassword: false,
+});
 
 /**
  * Modal component for creating a new user.
@@ -23,7 +41,7 @@ const PASSWORD_MINIMUM_SCORE = 50;
 @Component({
   selector: 'create-user',
   standalone: true,
-  imports: [FormsModule, TranslateModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './create-user.component.html',
   styleUrl: './create-user.component.less'
 })
@@ -45,20 +63,7 @@ export class CreateUserComponent implements OnInit, OnChanges {
   allowTokenLogin = false;
   allowSSOLogin = false;
 
-  model = {
-    username: '',
-    fullname: '',
-    email: '',
-    phone: '',
-    roles: [] as string[],
-    place: null as string | null,
-    contact: null as string | null,
-    token_login: false,
-    oidc_username: '',
-    password: '',
-    passwordConfirm: '',
-    showPassword: false,
-  };
+  model = getInitialModel();
 
   private settingsRoles: Record<string, { name: string; offline?: boolean }> = {};
   private cachedSettings: any = null;
@@ -186,69 +191,96 @@ export class CreateUserComponent implements OnInit, OnChanges {
   }
 
   /**
-   * Validates the form fields and populates the errors object.
-   * - Facility and contact are required for offline roles.
-   * - Phone is required when Token Login is enabled.
-   * - Password validation is skipped when Token Login or SSO is active.
+   * Validates the username field.
+   */
+  private validateUsername() {
+    if (!this.model.username) {
+      this.errors.username = 'field.required';
+    } else if (!/^[a-z0-9_-]+$/.test(this.model.username)) {
+      this.errors.username = 'username.invalid';
+    }
+  }
+
+  /**
+   * Validates the email field (optional, format check only).
+   */
+  private validateEmail() {
+    if (this.model.email && !/^[^\s@]+@[^\s@]+$/.test(this.model.email)) {
+      this.errors.email = 'email.invalid';
+    }
+  }
+
+  /**
+   * Validates the roles field.
+   */
+  private validateRoles() {
+    if (!this.model.roles.length) {
+      this.errors.roles = 'field.required';
+    }
+  }
+
+  /**
+   * Validates the phone field.
+   * Phone is required and must be valid when Token Login is enabled.
+   */
+  private validatePhone() {
+    if (!this.model.token_login) return;
+
+    if (!this.model.phone) {
+      this.errors.phone = 'field.required';
+    } else if (!phoneNumber.validate(this.cachedSettings, this.model.phone)) {
+      this.errors.phone = 'configuration.enable.token.login.phone';
+    }
+  }
+
+  /**
+   * Validates the facility and contact fields.
+   * Both are required for offline roles; facility is also required for online
+   * users who have selected a contact.
+   */
+  private validateFacilityAndContact() {
+    if (this.isOfflineUser()) {
+      if (!this.model.place) this.errors.place = 'field.required';
+      if (!this.model.contact) this.errors.contact = 'field.required';
+    } else if (this.model.contact && !this.model.place) {
+      this.errors.place = 'field.required';
+    }
+  }
+
+  /**
+   * Validates the password fields.
+   * Skipped entirely when Token Login or SSO is active.
+   */
+  private validatePassword() {
+    if (this.passwordHidden) return;
+
+    if (!this.model.password) {
+      this.errors.password = 'field.required';
+    } else if (this.model.password.length < PASSWORD_MINIMUM_LENGTH) {
+      this.errors.password = 'password.length.minimum';
+    } else if (passwordTester(this.model.password) < PASSWORD_MINIMUM_SCORE) {
+      this.errors.password = 'password.weak';
+    }
+
+    if (!this.model.passwordConfirm) {
+      this.errors.passwordConfirm = 'field.required';
+    } else if (this.model.password !== this.model.passwordConfirm) {
+      this.errors.passwordConfirm = 'Passwords must match';
+    }
+  }
+
+  /**
+   * Validates all form fields and populates the errors object.
    * @returns true if the form is valid, false otherwise
    */
   private validate(): boolean {
     this.errors = {};
-    const usernameRegex = /^[a-z0-9_-]+$/;
-
-    if (!this.model.username) {
-      this.errors.username = 'field.required';
-    } else if (!usernameRegex.test(this.model.username)) {
-      this.errors.username = 'username.invalid';
-    }
-
-    if (this.model.email && !/^[^\s@]+@[^\s@]+$/.test(this.model.email)) {
-      this.errors.email = 'email.invalid';
-    }
-
-    if (!this.model.roles.length) {
-      this.errors.roles = 'field.required';
-    }
-
-    // Phone is required when Token Login is enabled
-    if (this.model.token_login) {
-      if (!this.model.phone) {
-        this.errors.phone = 'field.required';
-      } else if (!phoneNumber.validate(this.cachedSettings, this.model.phone)) {
-        this.errors.phone = 'configuration.enable.token.login.phone';
-      }
-    }
-
-    if (this.isOfflineUser()) {
-      // Offline roles require both facility and associated contact
-      if (!this.model.place) {
-        this.errors.place = 'field.required';
-      }
-      if (!this.model.contact) {
-        this.errors.contact = 'field.required';
-      }
-    } else if (this.model.contact && !this.model.place) {
-      // Online role: if a contact is selected, a facility is still required
-      this.errors.place = 'field.required';
-    }
-
-    // Password validation is skipped when Token Login or SSO is active
-    if (!this.passwordHidden) {
-      if (!this.model.password) {
-        this.errors.password = 'field.required';
-      } else if (this.model.password.length < PASSWORD_MINIMUM_LENGTH) {
-        this.errors.password = 'password.length.minimum';
-      } else if (passwordTester(this.model.password) < PASSWORD_MINIMUM_SCORE) {
-        this.errors.password = 'password.weak';
-      }
-
-      if (!this.model.passwordConfirm) {
-        this.errors.passwordConfirm = 'field.required';
-      } else if (this.model.password !== this.model.passwordConfirm) {
-        this.errors.passwordConfirm = 'Passwords must match';
-      }
-    }
-
+    this.validateUsername();
+    this.validateEmail();
+    this.validateRoles();
+    this.validatePhone();
+    this.validateFacilityAndContact();
+    this.validatePassword();
     return Object.keys(this.errors).length === 0;
   }
 
@@ -258,16 +290,12 @@ export class CreateUserComponent implements OnInit, OnChanges {
    * @returns true if valid or not applicable
    */
   private async validateContactInPlace(): Promise<boolean> {
-    if (!this.isOfflineUser() || !this.model.contact || !this.model.place) {
-      return true;
-    }
+    if (!this.isOfflineUser() || !this.model.contact || !this.model.place) return true;
 
     const placeIds = Array.isArray(this.model.place) ? this.model.place : [this.model.place];
     const valid = await this.select2SearchService.isContactInPlace(this.model.contact, placeIds);
 
-    if (!valid) {
-      this.errors.contact = 'configuration.user.place.contact';
-    }
+    if (!valid) this.errors.contact = 'configuration.user.place.contact';
 
     return valid;
   }
@@ -275,13 +303,11 @@ export class CreateUserComponent implements OnInit, OnChanges {
   /**
    * Checks the replication limit for offline users.
    * Calls GET /api/v1/users-info and sets a warning if the limit would be exceeded.
-   * This is a warning only — it does not block form submission.
+   * This is a warning only — it does not block form submission on retry.
    * @returns true if within limit or not applicable, false if limit exceeded
    */
   private async validateReplicationLimit(): Promise<boolean> {
-    if (!this.isOfflineUser()) {
-      return true;
-    }
+    if (!this.isOfflineUser()) return true;
 
     try {
       const params: any = {
@@ -307,20 +333,7 @@ export class CreateUserComponent implements OnInit, OnChanges {
    * Resets the form model, errors, and Select2 dropdowns to their initial state.
    */
   private reset() {
-    this.model = {
-      username: '',
-      fullname: '',
-      email: '',
-      phone: '',
-      roles: [],
-      place: null,
-      contact: null,
-      token_login: false,
-      oidc_username: '',
-      password: '',
-      passwordConfirm: '',
-      showPassword: false,
-    };
+    this.model = getInitialModel();
     this.errors = {};
     this.loading = false;
     this.isOfflineRole = false;
@@ -346,35 +359,24 @@ export class CreateUserComponent implements OnInit, OnChanges {
   async submit() {
     this.computeFields();
 
-    if (!this.validate()) {
-      return;
-    }
+    if (!this.validate()) return;
 
     const contactValid = await this.validateContactInPlace();
-    if (!contactValid) {
-      return;
-    }
+    if (!contactValid) return;
 
     // Replication limit is a warning — show it and stop, let the user confirm by submitting again
     const withinLimit = await this.validateReplicationLimit();
-    if (!withinLimit) {
-      return;
-    }
+    if (!withinLimit) return;
 
     this.loading = true;
     this.errors = {};
     try {
+      const { password, token_login, oidc_username, ...userBaseProperties } = this.model;
       await this.createUserService.createUser({
-        username: this.model.username,
-        fullname: this.model.fullname,
-        email: this.model.email,
-        phone: this.model.phone,
-        roles: this.model.roles,
-        place: this.model.place,
-        contact: this.model.contact,
-        token_login: this.model.token_login || undefined,
-        oidc_username: this.model.oidc_username || undefined,
-        password: this.passwordHidden ? undefined : this.model.password,
+        ...userBaseProperties,
+        token_login: token_login || undefined,
+        oidc_username: oidc_username || undefined,
+        password: this.passwordHidden ? undefined : password,
       });
       this.usersService.notifyUsersUpdated();
       this.reset();
