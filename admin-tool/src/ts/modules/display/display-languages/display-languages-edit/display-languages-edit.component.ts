@@ -57,10 +57,10 @@ export class DisplayLanguagesEditComponent implements OnChanges {
    * Clears errors and loading state on every open.
    */
   ngOnChanges(changes: SimpleChanges): void {
-    if(changes['visible']?.currentValue === true){
-      if(this.doc){
+    if (changes['visible']?.currentValue === true) {
+      if (this.doc) {
         this.model = { code: this.doc.code, name: this.doc.name, rtl: this.doc.rtl ?? false };
-      } else{
+      } else {
         this.model = { code: '', name: '', rtl: false };
       }
       this.languageErrors = {};
@@ -78,12 +78,12 @@ export class DisplayLanguagesEditComponent implements OnChanges {
   private validate(): boolean {
     this.languageErrors = {};
     
-    if(!this.model.code) {
+    if (!this.model.code) {
       this.languageErrors.code = this.translate.instant('field is required', {
         field: this.translate.instant('Language code')
       });
     }
-    if(!this.model.name) {
+    if (!this.model.name) {
       this.languageErrors.name = this.translate.instant('field is required', {
         field: this.translate.instant('Name')
       });

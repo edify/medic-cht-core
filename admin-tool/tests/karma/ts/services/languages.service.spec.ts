@@ -180,14 +180,28 @@ describe('LanguagesService', () => {
   });
   describe('deleteLanguage', () => {
     it('should call db.get().remove with the doc', async () => {
-      const doc = { _id: 'messages-fr', _rev: '1-abc', code: 'fr', name: 'Français', type: 'translations', generic: {} } as any;
+      const doc = {
+        _id: 'messages-fr',
+        _rev: '1-abc',
+        code: 'fr',
+        name: 'Français',
+        type: 'translations',
+        generic: {}
+      } as any;
       await service.deleteLanguage(doc);
       expect(dbService.get().remove.calledWith(doc)).to.be.true;
     });
 
     it('should propagate error if remove fails', async () => {
       dbService.get().remove.rejects(new Error('error'));
-      const doc = { _id: 'messages-fr', _rev: '1-abc', code: 'fr', name: 'Français', type: 'translations', generic: {} } as any;
+      const doc = {
+        _id: 'messages-fr',
+        _rev: '1-abc',
+        code: 'fr',
+        name: 'Français',
+        type: 'translations',
+        generic: {}
+      } as any;
       const result = service.deleteLanguage(doc);
       await result.catch(err => expect(err.message).to.equal('error'));
     });

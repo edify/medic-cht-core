@@ -2,7 +2,9 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { DisplayLanguagesEditComponent } from '@admin-tool-modules/display/display-languages/display-languages-edit/display-languages-edit.component';
+import { 
+  DisplayLanguagesEditComponent 
+} from '@admin-tool-modules/display/display-languages/display-languages-edit/display-languages-edit.component';
 import { LanguagesService } from '@admin-tool-services/languages.service';
 
 describe('DisplayLanguagesEditComponent', () => {
@@ -66,31 +68,66 @@ describe('DisplayLanguagesEditComponent', () => {
   describe('ngOnChanges', () => {
     it('should preload model when visible changes to true with doc', () => {
       component.doc = mockDoc as any;
-      component.ngOnChanges({ visible: { currentValue: true, previousValue: false, firstChange: false, isFirstChange: () => false } });
+      component.ngOnChanges({
+        visible: {
+          currentValue: true,
+          previousValue: false,
+          firstChange: false,
+          isFirstChange: () => false
+        }
+      });
       expect(component.model).to.deep.equal({ code: 'en', name: 'English', rtl: false });
     });
 
     it('should reset model when visible changes to true without doc', () => {
       component.doc = null;
-      component.ngOnChanges({ visible: { currentValue: true, previousValue: false, firstChange: false, isFirstChange: () => false } });
+      component.ngOnChanges({
+        visible: {
+          currentValue: true,
+          previousValue: false,
+          firstChange: false,
+          isFirstChange: () => false
+        }
+      });
       expect(component.model).to.deep.equal({ code: '', name: '', rtl: false });
     });
 
     it('should clear languageErrors when visible changes to true', () => {
       component.languageErrors = { code: 'error' };
-      component.ngOnChanges({ visible: { currentValue: true, previousValue: false, firstChange: false, isFirstChange: () => false } });
+      component.ngOnChanges({
+        visible: {
+          currentValue: true,
+          previousValue: false,
+          firstChange: false,
+          isFirstChange: () => false
+        }
+      });
       expect(component.languageErrors).to.deep.equal({});
     });
 
     it('should clear loadingModalState when visible changes to true', () => {
       component.loadingModalState = true;
-      component.ngOnChanges({ visible: { currentValue: true, previousValue: false, firstChange: false, isFirstChange: () => false } });
+      component.ngOnChanges({
+        visible: {
+          currentValue: true,
+          previousValue: false,
+          firstChange: false,
+          isFirstChange: () => false
+        }
+      });
       expect(component.loadingModalState).to.be.false;
     });
 
     it('should not reset model when visible changes to false', () => {
       component.model = { code: 'en', name: 'English', rtl: false };
-      component.ngOnChanges({ visible: { currentValue: false, previousValue: true, firstChange: false, isFirstChange: () => false } });
+      component.ngOnChanges({
+        visible: {
+          currentValue: false,
+          previousValue: true,
+          firstChange: false,
+          isFirstChange: () => false
+        }
+      });
       expect(component.model).to.deep.equal({ code: 'en', name: 'English', rtl: false });
     });
   });
@@ -244,7 +281,7 @@ describe('DisplayLanguagesEditComponent', () => {
       expect(input.disabled).to.be.false;
     });
 
-    it('should show code error when languageErrors.code is set', async () => {
+    it('should show code error when languageErrors.code is set', () => {
       component.visible = true;
       component.languageErrors = { code: 'field is required' };
       fixture.detectChanges();
@@ -252,7 +289,7 @@ describe('DisplayLanguagesEditComponent', () => {
       expect(compiled.querySelector('.help-block.error')).to.exist;
     });
 
-    it('should show name error when languageErrors.name is set', async () => {
+    it('should show name error when languageErrors.name is set', () => {
       component.visible = true;
       component.languageErrors = { name: 'field is required' };
       fixture.detectChanges();
@@ -260,7 +297,7 @@ describe('DisplayLanguagesEditComponent', () => {
       expect(compiled.querySelector('.help-block.error')).to.exist;
     });
 
-    it('should disable buttons when loadingModalState is true', async () => {
+    it('should disable buttons when loadingModalState is true', () => {
       component.visible = true;
       component.loadingModalState = true;
       fixture.detectChanges();
@@ -269,7 +306,7 @@ describe('DisplayLanguagesEditComponent', () => {
       buttons.forEach(button => expect(button.disabled).to.be.true);
     });
 
-    it('should show error alert when responseStatus is error', async () => {
+    it('should show error alert when responseStatus is error', () => {
       component.visible = true;
       component.responseStatus = { state: 'error', msg: 'Error saving settings' };
       fixture.detectChanges();

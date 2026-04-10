@@ -53,9 +53,7 @@ export class LanguagesService {
    * @returns {number}
    */
   private countTotalTranslations(docs: LanguageDoc[]): number {
-    const allKeys = docs.flatMap(doc => 
-      Object.keys({ ...doc.generic, ...doc.custom })
-    );
+    const allKeys = docs.flatMap(doc => Object.keys({ ...doc.generic, ...doc.custom }));
     return new Set(allKeys).size;
   }
   
