@@ -81,7 +81,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
   /**
    * Opens the Add User modal.
    */
-  showCreateUserModal() {
+  addUser() {
     this.showCreateModal = true;
   }
 

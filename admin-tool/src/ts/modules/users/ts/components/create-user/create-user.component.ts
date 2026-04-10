@@ -374,19 +374,12 @@ export class CreateUserComponent implements OnInit, OnChanges {
     this.computeFields();
 
     if (!this.validate()) return;
-      return;
-    }
 
     const contactValid = await this.validateContactInPlace();
-    if (!contactValid) {
-      return;
-    }
+    if (!contactValid) return;
 
-    // Replication limit is a warning — show it and stop, let the user confirm by submitting again
     const withinLimit = await this.validateReplicationLimit();
-    if (!withinLimit) {
-      return;
-    }
+    if (!withinLimit) return;
 
     this.loading = true;
     this.errors = {};
