@@ -25,6 +25,10 @@ export interface LanguageModel {
   missing: number;
 }
 
+/**
+ * Validation errors for the add/edit language form fields.
+ * Used to display field-level error messages below the inputs.
+ */
 export interface LanguageValidation {
   code?: string;
   name?: string;

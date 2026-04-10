@@ -4,11 +4,11 @@ import { SettingsService } from './settings.service';
 import { LanguageDoc, LanguageModel } from '@admin-tool-modules/display/display-interfaces';
 
 /**
- * Service responsible for reading and writing CHT translation documents
+ * Service responsible for reading and writing CHT language documents
  * stored in CouchDB as 'messages-{code}' documents.
  *
  * Reads are done via DbService using allDocs with a key range.
- * Writes to translation documents are done via DbService using put and remove directly on CouchDB.
+ * Writes to language documents are done via DbService using put and remove directly on CouchDB.
  * Enable and disable operations update settings.languages via SettingsService.
  */
 @Injectable({
@@ -19,7 +19,7 @@ export class LanguagesService {
   constructor(private db: DbService, private settingsService: SettingsService) { }
 
   /**
-   * Fetches all translation documents from CouchDB and combines them
+   * Fetches all languages documents from CouchDB and combines them
    * with the enabled state from settings.languages to build the UI model.
    *
    * @returns {Promise<LanguageModel[]>}
@@ -49,7 +49,7 @@ export class LanguagesService {
    * Counts the total number of unique translation keys across all language documents.
    * Combines generic and custom keys for each document before counting.
    *
-   * @param {LanguageDoc[]} docs - all translation documents
+   * @param {LanguageDoc[]} docs - all language documents
    * @returns {number}
    */
   private countTotalTranslations(docs: LanguageDoc[]): number {
@@ -61,10 +61,10 @@ export class LanguagesService {
   
   /**
    * Counts the number of translation keys missing from a specific language document
-   * compared to the total number of unique keys across all documents.
+   * compared to the total number of unique keys across all language documents.
    *
-   * @param {LanguageDoc} doc - the translation document to check
-   * @param {number} total - the total number of unique keys across all documents
+   * @param {LanguageDoc} doc - the language document to check
+   * @param {number} total - the total number of unique keys across all language documents
    * @returns {number}
    */
   private countMissingTranslations(doc: LanguageDoc, total: number): number {
@@ -73,6 +73,14 @@ export class LanguagesService {
   }
   
 
+  /**
+   * Saves a language document to CouchDB.
+   * If the document does not have an _id (new language), assigns one as 'messages-' + doc.code.
+   * If the document already has an _id and _rev (edit), updates the existing document.
+   *
+   * @param {LanguageDoc} doc - the language document to save
+   * @returns {Promise<void>}
+   */
   async saveLanguage(doc: LanguageDoc): Promise<void> {
     if (!doc._id) {
       doc._id = 'messages-' + doc.code;
@@ -80,10 +88,26 @@ export class LanguagesService {
     await this.db.get().put(doc);
   }
 
+  /**
+   * Removes a language document from CouchDB.
+   * The document must have both _id and _rev for CouchDB to accept the removal.
+   *
+   * @param {LanguageDoc} doc - the language document to remove
+   * @returns {Promise<void>}
+   */
   async deleteLanguage(doc: LanguageDoc): Promise<void> {
     await this.db.get().remove(doc);
   }
 
+  /**
+   * Updates the enabled state of a language in settings.languages.
+   * If the language entry does not exist, creates a new one with the given locale and enabled state.
+   * Calls updateSettings with replace=false to merge without overwriting other settings.
+   *
+   * @param {LanguageDoc} doc - the language document whose locale will be matched in settings
+   * @param {boolean} enabled - the enabled state to set
+   * @returns {Promise<void>}
+   */
   private async setLanguageStatus(doc: LanguageDoc, enabled: boolean): Promise<void> {
     const settings = await this.settingsService.get();
     const languages = settings.languages || [];
@@ -96,13 +120,23 @@ export class LanguagesService {
     await this.settingsService.updateSettings({ languages });
   }
 
+  /**
+   * Enables a language by setting its enabled state to true in settings.languages.
+   *
+   * @param {LanguageDoc} doc - the language document to enable
+   * @returns {Promise<void>}
+   */
   async enableLanguage(doc: LanguageDoc): Promise<void> {
     await this.setLanguageStatus(doc, true);
   }
 
+  /**
+   * Disables a language by setting its enabled state to false in settings.languages.
+   *
+   * @param {LanguageDoc} doc - the language document to disable
+   * @returns {Promise<void>}
+   */
   async disableLanguage(doc: LanguageDoc): Promise<void> {
     await this.setLanguageStatus(doc, false);
   }
-
-
 }

@@ -32,7 +32,10 @@ export class DisplayLanguagesComponent implements OnInit {
   /** Tracks the state of save/edit/delete operations */
   responseStatus: ResponseStatus = {};
 
+  /** Controls visibility of the add/edit language modal */
   showEditModal = false;
+
+  /** Language document to edit, or null when adding a new language */
   selectedDoc: LanguageDoc | null = null;
 
   constructor(private languageService: LanguagesService){}
@@ -62,7 +65,12 @@ export class DisplayLanguagesComponent implements OnInit {
 
   }
 
-  //TODO: Implement editLanguage
+
+  /**
+   * Opens the edit modal with the selected language document.
+   *
+   * @param {LanguageDoc} doc - the language document to edit
+   */
   async editLanguage(doc: LanguageDoc): Promise<void> {
     this.selectedDoc = doc;
     this.showEditModal = true;
@@ -78,7 +86,9 @@ export class DisplayLanguagesComponent implements OnInit {
 
   }
 
-  //TODO: Implement addLanguage
+  /**
+   * Opens the edit modal in add mode with an empty form.
+   */
   async addLanguage(): Promise<void> {
     this.selectedDoc = null;
     this.showEditModal = true;
