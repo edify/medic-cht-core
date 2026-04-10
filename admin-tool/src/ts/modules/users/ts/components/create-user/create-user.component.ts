@@ -373,7 +373,7 @@ export class CreateUserComponent implements OnInit, OnChanges {
   async submit() {
     this.computeFields();
 
-    if (!this.validate()) {
+    if (!this.validate()) return;
       return;
     }
 
