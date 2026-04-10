@@ -373,13 +373,19 @@ export class CreateUserComponent implements OnInit, OnChanges {
   async submit() {
     this.computeFields();
 
-    if (!this.validate()) return;
+    if (!this.validate()) {
+      return;
+    }
 
     const contactValid = await this.validateContactInPlace();
-    if (!contactValid) return;
+    if (!contactValid) {
+      return;
+    }
 
     const withinLimit = await this.validateReplicationLimit();
-    if (!withinLimit) return;
+    if (!withinLimit) {
+      return;
+    }
 
     this.loading = true;
     this.errors = {};
