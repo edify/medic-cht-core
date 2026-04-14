@@ -55,10 +55,10 @@
                     </div>
                   }
                   <div>
-                    <a class="btn btn-link">
-                      <i class="fa fa-arrow-down" aria-hidden="true"></i>
+                    <button type="button" class="btn btn-link" (click)="downloadLanguage(languageModel.doc)">
+                      <i class="fa fa-arrow-down" aria-hidden="true" ></i>
                       <span>{{ 'Download' | translate }}</span>
-                    </a>
+                    </button>
                   </div>
                   <div>
                     <button type="button" class="btn btn-link" (click)="uploadLanguage(languageModel.doc)">
@@ -94,4 +94,11 @@
     (confirmed)="ngOnInit()"
   >
   </display-languages-delete>
+  <display-languages-upload
+    [visible]="showUploadModal"
+    [doc]="uploadDoc"
+    (closed)="showUploadModal = false"
+    (saved)="ngOnInit()"
+  >
+  </display-languages-upload>
 </div>

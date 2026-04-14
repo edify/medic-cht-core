@@ -28,6 +28,7 @@ describe('DisplayLanguagesComponent', () => {
       getLanguages: sinon.stub().resolves(mockLanguages),
       enableLanguage: sinon.stub().resolves(),
       disableLanguage: sinon.stub().resolves(),
+      importLanguage: sinon.stub().resolves(),
     };
 
     return TestBed.configureTestingModule({
@@ -167,6 +168,111 @@ describe('DisplayLanguagesComponent', () => {
       const doc = mockLanguages[0].doc as any;
       await component.deleteLanguage(doc);
       expect(component.showDeleteModal).to.be.true;
+    });
+  });
+  describe('uploadLanguage', () => {
+    it('should set uploadDoc with the doc', async () => {
+      const doc = mockLanguages[0].doc as any;
+      await component.uploadLanguage(doc);
+      expect(component.uploadDoc).to.equal(doc);
+    });
+
+    it('should set showUploadModal to true', async () => {
+      const doc = mockLanguages[0].doc as any;
+      await component.uploadLanguage(doc);
+      expect(component.showUploadModal).to.be.true;
+    });
+  });
+  describe('downloadLanguage', () => {
+    let createObjectURLStub;
+    let revokeObjectURLStub;
+    let createElementStub;
+    let mockAnchor;
+
+    beforeEach(() => {
+      createObjectURLStub = sinon.stub(window.URL, 'createObjectURL').returns('blob:fake-url');
+      revokeObjectURLStub = sinon.stub(window.URL, 'revokeObjectURL');
+      mockAnchor = { href: '', download: '', click: sinon.stub() };
+      createElementStub = sinon.stub(document, 'createElement').returns(mockAnchor as any);
+    });
+
+    it('should not create blob when doc has no translations', () => {
+      const doc = {
+        _id: 'messages-fr', code: 'fr', name: 'Français',
+        type: 'translations', generic: {}, custom: {}
+      } as any;
+      component.downloadLanguage(doc);
+      expect(createObjectURLStub.called).to.be.false;
+    });
+
+    it('should create blob with generic translations', () => {
+      const doc = {
+        _id: 'messages-en', code: 'en', name: 'English',
+        type: 'translations', generic: { Submit: 'Submit' }, custom: {}
+      } as any;
+      component.downloadLanguage(doc);
+      expect(createObjectURLStub.calledOnce).to.be.true;
+    });
+
+    it('should create blob with custom translations', () => {
+      const doc = {
+        _id: 'messages-en', code: 'en', name: 'English',
+        type: 'translations', generic: {}, custom: { Clinic: 'Household' }
+      } as any;
+      component.downloadLanguage(doc);
+      expect(createObjectURLStub.calledOnce).to.be.true;
+    });
+
+    it('should set download filename as doc._id.properties', () => {
+      const doc = {
+        _id: 'messages-en', code: 'en', name: 'English',
+        type: 'translations', generic: { Submit: 'Submit' }
+      } as any;
+      component.downloadLanguage(doc);
+      expect(mockAnchor.download).to.equal('messages-en.properties');
+    });
+
+    it('should set anchor href to blob url', () => {
+      const doc = {
+        _id: 'messages-en', code: 'en', name: 'English',
+        type: 'translations', generic: { Submit: 'Submit' }
+      } as any;
+      component.downloadLanguage(doc);
+      expect(mockAnchor.href).to.equal('blob:fake-url');
+    });
+
+    it('should click the anchor to trigger download', () => {
+      const doc = {
+        _id: 'messages-en', code: 'en', name: 'English',
+        type: 'translations', generic: { Submit: 'Submit' }
+      } as any;
+      component.downloadLanguage(doc);
+      expect(mockAnchor.click.calledOnce).to.be.true;
+    });
+
+    it('should revoke object url after click', () => {
+      const clock = sinon.useFakeTimers();
+      const doc = {
+        _id: 'messages-en', code: 'en', name: 'English',
+        type: 'translations', generic: { Submit: 'Submit' }
+      } as any;
+      component.downloadLanguage(doc);
+      expect(revokeObjectURLStub.called).to.be.false;
+      clock.tick(101);
+      expect(revokeObjectURLStub.calledWith('blob:fake-url')).to.be.true;
+      clock.restore();
+    });
+
+    it('should merge generic and custom translations', () => {
+      const doc = {
+        _id: 'messages-en', code: 'en', name: 'English',
+        type: 'translations',
+        generic: { Submit: 'Submit' },
+        custom: { Clinic: 'Household' }
+      } as any;
+      component.downloadLanguage(doc);
+      expect(createObjectURLStub.calledOnce).to.be.true;
+      expect(mockAnchor.click.calledOnce).to.be.true;
     });
   });
   describe('DOM', () => {

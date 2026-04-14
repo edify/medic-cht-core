@@ -143,4 +143,64 @@ export class LanguagesService {
   async disableLanguage(doc: LanguageDoc): Promise<void> {
     await this.setLanguageStatus(doc, false);
   }
+  
+  /**
+   * Imports translations from a parsed properties file into a language document.
+   * Only writes to the custom field — generic is never modified.
+   * Works on a copy of the document to avoid mutating the original on failed writes.
+   * Applies the following merge logic per key:
+   *   - If the key exists in generic and the imported value matches generic -> remove from custom (redundant)
+   *   - If the key exists in generic and the imported value differs -> add or update in custom
+   *   - If the key does not exist in generic -> add or update in custom
+   * Skips keys where the imported value is identical to the existing custom value.
+   * Does not call put if no changes were made.
+   *
+   * @param {LanguageDoc} doc - the language document to update
+   * @param {Record<string, string>} translations - parsed translations from the .properties file
+   * @returns {Promise<void>}
+   */
+  async importLanguage(doc: LanguageDoc, translations: Record<string, string>): Promise<void> {
+    const docCopy = { ...doc, custom: { ...doc.custom } };
+    const generic = docCopy.generic || {};
+    const custom = docCopy.custom || {};
+    let updated = false;
+
+    Object.keys(translations).forEach(key => {
+      const parsedValue = translations[key];
+      if (generic[key]) {
+        if (generic[key] === parsedValue) {
+          if (custom[key]) {
+            delete docCopy.custom![key];
+            updated = true;
+          }
+        } else if (custom[key]) {
+          if (custom[key] !== parsedValue) {
+            docCopy.custom![key] = parsedValue;
+            updated = true;
+          }
+        } else {
+          if (!docCopy.custom) {
+            docCopy.custom = {};
+          }
+          docCopy.custom[key] = parsedValue;
+          updated = true;
+        }
+      } else if (custom[key]) {
+        if (custom[key] !== parsedValue) {
+          docCopy.custom![key] = parsedValue;
+          updated = true;
+        }
+      } else {
+        if (!docCopy.custom) {
+          docCopy.custom = {};
+        }
+        docCopy.custom[key] = parsedValue;
+        updated = true;
+      }
+    });
+    if (!updated) {
+      return;
+    }
+    await this.db.get().put(docCopy);
+  }
 }

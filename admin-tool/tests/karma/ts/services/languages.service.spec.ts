@@ -305,4 +305,133 @@ describe('LanguagesService', () => {
       await result.catch(err => expect(err.message).to.equal('error'));
     });
   });
+  describe('importLanguage', () => {
+    it('should not call put if nothing changed', async () => {
+      const doc = {
+        _id: 'messages-en',
+        _rev: '1-abc',
+        code: 'en',
+        name: 'English',
+        type: 'translations',
+        generic: { Submit: 'Submit' },
+        custom: { Clinic: 'Household' },
+      } as any;
+      await service.importLanguage(doc, { Submit: 'Submit', Clinic: 'Household' });
+      expect(dbService.get().put.called).to.be.false;
+    });
+
+    it('should delete key from custom when imported value matches generic', async () => {
+      const doc = {
+        _id: 'messages-en', _rev: '1-abc', code: 'en', name: 'English', type: 'translations',
+        generic: { Submit: 'Submit' },
+        custom: { Submit: 'Submit' },
+      } as any;
+      await service.importLanguage(doc, { Submit: 'Submit' });
+      const putDoc = dbService.get().put.args[0][0];
+      expect(putDoc.custom.Submit).to.be.undefined;
+      expect(dbService.get().put.calledOnce).to.be.true;
+    });
+
+    it('should not delete key from custom when imported value differs from generic', async () => {
+      const doc = {
+        _id: 'messages-en', _rev: '1-abc', code: 'en', name: 'English', type: 'translations',
+        generic: { Submit: 'Submit' },
+        custom: { Submit: 'Enviar' },
+      } as any;
+      await service.importLanguage(doc, { Submit: 'Guardar' });
+      const putDoc = dbService.get().put.args[0][0];
+      expect(putDoc.custom.Submit).to.equal('Guardar');
+      expect(dbService.get().put.calledOnce).to.be.true;
+    });
+
+    it('should not update custom when imported value equals existing custom', async () => {
+      const doc = {
+        _id: 'messages-en', _rev: '1-abc', code: 'en', name: 'English', type: 'translations',
+        generic: { Submit: 'Submit' },
+        custom: { Submit: 'Enviar' },
+      } as any;
+      await service.importLanguage(doc, { Submit: 'Enviar' });
+      expect(dbService.get().put.called).to.be.false;
+    });
+
+    it('should add to custom when key exists in generic but not in custom', async () => {
+      const doc = {
+        _id: 'messages-en', _rev: '1-abc', code: 'en', name: 'English', type: 'translations',
+        generic: { Submit: 'Submit' },
+        custom: {},
+      } as any;
+      await service.importLanguage(doc, { Submit: 'Enviar' });
+      const putDoc = dbService.get().put.args[0][0];
+      expect(putDoc.custom.Submit).to.equal('Enviar');
+      expect(dbService.get().put.calledOnce).to.be.true;
+    });
+
+    it('should update custom when key not in generic and imported value differs', async () => {
+      const doc = {
+        _id: 'messages-en', _rev: '1-abc', code: 'en', name: 'English', type: 'translations',
+        generic: {},
+        custom: { Clinic: 'Household' },
+      } as any;
+      await service.importLanguage(doc, { Clinic: 'Clinic updated' });
+      const putDoc = dbService.get().put.args[0][0];
+      expect(putDoc.custom.Clinic).to.equal('Clinic updated');
+      expect(dbService.get().put.calledOnce).to.be.true;
+    });
+
+    it('should not update custom when key not in generic and imported value equals custom', async () => {
+      const doc = {
+        _id: 'messages-en', _rev: '1-abc', code: 'en', name: 'English', type: 'translations',
+        generic: {},
+        custom: { Clinic: 'Household' },
+      } as any;
+      await service.importLanguage(doc, { Clinic: 'Household' });
+      expect(dbService.get().put.called).to.be.false;
+    });
+
+    it('should add to custom when key does not exist in generic or custom', async () => {
+      const doc = {
+        _id: 'messages-en', _rev: '1-abc', code: 'en', name: 'English', type: 'translations',
+        generic: {},
+        custom: {},
+      } as any;
+      await service.importLanguage(doc, { NewKey: 'New Value' });
+      const putDoc = dbService.get().put.args[0][0];
+      expect(putDoc.custom.NewKey).to.equal('New Value');
+      expect(dbService.get().put.calledOnce).to.be.true;
+    });
+
+    it('should create custom object if undefined when adding new key', async () => {
+      const doc = {
+        _id: 'messages-en', _rev: '1-abc', code: 'en', name: 'English', type: 'translations',
+        generic: {},
+      } as any;
+      await service.importLanguage(doc, { NewKey: 'New Value' });
+      const putDoc = dbService.get().put.args[0][0];
+      expect(putDoc.custom).to.exist;
+      expect(putDoc.custom.NewKey).to.equal('New Value');
+    });
+
+    it('should call put with a copy of the doc', async () => {
+      const doc = {
+        _id: 'messages-en', _rev: '1-abc', code: 'en', name: 'English', type: 'translations',
+        generic: {},
+        custom: {},
+      } as any;
+      await service.importLanguage(doc, { NewKey: 'New Value' });
+      const putDoc = dbService.get().put.args[0][0];
+      expect(putDoc).to.not.equal(doc);
+      expect(putDoc._id).to.equal(doc._id);
+    });
+
+    it('should propagate error if put fails', async () => {
+      dbService.get().put.rejects(new Error('error'));
+      const doc = {
+        _id: 'messages-en', _rev: '1-abc', code: 'en', name: 'English', type: 'translations',
+        generic: {},
+        custom: {},
+      } as any;
+      const result = service.importLanguage(doc, { NewKey: 'New Value' });
+      await result.catch(err => expect(err.message).to.equal('error'));
+    });
+  });
 });
