@@ -240,6 +240,15 @@ describe('DisplayLanguagesComponent', () => {
       component.downloadLanguage(doc);
       expect(mockAnchor.href).to.equal('blob:fake-url');
     });
+    
+    it('should create an anchor element', () => {
+      const doc = {
+        _id: 'messages-en', code: 'en', name: 'English',
+        type: 'translations', generic: { Submit: 'Submit' }
+      } as any;
+      component.downloadLanguage(doc);
+      expect(createElementStub.calledWith('a')).to.be.true;
+    });
 
     it('should click the anchor to trigger download', () => {
       const doc = {

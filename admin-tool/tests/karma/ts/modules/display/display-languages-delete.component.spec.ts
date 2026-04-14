@@ -2,7 +2,9 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { DisplayLanguagesDeleteComponent } from '@admin-tool-modules/display/display-languages/display-languages-delete/display-languages-delete.component';
+import { 
+  DisplayLanguagesDeleteComponent 
+} from '@admin-tool-modules/display/display-languages/display-languages-delete/display-languages-delete.component';
 import { LanguagesService } from '@admin-tool-services/languages.service';
 
 describe('DisplayLanguagesDeleteComponent', () => {

@@ -15,7 +15,7 @@ import { ResponseStatus } from '@admin-tool-modules/global-modules-interfaces';
   templateUrl: './display-languages-delete.component.html',
   styleUrl: './display-languages-delete.component.less'
 })
-export class DisplayLanguagesDeleteComponent {
+export class DisplayLanguagesDeleteComponent implements OnChanges {
 
   /** Controls visibility of the modal */
   @Input() visible = false;

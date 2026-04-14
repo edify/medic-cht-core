@@ -3,7 +3,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { 
-    DisplayLanguagesUploadComponent 
+  DisplayLanguagesUploadComponent 
 } from '@admin-tool-modules/display/display-languages/display-languages-upload/display-languages-upload.component';
 import { LanguagesService } from '@admin-tool-services/languages.service';
 
