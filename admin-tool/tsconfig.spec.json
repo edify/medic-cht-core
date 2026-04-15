@@ -22,6 +22,5 @@
     "src",
     "tests/karma/**/*.spec.ts",
     "tests/karma/**/*.d.ts",
-    "src/**/*.d.ts"
   ]
 }
