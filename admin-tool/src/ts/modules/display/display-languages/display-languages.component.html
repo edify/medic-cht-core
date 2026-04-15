@@ -89,14 +89,14 @@
   </display-languages-edit>
   <display-languages-delete
     [visible]="showDeleteModal"
-    [doc]="deleteDoc"
+    [doc]="selectedDoc"
     (closed)="showDeleteModal = false"
     (confirmed)="ngOnInit()"
   >
   </display-languages-delete>
   <display-languages-upload
     [visible]="showUploadModal"
-    [doc]="uploadDoc"
+    [doc]="selectedDoc"
     (closed)="showUploadModal = false"
     (saved)="ngOnInit()"
   >

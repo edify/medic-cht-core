@@ -43,20 +43,14 @@ export class DisplayLanguagesComponent implements OnInit {
   /** Controls visibility of the add/edit language modal */
   showEditModal = false;
 
-  /** Language document to edit, or null when adding a new language */
+  /** Language document to edit, delete, upload, or null when adding a new language */
   selectedDoc: LanguageDoc | null = null;
 
   /** Controls visibility of the delete confirmation modal */
   showDeleteModal = false;
 
-  /** Language document to delete */
-  deleteDoc: LanguageDoc | null = null;
-
   /** Controls visibility of the upload modal */
   showUploadModal = false;
-
-  /** Language document to import translations into */
-  uploadDoc: LanguageDoc | null = null;
 
   constructor(private languageService: LanguagesService){}
 
@@ -122,7 +116,7 @@ export class DisplayLanguagesComponent implements OnInit {
    * @param {LanguageDoc} doc - the language document to import translations into
    */
   async uploadLanguage(doc: LanguageDoc): Promise<void> {
-    this.uploadDoc = doc;
+    this.selectedDoc = doc;
     this.showUploadModal = true;
   }
 
@@ -132,7 +126,7 @@ export class DisplayLanguagesComponent implements OnInit {
    * @param {LanguageDoc} doc - the language document to delete
    */
   async deleteLanguage(doc: LanguageDoc): Promise<void> {
-    this.deleteDoc = doc;
+    this.selectedDoc = doc;
     this.showDeleteModal = true;
   }
 

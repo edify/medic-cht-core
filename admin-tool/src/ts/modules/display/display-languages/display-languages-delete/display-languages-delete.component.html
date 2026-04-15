@@ -25,7 +25,7 @@
           <button type="button" class="btn btn-link" (click)="cancel()" [disabled]="loadingModalState">
             {{ 'cancel' | translate }}
           </button>
-          <button type="button" class="btn btn-danger" (click)="submit()" [disabled]="loadingModalState">
+          <button type="button" class="btn btn-danger" (click)="confirmDelete()" [disabled]="loadingModalState">
             {{ loadingModalState ? ('Deleting' | translate) : ('bulkdelete.confirm.action' | translate) }}
           </button>
         </div>

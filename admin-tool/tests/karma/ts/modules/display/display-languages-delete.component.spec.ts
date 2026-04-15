@@ -91,10 +91,10 @@ describe('DisplayLanguagesDeleteComponent', () => {
       expect(component.loadingModalState).to.be.true;
     });
   });
-  describe('submit', () => {
+  describe('confirmDelete', () => {
     it('should call deleteLanguage with the doc', async () => {
       component.doc = mockDoc as any;
-      await component.submit();
+      await component.confirmDelete();
       expect(languagesService.deleteLanguage.calledWith(mockDoc)).to.be.true;
     });
 
@@ -102,7 +102,7 @@ describe('DisplayLanguagesDeleteComponent', () => {
       component.doc = mockDoc as any;
       let confirmedEmitted = false;
       component.confirmed.subscribe(() => confirmedEmitted = true);
-      await component.submit();
+      await component.confirmDelete();
       expect(confirmedEmitted).to.be.true;
     });
 
@@ -110,7 +110,7 @@ describe('DisplayLanguagesDeleteComponent', () => {
       component.doc = mockDoc as any;
       let closedEmitted = false;
       component.closed.subscribe(() => closedEmitted = true);
-      await component.submit();
+      await component.confirmDelete();
       expect(closedEmitted).to.be.true;
     });
 
@@ -118,14 +118,14 @@ describe('DisplayLanguagesDeleteComponent', () => {
       component.doc = mockDoc as any;
       languagesService.deleteLanguage.rejects(new Error('error'));
       sinon.stub(console, 'error');
-      await component.submit();
+      await component.confirmDelete();
       expect(component.responseStatus.state).to.equal('error');
       expect(component.responseStatus.msg).to.equal('Error deleting document');
     });
 
     it('should set loadingModalState to false after success', async () => {
       component.doc = mockDoc as any;
-      await component.submit();
+      await component.confirmDelete();
       expect(component.loadingModalState).to.be.false;
     });
 
@@ -133,7 +133,7 @@ describe('DisplayLanguagesDeleteComponent', () => {
       component.doc = mockDoc as any;
       languagesService.deleteLanguage.rejects(new Error('error'));
       sinon.stub(console, 'error');
-      await component.submit();
+      await component.confirmDelete();
       expect(component.loadingModalState).to.be.false;
     });
 
@@ -143,7 +143,7 @@ describe('DisplayLanguagesDeleteComponent', () => {
         expect(component.loadingModalState).to.be.true;
         return Promise.resolve();
       });
-      await component.submit();
+      await component.confirmDelete();
     });
   });
   describe('cancel', () => {

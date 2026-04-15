@@ -158,10 +158,10 @@ describe('DisplayLanguagesComponent', () => {
     });
   });
   describe('deleteLanguage', () => {
-    it('should set deleteDoc with the doc', async () => {
+    it('should set selectedDoc with the doc', async () => {
       const doc = mockLanguages[0].doc as any;
       await component.deleteLanguage(doc);
-      expect(component.deleteDoc).to.equal(doc);
+      expect(component.selectedDoc).to.equal(doc);
     });
 
     it('should set showDeleteModal to true', async () => {
@@ -171,10 +171,10 @@ describe('DisplayLanguagesComponent', () => {
     });
   });
   describe('uploadLanguage', () => {
-    it('should set uploadDoc with the doc', async () => {
+    it('should set selectedDoc with the doc', async () => {
       const doc = mockLanguages[0].doc as any;
       await component.uploadLanguage(doc);
-      expect(component.uploadDoc).to.equal(doc);
+      expect(component.selectedDoc).to.equal(doc);
     });
 
     it('should set showUploadModal to true', async () => {

@@ -54,7 +54,7 @@ export class DisplayLanguagesDeleteComponent implements OnChanges {
    *
    * @returns {Promise<void>}
    */
-  async submit(): Promise<void> {
+  async confirmDelete(): Promise<void> {
     this.loadingModalState = true;
     this.responseStatus = {};
 
