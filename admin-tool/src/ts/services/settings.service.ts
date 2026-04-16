@@ -14,6 +14,11 @@ export interface DateTimeSettings {
   dateTimeFormat: string;
 }
 
+export interface LanguageSettings {
+  locale: string;
+  localeOutgoing: string;
+}
+
 /**
  * Represents the known properties of the CHT instance settings object.
  * Only includes fields used by the admin tool — the full settings schema
@@ -173,4 +178,18 @@ export class SettingsService {
     return this.updateSettings({ permissions }, true);
   }
 
+  async getLanguageSettings(): Promise<LanguageSettings> {
+    const res = await this.get();
+    return {
+      locale: res.locale ?? '',
+      localeOutgoing: res.locale_outgoing ?? '',
+    };
+  }
+  
+  async updateLanguageSettings(changes: LanguageSettings): Promise<void> {
+    return this.updateSettings({
+      locale: changes.locale,
+      locale_outgoing: changes.localeOutgoing,
+    });
+  }
 }
