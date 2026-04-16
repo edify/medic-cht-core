@@ -102,7 +102,7 @@ describe('DeleteUserComponent', () => {
   });
 
   describe('Interface', () => {
-    it('should emit closed when cancel is called', async () => {
+    it('should emit closed when cancel is called', () => {
       const closedSpy = sinon.spy();
       component.closed.subscribe(closedSpy);
       component.cancel();

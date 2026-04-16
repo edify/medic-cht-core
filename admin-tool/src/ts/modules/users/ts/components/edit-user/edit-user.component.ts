@@ -150,7 +150,9 @@ export class EditUserComponent implements OnChanges {
   }
 
   private populateModel() {
-    if (!this.user) return;
+    if (!this.user) {
+      return;
+    }
 
     const facilityId = this.user.facility_id
       ? Array.isArray(this.user.facility_id)
@@ -161,15 +163,15 @@ export class EditUserComponent implements OnChanges {
     const tokenLoginData = (this.user as any).token_login;
     const tokenLoginEnabled = tokenLoginData
       ? {
-          active: tokenLoginData.active,
-          expired: tokenLoginData.expiration_date <= new Date().getTime(),
-          expirationDate: tokenLoginData.expiration_date
-            ? new Date(tokenLoginData.expiration_date).toLocaleDateString()
-            : '',
-          loginDate: tokenLoginData.login_date
-            ? new Date(tokenLoginData.login_date).toLocaleDateString()
-            : undefined,
-        }
+        active: tokenLoginData.active,
+        expired: tokenLoginData.expiration_date <= new Date().getTime(),
+        expirationDate: tokenLoginData.expiration_date
+          ? new Date(tokenLoginData.expiration_date).toLocaleDateString()
+          : '',
+        loginDate: tokenLoginData.login_date
+          ? new Date(tokenLoginData.login_date).toLocaleDateString()
+          : undefined,
+      }
       : null;
 
     this.model = {
@@ -195,8 +197,12 @@ export class EditUserComponent implements OnChanges {
   }
 
   private filterRoles(roles: string[]): string[] {
-    if (!roles.length) return [];
-    if (roles.includes('_admin')) return ['_admin'];
+    if (!roles.length) {
+      return [];
+    }
+    if (roles.includes('_admin')) {
+      return ['_admin'];
+    }
     return roles.filter(role => !!this.settingsRoles[role]);
   }
 
@@ -281,7 +287,9 @@ export class EditUserComponent implements OnChanges {
   }
 
   private validatePhone() {
-    if (!this.model.token_login) return;
+    if (!this.model.token_login) {
+      return;
+    }
     if (!this.model.phone) {
       this.errors.phone = 'field.required';
     } else if (!phoneNumber.validate(this.cachedSettings, this.model.phone)) {
@@ -291,8 +299,12 @@ export class EditUserComponent implements OnChanges {
 
   private validateFacilityAndContact() {
     if (this.isOfflineUser()) {
-      if (!this.model.place) this.errors.place = 'field.required';
-      if (!this.model.contact) this.errors.contact = 'field.required';
+      if (!this.model.place) {
+        this.errors.place = 'field.required';
+      }
+      if (!this.model.contact) {
+        this.errors.contact = 'field.required';
+      }
     } else if (this.model.contact && !this.model.place) {
       this.errors.place = 'field.required';
     }
@@ -350,18 +362,24 @@ export class EditUserComponent implements OnChanges {
   }
 
   private async validateContactInPlace(): Promise<boolean> {
-    if (!this.isOfflineUser() || !this.model.contact || !this.model.place) return true;
+    if (!this.isOfflineUser() || !this.model.contact || !this.model.place) {
+      return true;
+    }
 
     const placeIds = Array.isArray(this.model.place) ? this.model.place : [this.model.place];
     const valid = await this.select2SearchService.isContactInPlace(this.model.contact, placeIds);
 
-    if (!valid) this.errors.contact = 'configuration.user.place.contact';
+    if (!valid) {
+      this.errors.contact = 'configuration.user.place.contact';
+    }
 
     return valid;
   }
 
   private async validateReplicationLimit(): Promise<boolean> {
-    if (!this.isOfflineUser()) return true;
+    if (!this.isOfflineUser()) {
+      return true;
+    }
 
     try {
       const params: any = {
@@ -392,10 +410,14 @@ export class EditUserComponent implements OnChanges {
     const updates: Record<string, any> = {};
 
     for (const key of Object.keys(this.model) as (keyof EditUserModel)[]) {
-      if (key === 'id' || FIELDS_TO_IGNORE.includes(key)) continue;
+      if (key === 'id' || FIELDS_TO_IGNORE.includes(key)) {
+        continue;
+      }
 
       if (key === 'password') {
-        if (this.model.password) updates.password = this.model.password;
+        if (this.model.password) {
+          updates.password = this.model.password;
+        }
         continue;
       }
 
@@ -441,13 +463,19 @@ export class EditUserComponent implements OnChanges {
   async submit() {
     this.computeFields();
 
-    if (!this.validate()) return;
+    if (!this.validate()) {
+      return;
+    }
 
     const contactValid = await this.validateContactInPlace();
-    if (!contactValid) return;
+    if (!contactValid) {
+      return;
+    }
 
     const withinLimit = await this.validateReplicationLimit();
-    if (!withinLimit) return;
+    if (!withinLimit) {
+      return;
+    }
 
     const updates = this.getChangedUpdates();
     if (!Object.keys(updates).length) {

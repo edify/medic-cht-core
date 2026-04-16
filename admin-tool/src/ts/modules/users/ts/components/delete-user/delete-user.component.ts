@@ -35,7 +35,9 @@ export class DeleteUserComponent {
   }
 
   async submit() {
-    if (!this.user?.username) return;
+    if (!this.user?.username) {
+      return;
+    }
 
     this.loading = true;
     this.error = null;
