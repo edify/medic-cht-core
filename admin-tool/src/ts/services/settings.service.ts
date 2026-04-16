@@ -14,6 +14,9 @@ export interface DateTimeSettings {
   dateTimeFormat: string;
 }
 
+/**
+ * Interface representing the application and outgoing message language settings.
+ */
 export interface LanguageSettings {
   locale: string;
   localeOutgoing: string;
@@ -178,6 +181,13 @@ export class SettingsService {
     return this.updateSettings({ permissions }, true);
   }
 
+  /**
+   * Retrieves the application language and outgoing message language from settings,
+   * mapping the API's snake_case fields (locale, locale_outgoing)
+   * to the LanguageSettings model.
+   *
+   * @returns {Promise<LanguageSettings>}
+   */
   async getLanguageSettings(): Promise<LanguageSettings> {
     const res = await this.get();
     return {
@@ -186,6 +196,14 @@ export class SettingsService {
     };
   }
   
+  /**
+   * Persists the application language and outgoing message language to the API,
+   * mapping camelCase model fields back to the API's snake_case keys.
+   * Uses replace=false to merge without overwriting other settings.
+   *
+   * @param {LanguageSettings} changes - the new locale and locale_outgoing to save
+   * @returns {Promise<void>}
+   */
   async updateLanguageSettings(changes: LanguageSettings): Promise<void> {
     return this.updateSettings({
       locale: changes.locale,
