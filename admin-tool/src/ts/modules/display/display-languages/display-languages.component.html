@@ -49,7 +49,7 @@
         <p class="help-block">{{ 'display.language.accordion.title' | translate }}</p>
         <div id="language-accordion" class="panel-group" role="tablist">
           @for (languageModel of languages; track languageModel.doc._id) {
-            <div class="panel panel-default" [class.disabled]="!languageModel.enabled">
+            <div class="panel panel-default">
               <div class="panel-heading" role="tab" [id]="'locale-' + languageModel.doc.code">
                 <h4 class="panel-title">
                   <a class="collapsed"

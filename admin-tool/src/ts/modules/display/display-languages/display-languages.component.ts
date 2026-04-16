@@ -68,7 +68,7 @@ export class DisplayLanguagesComponent implements OnInit {
     
     try {
       this.languages = await this.languageService.getLanguages();
-      const languageSettings = await this.settingsService.getLanguageSettings();
+      const languageSettings: LanguageSettings = await this.settingsService.getLanguageSettings();
       this.localeLanguage = languageSettings.locale;
       this.localeOutgoingLanguage = languageSettings.localeOutgoing;
     } catch (error) {
