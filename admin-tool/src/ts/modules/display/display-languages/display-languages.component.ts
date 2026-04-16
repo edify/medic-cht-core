@@ -62,6 +62,12 @@ export class DisplayLanguagesComponent implements OnInit {
   /** Currently selected language code for outgoing messages */
   localeOutgoingLanguage = '';
 
+  /** Default application language code saved in settings, used to display star icons in the accordion */
+  savedLocaleLanguage = '';
+
+  /** Outgoing message language code saved in settings, used to display star icons in the accordion */
+  savedLocaleOutgoingLanguage = '';
+
   constructor(private languageService: LanguagesService, private settingsService: SettingsService){}
 
   /**
@@ -77,6 +83,8 @@ export class DisplayLanguagesComponent implements OnInit {
       const languageSettings: LanguageSettings = await this.settingsService.getLanguageSettings();
       this.localeLanguage = languageSettings.locale;
       this.localeOutgoingLanguage = languageSettings.localeOutgoing;
+      this.savedLocaleLanguage = languageSettings.locale;
+      this.savedLocaleOutgoingLanguage = languageSettings.localeOutgoing;
     } catch (error) {
       console.error('Error fetching languages', error);
     } finally {
@@ -98,6 +106,8 @@ export class DisplayLanguagesComponent implements OnInit {
         locale: this.localeLanguage,
         localeOutgoing: this.localeOutgoingLanguage
       });
+      this.savedLocaleLanguage = this.localeLanguage;
+      this.savedLocaleOutgoingLanguage = this.localeOutgoingLanguage;
       this.responseStatus = { state: 'success', msg: 'Saved'};
       setTimeout(() => {
         if (this.responseStatus.state === 'success') {

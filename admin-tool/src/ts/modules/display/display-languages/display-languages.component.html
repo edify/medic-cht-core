@@ -57,14 +57,14 @@
                     [attr.data-target]="'#locale-' + languageModel.doc.code + '-body'"
                     data-parent="#language-accordion">
                     {{ languageModel.doc.name }}
-                      @if (languageModel.doc.code === localeLanguage) {
+                      @if (languageModel.doc.code === savedLocaleLanguage) {
                         <span class="fa-stack default" [title]="'Default Application Language' | translate">
                           <i class="fa fa-file-o fa-stack-2x"></i>
                           <i class="fa fa-star fa-stack-1x"></i>
                           <span class="sr-only">{{ 'Default Application Language' | translate }}</span>
                         </span>
                       }
-                      @if (languageModel.doc.code === localeOutgoingLanguage) {
+                      @if (languageModel.doc.code === savedLocaleOutgoingLanguage) {
                         <span class="fa-stack default" [title]="'Language For Outgoing Messages' | translate">
                           <i class="fa fa-envelope-o fa-stack-2x"></i>
                           <i class="fa fa-star fa-stack-1x"></i>
