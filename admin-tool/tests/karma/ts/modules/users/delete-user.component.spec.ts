@@ -90,13 +90,13 @@ describe('DeleteUserComponent', () => {
   describe('Boundaries', () => {
     it('should not call deleteUser when user has no username', async () => {
       component.user = { id: '1' } as User;
-      await component.submit();
+      await component.confirm();
       expect(deleteUserService.deleteUser.callCount).to.equal(0);
     });
 
     it('should not call deleteUser when user is null', async () => {
       component.user = null;
-      await component.submit();
+      await component.confirm();
       expect(deleteUserService.deleteUser.callCount).to.equal(0);
     });
   });
@@ -121,7 +121,7 @@ describe('DeleteUserComponent', () => {
       await stabilize();
       await new Promise(resolve => setTimeout(resolve, 0));
 
-      await component.submit();
+      await component.confirm();
 
       expect(deleteUserService.deleteUser.calledWith('b_wayne')).to.be.true;
     });
@@ -132,7 +132,7 @@ describe('DeleteUserComponent', () => {
       await stabilize();
       await new Promise(resolve => setTimeout(resolve, 0));
 
-      await component.submit();
+      await component.confirm();
 
       expect(usersService.notifyUsersUpdated.callCount).to.equal(1);
     });
@@ -147,7 +147,7 @@ describe('DeleteUserComponent', () => {
       await stabilize();
       await new Promise(resolve => setTimeout(resolve, 0));
 
-      await component.submit();
+      await component.confirm();
 
       expect(userDeletedSpy.callCount).to.equal(1);
       expect(closedSpy.callCount).to.equal(1);
@@ -159,7 +159,7 @@ describe('DeleteUserComponent', () => {
       await stabilize();
       await new Promise(resolve => setTimeout(resolve, 0));
 
-      await component.submit();
+      await component.confirm();
 
       expect(component.error).to.equal('Server error');
     });
@@ -170,7 +170,7 @@ describe('DeleteUserComponent', () => {
       await stabilize();
       await new Promise(resolve => setTimeout(resolve, 0));
 
-      await component.submit();
+      await component.confirm();
 
       expect(component.error).to.equal('Error deleting document');
     });
@@ -181,7 +181,7 @@ describe('DeleteUserComponent', () => {
       await stabilize();
       await new Promise(resolve => setTimeout(resolve, 0));
 
-      await component.submit();
+      await component.confirm();
 
       expect(component.loading).to.equal(false);
     });
@@ -196,7 +196,7 @@ describe('DeleteUserComponent', () => {
       await stabilize();
       await new Promise(resolve => setTimeout(resolve, 0));
 
-      await component.submit();
+      await component.confirm();
 
       expect(userDeletedSpy.callCount).to.equal(0);
     });

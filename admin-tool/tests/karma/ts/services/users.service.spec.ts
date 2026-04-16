@@ -1,13 +1,21 @@
 import { TestBed } from '@angular/core/testing';
 import { expect } from 'chai';
-import sinon from 'sinon';
+import sinon, { SinonStub } from 'sinon';
 import { UsersService } from '@admin-tool-services/users.service';
 import { DbService } from '@admin-tool-services/db.service';
 
+interface DbInstanceMock {
+  query: SinonStub;
+}
+
+interface DbServiceMock {
+  get: SinonStub;
+}
+
 describe('UsersService', () => {
   let service: UsersService;
-  let dbService: any;
-  let dbInstance: any;
+  let dbService: DbServiceMock;
+  let dbInstance: DbInstanceMock;
 
   beforeEach(() => {
     dbInstance = {

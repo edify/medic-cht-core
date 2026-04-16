@@ -1,8 +1,17 @@
 @import 'variables';
 
 .modal {
+  display: block;
+
   &.in {
     opacity: 1;
+  }
+
+  .modal-dialog {
+    width: 50%;
+    min-width: 30rem;
+    max-width: 50rem;
+    margin: 5% auto;
   }
 
   .modal-header {

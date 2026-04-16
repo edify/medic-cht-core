@@ -14,6 +14,7 @@ import { User } from '@admin-tool-modules/users/users-interfaces';
   standalone: true,
   imports: [TranslatePipe],
   templateUrl: './delete-user.component.html',
+  styleUrl: './delete-user.component.less',
 })
 export class DeleteUserComponent {
   @Input() visible = false;
@@ -34,7 +35,7 @@ export class DeleteUserComponent {
     this.closed.emit();
   }
 
-  async submit() {
+  async confirm() {
     if (!this.user?.username) {
       return;
     }

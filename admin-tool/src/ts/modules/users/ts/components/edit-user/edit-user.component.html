@@ -151,7 +151,7 @@
           </div>
 
           <!-- SSO Username -->
-          @if (allowSSOLogin && (model.tokenLoginEnabled && model.token_login === false || !model.tokenLoginEnabled && !model.token_login)) {
+          @if (allowSSOLogin && !model.token_login) {
             <div class="form-group">
               <label for="sso-login">{{ 'user.sso.username' | translate }}</label>
               <input
