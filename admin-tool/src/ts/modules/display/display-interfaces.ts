@@ -33,3 +33,13 @@ export interface LanguageValidation {
   code?: string;
   name?: string;
 }
+
+export interface DisplayTranslationRow {
+  key: string;
+  leftValue: string;
+  rightValue: string | undefined;
+}
+
+export interface TranslationKeyValues {
+  [code: string]: string;
+}

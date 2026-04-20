@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { DbService } from './db.service';
 import { SettingsService } from './settings.service';
-import { LanguageDoc, LanguageModel } from '@admin-tool-modules/display/display-interfaces';
+import { LanguageDoc, LanguageModel, TranslationKeyValues } from '@admin-tool-modules/display/display-interfaces';
 
 /**
  * Service responsible for reading and writing CHT language documents
@@ -17,6 +17,15 @@ import { LanguageDoc, LanguageModel } from '@admin-tool-modules/display/display-
 export class LanguagesService {
 
   constructor(private db: DbService, private settingsService: SettingsService) { }
+
+  async getLanguageDocs(): Promise<LanguageDoc[]> {
+    const result = await this.db.get().allDocs({
+      startkey: 'messages-',
+      endkey: 'messages-\ufff0',
+      include_docs: true
+    });
+    return result.rows.map(row => row.doc as LanguageDoc);
+  }
 
   /**
    * Fetches all languages documents from CouchDB and combines them
@@ -202,5 +211,42 @@ export class LanguagesService {
       return;
     }
     await this.db.get().put(docCopy);
+  }
+  
+  async saveTranslation(key: string, values: TranslationKeyValues, docs: LanguageDoc[]): Promise<void> {
+    for (const doc of docs) {
+      const docCopy = { ...doc, custom: { ...doc.custom } };
+      const generic = docCopy.generic || {};
+      const custom = docCopy.custom || {};
+      const newValue = values[doc.code] ?? '';
+      let updated = false;
+
+      if (!newValue) {
+        if (custom[key]) {
+          delete docCopy.custom![key];
+          updated = true;
+        }
+      } else if (generic[key]) {
+        if (generic[key] === newValue) {
+          if (custom[key]) {
+            delete docCopy.custom![key];
+            updated = true;
+          }
+        } else if (custom[key] !== newValue) {
+          docCopy.custom![key] = newValue;
+          updated = true;
+        }
+      } else if (custom[key] !== newValue) {
+        if (!docCopy.custom) {
+          docCopy.custom = {};
+        }
+        docCopy.custom![key] = newValue;
+        updated = true;
+      }
+
+      if (updated) {
+        await this.db.get().put(docCopy);
+      }
+    }
   }
 }
