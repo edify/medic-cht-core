@@ -434,4 +434,93 @@ describe('LanguagesService', () => {
       await result.catch(err => expect(err.message).to.equal('error'));
     });
   });
+  describe('getLanguageDocs', () => {
+    it('should call allDocs with correct params', async () => {
+      await service.getLanguageDocs();
+      expect(dbService.get().allDocs.calledWith({
+        startkey: 'messages-',
+        endkey: 'messages-\ufff0',
+        include_docs: true
+      })).to.be.true;
+    });
+
+    it('should return an array of LanguageDocs', async () => {
+      const result = await service.getLanguageDocs();
+      expect(result).to.have.length(2);
+    });
+
+    it('should map rows to docs correctly', async () => {
+      const result = await service.getLanguageDocs();
+      expect(result[0].code).to.equal('en');
+      expect(result[1].code).to.equal('es');
+    });
+
+    it('should propagate error when allDocs fails', async () => {
+      dbService.get().allDocs.rejects({ status: 500 });
+      const result = service.getLanguageDocs();
+      await result.catch(err => expect(err).to.deep.equal({ status: 500 }));
+    });
+  });
+  describe('saveTranslation', () => {
+    it('should not call put if no values changed', async () => {
+      const values = { en: 'Submit', es: 'Enviar' };
+      await service.saveTranslation('Submit', values, mockDocs as any);
+      expect(dbService.get().put.called).to.be.false;
+    });
+
+    it('should call put on doc when value differs from generic', async () => {
+      const values = { en: 'Submit', es: 'Enviar actualizado' };
+      await service.saveTranslation('Submit', values, mockDocs as any);
+      expect(dbService.get().put.calledOnce).to.be.true;
+    });
+
+    it('should put value in custom when different from generic', async () => {
+      const values = { en: 'Submit', es: 'Enviar actualizado' };
+      await service.saveTranslation('Submit', values, mockDocs as any);
+      const savedDoc = dbService.get().put.args[0][0];
+      expect(savedDoc.custom['Submit']).to.equal('Enviar actualizado');
+    });
+
+    it('should delete from custom when new value equals generic', async () => {
+      const doc = {
+        ...mockDocs[0],
+        custom: { ...mockDocs[0].custom, Submit: 'Submit' }
+      } as any;
+      await service.saveTranslation('Submit', { en: 'Submit' }, [doc]);
+      const savedDoc = dbService.get().put.args[0][0];
+      expect(savedDoc.custom['Submit']).to.be.undefined;
+    });
+
+    it('should add to custom when key does not exist in generic', async () => {
+      const values = { en: 'New value' };
+      await service.saveTranslation('NewKey', values, mockDocs as any);
+      const savedDoc = dbService.get().put.args[0][0];
+      expect(savedDoc.custom['NewKey']).to.equal('New value');
+    });
+
+    it('should delete from custom when new value is empty', async () => {
+      const values = { en: '' };
+      await service.saveTranslation('Clinic', values, mockDocs as any);
+      const savedDoc = dbService.get().put.args[0][0];
+      expect(savedDoc.custom['Clinic']).to.be.undefined;
+    });
+
+    it('should not mutate original doc', async () => {
+      const values = { es: 'Enviar actualizado' };
+      await service.saveTranslation('Submit', values, mockDocs as any);
+      expect(mockDocs[1].generic['Submit']).to.equal('Enviar');
+    });
+
+    it('should call put for each doc that changed', async () => {
+      const values = { en: 'Submit updated', es: 'Enviar actualizado' };
+      await service.saveTranslation('Submit', values, mockDocs as any);
+      expect(dbService.get().put.callCount).to.equal(2);
+    });
+
+    it('should skip doc if code not in values', async () => {
+      const values = { en: 'Submit updated' };
+      await service.saveTranslation('Submit', values, mockDocs as any);
+      expect(dbService.get().put.callCount).to.equal(1);
+    });
+  });
 });

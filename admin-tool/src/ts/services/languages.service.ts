@@ -18,6 +18,12 @@ export class LanguagesService {
 
   constructor(private db: DbService, private settingsService: SettingsService) { }
 
+  /**
+   * Fetches all language documents from CouchDB as raw docs without any settings enrichment.
+   * Used by components that only need the translation content, not the enabled state or missing count.
+   *
+   * @returns {Promise<LanguageDoc[]>}
+   */
   async getLanguageDocs(): Promise<LanguageDoc[]> {
     const result = await this.db.get().allDocs({
       startkey: 'messages-',
@@ -34,20 +40,13 @@ export class LanguagesService {
    * @returns {Promise<LanguageModel[]>}
    */
   async getLanguages(): Promise<LanguageModel[]> {
-    const result = await this.db.get().allDocs({
-      startkey: 'messages-',
-      endkey: 'messages-\ufff0',
-      include_docs: true
-    });
+    const docs = await this.getLanguageDocs();
     const settings = await this.settingsService.get();
-    
-    const docs = result.rows.map(row => row.doc as LanguageDoc);
     const totalTranslations = this.countTotalTranslations(docs);
 
-    const languages = result.rows.map(row => {
-      const doc = row.doc as LanguageDoc;
+    const languages = docs.map(doc => {
       const languageSetting = settings.languages?.find(language => language.locale === doc.code);
-      const enabled = settings.languages?.length 
+      const enabled = settings.languages?.length
         ? languageSetting ? languageSetting.enabled !== false : false
         : true;
       const missing = this.countMissingTranslations(doc, totalTranslations);
@@ -213,6 +212,23 @@ export class LanguagesService {
     await this.db.get().put(docCopy);
   }
   
+  /**
+   * Saves a single translation key across all language documents.
+   * Only writes to the custom field — generic is never modified.
+   * Works on a copy of each document to avoid mutating the originals on failed writes.
+   * Applies the following merge logic per doc:
+   *   - If the new value is empty -> remove the key from custom if it existed
+   *   - If the key exists in generic and the new value matches generic -> remove from custom (redundant)
+   *   - If the key exists in generic and the new value differs -> add or update in custom
+   *   - If the key does not exist in generic -> add or update in custom
+   * Skips docs where the value is identical to the existing custom value.
+   * Does not call put if no changes were made in a doc.
+   *
+   * @param {string} key - the translation key to save
+   * @param {TranslationKeyValues} values - map of language code to new translation value
+   * @param {LanguageDoc[]} docs - all language documents to apply the change to
+   * @returns {Promise<void>}
+   */
   async saveTranslation(key: string, values: TranslationKeyValues, docs: LanguageDoc[]): Promise<void> {
     for (const doc of docs) {
       const docCopy = { ...doc, custom: { ...doc.custom } };

@@ -4,10 +4,25 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { LanguagesService } from '@admin-tool-services/languages.service';
 import { LanguageDoc, DisplayTranslationRow } from '../display-interfaces';
 
+/** Code used internally to identify the Translation Keys option in the left dropdown */
 const TRANSLATION_KEYS_CODE = 'keys';
+
+/** Display name shown to the user for the Translation Keys option in the left dropdown */
 const TRANSLATION_KEYS_NAME = 'Translation Keys';
+
+/** Default language code used as the initial left column selection and as the base doc in Translation Keys mode */
 const DEFAULT_LANGUAGE = 'en';
 
+/**
+ * Component for viewing and editing translation strings side-by-side across two languages.
+ *
+ * Loads all language documents from CouchDB on init and displays them in a two-column table.
+ * The left dropdown includes a Translation Keys option that shows raw i18n keys instead of translated values.
+ * Clicking any row opens the edit modal for that key.
+ * The + Add Translation button opens the modal in add mode for creating a new key.
+ *
+ * Part of the Display module.
+ */
 @Component({
   selector: 'display-translations',
   imports: [FormsModule, TranslatePipe],
@@ -16,20 +31,33 @@ const DEFAULT_LANGUAGE = 'en';
 })
 export class DisplayTranslationsComponent implements OnInit {
 
+  /** Controls visibility of the loader while language documents are being fetched */
   loadingPageStatus = false;
 
+  /** Raw language documents fetched from CouchDB, kept in memory to avoid re-fetching on dropdown changes */
   docs: LanguageDoc[] = [];
 
+  /** Options for the left dropdown — includes Translation Keys as first option followed by all languages */
   leftTranslationOptions: { code: string, name: string }[] = [];
+
+  /** Options for the right dropdown — includes all languages without the Translation Keys option */
   rightTranslationOptions: { code: string, name: string }[] = [];
 
+  /** Currently selected language code for the left column */
   leftCode = '';
+
+  /** Currently selected language code for the right column */
   rightCode = '';
 
+  /** Rows built from the selected left and right language documents for the side-by-side table */
   translationRows: DisplayTranslationRow[] = [];
 
   constructor(private languagesService: LanguagesService){}
 
+  /**
+   * Fetches all language documents on init, builds the dropdown options,
+   * initialises the selected locale codes and builds the initial translation rows.
+   */
   async ngOnInit(): Promise<void> {
     this.loadingPageStatus = true;
 
@@ -50,12 +78,24 @@ export class DisplayTranslationsComponent implements OnInit {
     }
   } 
 
+  /**
+   * Sets the initial locale codes for the dropdowns.
+   * Left column defaults to English. Right column defaults to the first language that is not English,
+   * or English if no other language exists.
+   */
   private initLocaleCodes(): void {
     this.leftCode = DEFAULT_LANGUAGE;
     const right = this.rightTranslationOptions.find(translation => translation.code !== DEFAULT_LANGUAGE);
     this.rightCode = right?.code ?? DEFAULT_LANGUAGE;
   }
   
+  /**
+   * Builds the translation rows for the side-by-side table based on the currently selected
+   * left and right locale codes.
+   * When Translation Keys mode is active (leftCode === 'keys'), uses English as the base doc
+   * and sets leftValue to the raw key instead of the translated value.
+   * rightValue is undefined when the key does not exist in the right language document.
+   */
   buildTranslationRows(): void {
     const showKeys = this.leftCode === TRANSLATION_KEYS_CODE;
     const leftDoc = this.docs.find(doc => doc.code === (showKeys ? DEFAULT_LANGUAGE : this.leftCode));
@@ -71,6 +111,10 @@ export class DisplayTranslationsComponent implements OnInit {
     }));
   }
 
+  /**
+   * Rebuilds the translation rows when either dropdown value changes.
+   * Does not re-fetch from CouchDB — uses the docs already in memory.
+   */
   onDropdownChange(): void {
     this.buildTranslationRows();
   }
