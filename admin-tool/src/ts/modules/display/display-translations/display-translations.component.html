@@ -48,4 +48,12 @@
       }
     </div>
   }
+  <display-translations-edit
+    [visible]="showEditModal"
+    [key]="selectedKey"
+    [docs]="docs"
+    (closed)="showEditModal = false"
+    (saved)="ngOnInit()"
+  >
+  </display-translations-edit>
 </div>

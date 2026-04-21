@@ -34,7 +34,7 @@ export class LanguagesService {
   }
 
   /**
-   * Fetches all languages documents from CouchDB and combines them
+   * Fetches all languages documents from CouchDB via getLanguageDocs and combines them
    * with the enabled state from settings.languages to build the UI model.
    *
    * @returns {Promise<LanguageModel[]>}
@@ -161,7 +161,7 @@ export class LanguagesService {
    *   - If the key exists in generic and the imported value differs -> add or update in custom
    *   - If the key does not exist in generic -> add or update in custom
    * Skips keys where the imported value is identical to the existing custom value.
-   * Does not call put if no changes were made.
+   * Does not call bulkDocs if no changes were made.
    *
    * @param {LanguageDoc} doc - the language document to update
    * @param {Record<string, string>} translations - parsed translations from the .properties file
@@ -230,6 +230,8 @@ export class LanguagesService {
    * @returns {Promise<void>}
    */
   async saveTranslation(key: string, values: TranslationKeyValues, docs: LanguageDoc[]): Promise<void> {
+    const updatedDocs: LanguageDoc[] = [];
+
     for (const doc of docs) {
       const docCopy = { ...doc, custom: { ...doc.custom } };
       const generic = docCopy.generic || {};
@@ -261,8 +263,11 @@ export class LanguagesService {
       }
 
       if (updated) {
-        await this.db.get().put(docCopy);
+        updatedDocs.push(docCopy);
       }
+    }
+    if (updatedDocs.length) {
+      await this.db.get().bulkDocs(updatedDocs);
     }
   }
 }

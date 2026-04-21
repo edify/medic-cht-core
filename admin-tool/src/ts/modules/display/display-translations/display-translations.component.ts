@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LanguagesService } from '@admin-tool-services/languages.service';
 import { LanguageDoc, DisplayTranslationRow } from '../display-interfaces';
+import { DisplayTranslationsEditComponent } from './display-translations-edit/display-translations-edit.component';
 
 /** Code used internally to identify the Translation Keys option in the left dropdown */
 const TRANSLATION_KEYS_CODE = 'keys';
@@ -25,7 +26,7 @@ const DEFAULT_LANGUAGE = 'en';
  */
 @Component({
   selector: 'display-translations',
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, DisplayTranslationsEditComponent],
   templateUrl: './display-translations.component.html',
   styleUrl: './display-translations.component.less'
 })
@@ -51,6 +52,12 @@ export class DisplayTranslationsComponent implements OnInit {
 
   /** Rows built from the selected left and right language documents for the side-by-side table */
   translationRows: DisplayTranslationRow[] = [];
+
+  /** Controls visibility of the add/edit translation modal */
+  showEditModal = false;
+
+  /** Translation key to edit, or null when adding a new key */
+  selectedKey: string | null = null;
 
   constructor(private languagesService: LanguagesService){}
 
@@ -119,14 +126,22 @@ export class DisplayTranslationsComponent implements OnInit {
     this.buildTranslationRows();
   }
 
-  //TODO
+  /**
+   * Opens the add/edit modal in add mode with an empty form.
+   */
   addTranslation(): void {
-    
+    this.selectedKey = null;
+    this.showEditModal = true;
   }
 
-  //TODO
+  /**
+   * Opens the add/edit modal in edit mode with the selected key preloaded.
+   *
+   * @param {string} key - the translation key to edit
+   */
   editTranslation(key: string): void {
-    
+    this.selectedKey = key;
+    this.showEditModal = true;
   }  
 
 }

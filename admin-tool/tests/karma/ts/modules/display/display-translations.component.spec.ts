@@ -240,6 +240,28 @@ describe('DisplayTranslationsComponent', () => {
       expect(row!.rightValue).to.equal('Enviar');
     });
   });
+  describe('addTranslation', () => {
+    it('should set selectedKey to null', () => {
+      component.addTranslation();
+      expect(component.selectedKey).to.be.null;
+    });
+
+    it('should set showEditModal to true', () => {
+      component.addTranslation();
+      expect(component.showEditModal).to.be.true;
+    });
+  });
+  describe('editTranslation', () => {
+    it('should set selectedKey to the given key', () => {
+      component.editTranslation('Submit');
+      expect(component.selectedKey).to.equal('Submit');
+    });
+
+    it('should set showEditModal to true', () => {
+      component.editTranslation('Submit');
+      expect(component.showEditModal).to.be.true;
+    });
+  });
   describe('DOM', () => {
     beforeEach(async () => {
       await fixture.whenStable();

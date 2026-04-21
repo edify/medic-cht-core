@@ -38,6 +38,7 @@ describe('LanguagesService', () => {
         }),
         put: sinon.stub().resolves(),
         remove: sinon.stub().resolves(),
+        bulkDocs: sinon.stub().resolves([]),
       }),
     };
 
@@ -462,23 +463,24 @@ describe('LanguagesService', () => {
     });
   });
   describe('saveTranslation', () => {
-    it('should not call put if no values changed', async () => {
+    it('should not call bulkDocs if no values changed', async () => {
       const values = { en: 'Submit', es: 'Enviar' };
       await service.saveTranslation('Submit', values, mockDocs as any);
-      expect(dbService.get().put.called).to.be.false;
+      expect(dbService.get().bulkDocs.called).to.be.false;
     });
 
-    it('should call put on doc when value differs from generic', async () => {
+    it('should call bulkDocs when value differs from generic', async () => {
       const values = { en: 'Submit', es: 'Enviar actualizado' };
       await service.saveTranslation('Submit', values, mockDocs as any);
-      expect(dbService.get().put.calledOnce).to.be.true;
+      expect(dbService.get().bulkDocs.calledOnce).to.be.true;
     });
 
     it('should put value in custom when different from generic', async () => {
       const values = { en: 'Submit', es: 'Enviar actualizado' };
       await service.saveTranslation('Submit', values, mockDocs as any);
-      const savedDoc = dbService.get().put.args[0][0];
-      expect(savedDoc.custom['Submit']).to.equal('Enviar actualizado');
+      const savedDocs = dbService.get().bulkDocs.args[0][0];
+      const esDoc = savedDocs.find((doc: any) => doc.code === 'es');
+      expect(esDoc.custom['Submit']).to.equal('Enviar actualizado');
     });
 
     it('should delete from custom when new value equals generic', async () => {
@@ -487,22 +489,24 @@ describe('LanguagesService', () => {
         custom: { ...mockDocs[0].custom, Submit: 'Submit' }
       } as any;
       await service.saveTranslation('Submit', { en: 'Submit' }, [doc]);
-      const savedDoc = dbService.get().put.args[0][0];
-      expect(savedDoc.custom['Submit']).to.be.undefined;
+      const savedDocs = dbService.get().bulkDocs.args[0][0];
+      expect(savedDocs[0].custom['Submit']).to.be.undefined;
     });
 
     it('should add to custom when key does not exist in generic', async () => {
       const values = { en: 'New value' };
       await service.saveTranslation('NewKey', values, mockDocs as any);
-      const savedDoc = dbService.get().put.args[0][0];
-      expect(savedDoc.custom['NewKey']).to.equal('New value');
+      const savedDocs = dbService.get().bulkDocs.args[0][0];
+      const enDoc = savedDocs.find((doc: any) => doc.code === 'en');
+      expect(enDoc.custom['NewKey']).to.equal('New value');
     });
 
     it('should delete from custom when new value is empty', async () => {
       const values = { en: '' };
       await service.saveTranslation('Clinic', values, mockDocs as any);
-      const savedDoc = dbService.get().put.args[0][0];
-      expect(savedDoc.custom['Clinic']).to.be.undefined;
+      const savedDocs = dbService.get().bulkDocs.args[0][0];
+      const enDoc = savedDocs.find((doc: any) => doc.code === 'en');
+      expect(enDoc.custom['Clinic']).to.be.undefined;
     });
 
     it('should not mutate original doc', async () => {
@@ -511,16 +515,18 @@ describe('LanguagesService', () => {
       expect(mockDocs[1].generic['Submit']).to.equal('Enviar');
     });
 
-    it('should call put for each doc that changed', async () => {
+    it('should call bulkDocs once with all changed docs', async () => {
       const values = { en: 'Submit updated', es: 'Enviar actualizado' };
       await service.saveTranslation('Submit', values, mockDocs as any);
-      expect(dbService.get().put.callCount).to.equal(2);
+      const savedDocs = dbService.get().bulkDocs.args[0][0];
+      expect(savedDocs).to.have.length(2);
     });
 
     it('should skip doc if code not in values', async () => {
       const values = { en: 'Submit updated' };
       await service.saveTranslation('Submit', values, mockDocs as any);
-      expect(dbService.get().put.callCount).to.equal(1);
+      const savedDocs = dbService.get().bulkDocs.args[0][0];
+      expect(savedDocs).to.have.length(1);
     });
   });
 });
