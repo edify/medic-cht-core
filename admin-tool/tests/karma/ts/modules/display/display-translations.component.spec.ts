@@ -2,7 +2,9 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { DisplayTranslationsComponent } from '@admin-tool-modules/display/display-translations/display-translations.component';
+import { 
+  DisplayTranslationsComponent
+} from '@admin-tool-modules/display/display-translations/display-translations.component';
 import { LanguagesService } from '@admin-tool-services/languages.service';
 
 describe('DisplayTranslationsComponent', () => {

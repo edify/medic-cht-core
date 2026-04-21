@@ -1,4 +1,15 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, ViewChildren, QueryList, ElementRef, ViewChild } from '@angular/core';
+import { 
+  Component, 
+  Input, 
+  Output, 
+  EventEmitter, 
+  OnChanges, 
+  SimpleChanges, 
+  ViewChildren, 
+  QueryList, 
+  ElementRef, 
+  ViewChild 
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { LanguagesService } from '@admin-tool-services/languages.service';
@@ -19,7 +30,7 @@ import { ResponseStatus } from '@admin-tool-modules/global-modules-interfaces';
   templateUrl: './display-translations-edit.component.html',
   styleUrl: './display-translations-edit.component.less'
 })
-export class DisplayTranslationsEditComponent {
+export class DisplayTranslationsEditComponent implements OnChanges{
 
   /** Controls visibility of the modal */
   @Input() visible = false;
