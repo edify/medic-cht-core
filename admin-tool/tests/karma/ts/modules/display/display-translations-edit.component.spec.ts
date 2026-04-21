@@ -242,10 +242,10 @@ describe('DisplayTranslationsEditComponent', () => {
       component.docs = mockDocs as any;
       component.translationValues = { en: 'Submit', es: 'Enviar' };
       await component.submit();
-      expect(languagesService.saveTranslation.calledWith(
-        'Submit', 
-        { en: 'Submit', es: 'Enviar' }, 
-        mockDocs)).to.be.true;
+      const [key, values, docs] = languagesService.saveTranslation.args[0];
+      expect(key).to.equal('Submit');
+      expect(values).to.deep.equal({ en: 'Submit', es: 'Enviar' });
+      expect(docs).to.deep.equal(mockDocs);
     });
 
     it('should call saveTranslation with newKey in add mode', async () => {
