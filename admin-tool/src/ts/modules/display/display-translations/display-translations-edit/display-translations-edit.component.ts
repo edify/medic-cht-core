@@ -96,17 +96,15 @@ export class DisplayTranslationsEditComponent implements OnChanges{
           this.translationValues[doc.code] = values[this.key!] ?? '';
         });
       }
-      setTimeout(() => {
-        this.textareas.forEach(textarea => {
-          textarea.nativeElement.style.height = '';
-          textarea.nativeElement.style.width = '';
-        });
-      }, 0);
-      setTimeout(() => {
+      this.textareas.forEach(textarea => {
+        textarea.nativeElement.style.height = '';
+        textarea.nativeElement.style.width = '';
+      });
+      (window.requestAnimationFrame || (window as any).webkitRequestAnimationFrame)(() => {
         if (this.modalBody) {
           this.modalBody.nativeElement.scrollTop = 0;
         }
-      }, 0);
+      });
     }
   }
 

@@ -4,15 +4,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { LanguagesService } from '@admin-tool-services/languages.service';
 import { LanguageDoc, DisplayTranslationRow } from '../display-interfaces';
 import { DisplayTranslationsEditComponent } from './display-translations-edit/display-translations-edit.component';
-
-/** Code used internally to identify the Translation Keys option in the left dropdown */
-const TRANSLATION_KEYS_CODE = 'keys';
-
-/** Display name shown to the user for the Translation Keys option in the left dropdown */
-const TRANSLATION_KEYS_NAME = 'Translation Keys';
-
-/** Default language code used as the initial left column selection and as the base doc in Translation Keys mode */
-const DEFAULT_LANGUAGE = 'en';
+import { TRANSLATION_KEYS_CODE, TRANSLATION_KEYS_NAME, DEFAULT_LANGUAGE } from '../display-constans';
 
 /**
  * Component for viewing and editing translation strings side-by-side across two languages.
