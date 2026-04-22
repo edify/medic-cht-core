@@ -1,12 +1,16 @@
 import { Injectable } from '@angular/core';
 import { DbService } from './db.service';
 import { SettingsService } from './settings.service';
+<<<<<<< HEAD
 import { 
   LanguageDoc, 
   LanguageModel, 
   PrivacyPoliciesDoc, 
   TranslationKeyValues 
 } from '@admin-tool-modules/display/display-interfaces';
+=======
+import { LanguageDoc, LanguageModel, TranslationKeyValues } from '@admin-tool-modules/display/display-interfaces';
+>>>>>>> app-build-integration
 
 /**
  * Service responsible for reading and writing CHT language documents

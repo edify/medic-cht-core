@@ -530,7 +530,6 @@ describe('LanguagesService', () => {
       expect(savedDocs).to.have.length(1);
     });
   });
-
   describe('getPrivacyPoliciesDoc', () => {
     it('should fetch the privacy policies doc without attachments by default', async () => {
       dbService.get().get.resolves({ _id: 'privacy-policies', privacy_policies: {}, _attachments: {} });

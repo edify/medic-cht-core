@@ -3,7 +3,10 @@ import { DisplayHeaderComponent } from './display-header/display-header.componen
 import { DisplayDateTimeComponent } from './display-date-time/display-date-time.component';
 import { DisplayLanguagesComponent } from './display-languages/display-languages.component';
 import { DisplayTranslationsComponent } from './display-translations/display-translations.component';
+<<<<<<< HEAD
 import { DisplayPrivacyPoliciesComponent } from './display-privacy-policies/display-privacy-policies.component';
+=======
+>>>>>>> app-build-integration
 
 /**
  * Routes for the Display module.
