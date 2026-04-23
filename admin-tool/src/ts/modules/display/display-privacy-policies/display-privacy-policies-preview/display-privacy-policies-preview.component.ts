@@ -8,7 +8,8 @@ import {
   ViewChild,
   ElementRef
 } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
+import { SecurityContext } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { PrivacyPolicyAttachment } from '../../display-interfaces';
 
@@ -49,7 +50,7 @@ export class DisplayPrivacyPoliciesPreviewComponent implements OnChanges{
   @ViewChild('modalBody') modalBody!: ElementRef<HTMLDivElement>;
 
   /** Sanitized HTML content to render inside the modal body */
-  content: SafeHtml | null = null;
+  content: string | null = null;
 
   /** Translation key for the error message shown when content_type is not text/html or FileReader fails */
   errorKey: string | null = null;
@@ -74,7 +75,8 @@ export class DisplayPrivacyPoliciesPreviewComponent implements OnChanges{
           this.errorKey = 'display.privacy.policies.preview.wrong.type';
           return;
         }
-        this.content = this.sanitizer.bypassSecurityTrustHtml(
+        this.content = this.sanitizer.sanitize(
+          SecurityContext.HTML, 
           this.decodeBase64Html(this.attachment.data as string)
         );
       } else if (this.stagedFile) {
@@ -119,7 +121,7 @@ export class DisplayPrivacyPoliciesPreviewComponent implements OnChanges{
   private readFileAsHtml(file: File): void {
     const reader = new FileReader();
     reader.addEventListener('loadend', () => {
-      this.content = this.sanitizer.bypassSecurityTrustHtml(reader.result as string);
+      this.content = this.sanitizer.sanitize(SecurityContext.HTML, reader.result as string);
     });
     reader.addEventListener('error', () => {
       console.error('Error reading file', reader.error);

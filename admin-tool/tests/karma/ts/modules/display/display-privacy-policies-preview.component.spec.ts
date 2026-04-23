@@ -55,7 +55,7 @@ describe('DisplayPrivacyPoliciesPreviewComponent', () => {
   });
   describe('ngOnChanges', () => {
     it('should clear content when visible changes to true', () => {
-      component.content = component['sanitizer'].bypassSecurityTrustHtml('<p>test</p>');
+      component.content = '<p>test</p>';
       component.ngOnChanges({
         visible: { currentValue: true, previousValue: false, firstChange: false, isFirstChange: () => false }
       });
@@ -255,12 +255,12 @@ describe('DisplayPrivacyPoliciesPreviewComponent', () => {
 
     it('should render content when content is set', () => {
       component.visible = true;
-      component.content = component['sanitizer'].bypassSecurityTrustHtml('<p>hello</p>');
+      component.content = '<p>hello</p>';
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.modal-body p')).to.exist;
     });
-
+    
     it('should show close button', () => {
       component.visible = true;
       fixture.detectChanges();
