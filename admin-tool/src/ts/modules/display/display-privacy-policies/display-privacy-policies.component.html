@@ -40,7 +40,7 @@
                   <span class="error">{{ 'display.privacy.policies.preview.wrong.type' | translate }}</span>
                 }
                 <div class="actions">
-                  <button class="btn btn-default" type="button">
+                  <button class="btn btn-default" type="button" (click)="openAttachmentPreview(row.attachment!, row.name)">
                     {{ 'display.privacy.policies.preview' | translate }}
                   </button>
                   <button class="btn btn-danger" type="button" (click)="deletePolicy(row.code)">
@@ -84,7 +84,7 @@
                   <span class="error">{{ 'display.privacy.policies.preview.wrong.type' | translate }}</span>
                 }
                 <div class="actions">
-                  <button class="btn btn-default" type="button">
+                  <button class="btn btn-default" type="button" (click)="openStagedFilePreview(row.stagedFile!, row.name)">
                     {{ 'display.privacy.policies.preview' | translate }}
                   </button>
                   <button class="btn btn-danger" type="button" (click)="deleteUpdate(row.code)">
@@ -115,4 +115,12 @@
       </div>
     </div>
   }
+  <display-privacy-policies-preview
+    [visible]="showPreviewModal"
+    [languageName]="previewLanguageName"
+    [attachment]="previewAttachment"
+    [stagedFile]="previewStagedFile"
+    (closed)="showPreviewModal = false"
+  >
+  </display-privacy-policies-preview>
 </div>

@@ -66,6 +66,22 @@ describe('DisplayPrivacyPoliciesComponent', () => {
     it('should start with empty languagePolicyDeletes', () => {
       expect(component.languagePolicyDeletes).to.deep.equal([]);
     });
+
+    it('should start with showPreviewModal false', () => {
+      expect(component.showPreviewModal).to.be.false;
+    });
+
+    it('should start with previewAttachment null', () => {
+      expect(component.previewAttachment).to.be.null;
+    });
+
+    it('should start with previewStagedFile null', () => {
+      expect(component.previewStagedFile).to.be.null;
+    });
+
+    it('should start with previewLanguageName empty', () => {
+      expect(component.previewLanguageName).to.equal('');
+    });
   });
   describe('ngOnInit', () => {
     it('should call getLanguageDocs on init', () => {
@@ -381,6 +397,58 @@ describe('DisplayPrivacyPoliciesComponent', () => {
       clock.restore();
     });
   });
+  describe('openAttachmentPreview', () => {
+    it('should set previewAttachment', () => {
+      const attachment = { content_type: 'text/html', digest: 'md5-xxx', data: 'abc' };
+      component.openAttachmentPreview(attachment, 'English');
+      expect(component.previewAttachment).to.equal(attachment);
+    });
+
+    it('should set previewLanguageName', () => {
+      const attachment = { content_type: 'text/html', digest: 'md5-xxx', data: 'abc' };
+      component.openAttachmentPreview(attachment, 'English');
+      expect(component.previewLanguageName).to.equal('English');
+    });
+
+    it('should set showPreviewModal to true', () => {
+      const attachment = { content_type: 'text/html', digest: 'md5-xxx', data: 'abc' };
+      component.openAttachmentPreview(attachment, 'English');
+      expect(component.showPreviewModal).to.be.true;
+    });
+
+    it('should set previewStagedFile to null', () => {
+      component.previewStagedFile = new File([''], 'en.html', { type: 'text/html' });
+      const attachment = { content_type: 'text/html', digest: 'md5-xxx', data: 'abc' };
+      component.openAttachmentPreview(attachment, 'English');
+      expect(component.previewStagedFile).to.be.null;
+    });
+  });
+  describe('openStagedFilePreview', () => {
+    it('should set previewStagedFile', () => {
+      const file = new File([''], 'en.html', { type: 'text/html' });
+      component.openStagedFilePreview(file, 'English');
+      expect(component.previewStagedFile).to.equal(file);
+    });
+
+    it('should set previewLanguageName', () => {
+      const file = new File([''], 'en.html', { type: 'text/html' });
+      component.openStagedFilePreview(file, 'English');
+      expect(component.previewLanguageName).to.equal('English');
+    });
+
+    it('should set showPreviewModal to true', () => {
+      const file = new File([''], 'en.html', { type: 'text/html' });
+      component.openStagedFilePreview(file, 'English');
+      expect(component.showPreviewModal).to.be.true;
+    });
+
+    it('should set previewAttachment to null', () => {
+      component.previewAttachment = { content_type: 'text/html', digest: 'md5-xxx', data: 'abc' };
+      const file = new File([''], 'en.html', { type: 'text/html' });
+      component.openStagedFilePreview(file, 'English');
+      expect(component.previewAttachment).to.be.null;
+    });
+  });
   describe('DOM', () => {
     beforeEach(async () => {
       await fixture.whenStable();
@@ -468,6 +536,45 @@ describe('DisplayPrivacyPoliciesComponent', () => {
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.error')).to.exist;
+    });
+    
+    it('should call openAttachmentPreview when preview button is clicked on current policy', async () => {
+      await fixture.whenStable();
+      const openSpy = sinon.spy(component, 'openAttachmentPreview');
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const previewBtn = compiled.querySelector('.actions .btn-default') as HTMLButtonElement;
+      previewBtn.click();
+      expect(openSpy.calledOnce).to.be.true;
+    });
+
+    it('should call openStagedFilePreview when preview button is clicked on staged file', async () => {
+      await fixture.whenStable();
+      const file = new File([''], 'en.html', { type: 'text/html' });
+      component.privacyPolicyRows[0].stagedFile = file;
+      fixture.detectChanges();
+      const openSpy = sinon.spy(component, 'openStagedFilePreview');
+      const compiled = fixture.nativeElement as HTMLElement;
+      const previewBtns = compiled.querySelectorAll('.actions .btn-default');
+      (previewBtns[previewBtns.length - 1] as HTMLButtonElement).click();
+      expect(openSpy.calledOnce).to.be.true;
+    });
+
+    it('should show preview modal when showPreviewModal is true', async () => {
+      await fixture.whenStable();
+      component.showPreviewModal = true;
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('display-privacy-policies-preview')).to.exist;
+    });
+
+    it('should set showPreviewModal to false when preview modal emits closed', async () => {
+      await fixture.whenStable();
+      component.showPreviewModal = true;
+      fixture.detectChanges();
+      component.showPreviewModal = false;
+      fixture.detectChanges();
+      expect(component.showPreviewModal).to.be.false;
     });
   });
 });

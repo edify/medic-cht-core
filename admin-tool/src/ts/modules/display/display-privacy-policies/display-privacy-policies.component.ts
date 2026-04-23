@@ -2,9 +2,17 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LanguagesService } from '@admin-tool-services/languages.service';
-import { PrivacyPolicyRow, PrivacyPoliciesDoc, LanguageDoc } from '../display-interfaces';
+import { 
+  PrivacyPolicyRow, 
+  PrivacyPoliciesDoc, 
+  LanguageDoc, 
+  PrivacyPolicyAttachment 
+} from '../display-interfaces';
 import { ResponseStatus } from '@admin-tool-modules/global-modules-interfaces';
 import { DecimalPipe } from '@angular/common';
+import { 
+  DisplayPrivacyPoliciesPreviewComponent 
+} from './display-privacy-policies-preview/display-privacy-policies-preview.component';
 
 /**
  * Component for managing privacy policy HTML documents for each application language.
@@ -15,7 +23,7 @@ import { DecimalPipe } from '@angular/common';
  */
 @Component({
   selector: 'display-privacy-policies',
-  imports: [FormsModule, TranslatePipe, DecimalPipe],
+  imports: [FormsModule, TranslatePipe, DecimalPipe, DisplayPrivacyPoliciesPreviewComponent],
   templateUrl: './display-privacy-policies.component.html',
   styleUrl: './display-privacy-policies.component.less'
 })
@@ -35,6 +43,18 @@ export class DisplayPrivacyPoliciesComponent implements OnInit {
 
   /** Language codes whose current policies are pending deletion on the next submit */
   languagePolicyDeletes: string[] = [];
+
+  /** Controls visibility of the preview modal */
+  showPreviewModal = false;
+
+  /** Saved attachment to preview, null if previewing a staged file */
+  previewAttachment: PrivacyPolicyAttachment | null = null;
+
+  /** Staged file to preview, null if previewing a saved attachment */
+  previewStagedFile: File | null = null;
+
+  /** Name of the language whose policy is being previewed */
+  previewLanguageName: string = '';
 
   constructor(private languagesService: LanguagesService) {}
 
@@ -227,6 +247,34 @@ export class DisplayPrivacyPoliciesComponent implements OnInit {
       console.error('Error while uploading privacy policies', error);
       this.responseStatus = { state: 'error', msg: 'display.privacy.policies.failure' };
     }
+  }
+
+  /**
+   * Opens the preview modal for a saved attachment from CouchDB.
+   * Sets the attachment as the preview source and clears any staged file.
+   *
+   * @param {PrivacyPolicyAttachment} attachment - the saved attachment to preview
+   * @param {string} name - the display name of the language whose policy is being previewed
+   */
+  openAttachmentPreview(attachment: PrivacyPolicyAttachment, name: string): void {
+    this.previewAttachment = attachment;
+    this.previewStagedFile = null;
+    this.previewLanguageName = name;
+    this.showPreviewModal = true;
+  }
+
+  /**
+   * Opens the preview modal for a staged file selected by the user.
+   * Sets the staged file as the preview source and clears any saved attachment.
+   *
+   * @param {File} file - the staged file to preview
+   * @param {string} name - the display name of the language whose policy is being previewed
+   */
+  openStagedFilePreview(file: File, name: string): void {
+    this.previewStagedFile = file;
+    this.previewAttachment = null;
+    this.previewLanguageName = name;
+    this.showPreviewModal = true;
   }
 
 }
