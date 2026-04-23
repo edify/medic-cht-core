@@ -92,6 +92,20 @@ describe('DisplayPrivacyPoliciesComponent', () => {
       expect(enRow!.attachment).to.deep.equal(mockPrivacyPoliciesDoc._attachments['en.html']);
     });
 
+    it('should show rows even if getPrivacyPoliciesDoc fails', async () => {
+      languagesService.getPrivacyPoliciesDoc.rejects(new Error('error'));
+      sinon.stub(console, 'error');
+      await component.ngOnInit();
+      expect(component.privacyPolicyRows).to.have.length(2);
+    });
+
+    it('should set attachment to null for all rows if getPrivacyPoliciesDoc fails', async () => {
+      languagesService.getPrivacyPoliciesDoc.rejects(new Error('error'));
+      sinon.stub(console, 'error');
+      await component.ngOnInit();
+      component.privacyPolicyRows.forEach(row => expect(row.attachment).to.be.null);
+    });
+
     it('should set attachment to null for language without a policy', async () => {
       await fixture.whenStable();
       const esRow = component.privacyPolicyRows.find(row => row.code === 'es');
@@ -185,6 +199,275 @@ describe('DisplayPrivacyPoliciesComponent', () => {
       await fixture.whenStable();
       component.deletePolicy('fr');
       expect(component.languagePolicyDeletes).to.not.include('fr');
+    });
+  });
+  describe('buildPrivacyPolicyRows', () => {
+    it('should build a row for each language doc', async () => {
+      await fixture.whenStable();
+      expect(component.privacyPolicyRows).to.have.length(2);
+    });
+
+    it('should set attachment for language that has a policy', async () => {
+      await fixture.whenStable();
+      const enRow = component.privacyPolicyRows.find(row => row.code === 'en');
+      expect(enRow!.attachment).to.deep.equal(mockPrivacyPoliciesDoc._attachments['en.html']);
+    });
+
+    it('should set attachment to null for language without a policy', async () => {
+      await fixture.whenStable();
+      const esRow = component.privacyPolicyRows.find(row => row.code === 'es');
+      expect(esRow!.attachment).to.be.null;
+    });
+
+    it('should set stagedFile to null for all rows', async () => {
+      await fixture.whenStable();
+      component.privacyPolicyRows.forEach(row => expect(row.stagedFile).to.be.null);
+    });
+
+    it('should set code and name from language doc', async () => {
+      await fixture.whenStable();
+      const enRow = component.privacyPolicyRows.find(row => row.code === 'en');
+      expect(enRow!.code).to.equal('en');
+      expect(enRow!.name).to.equal('English');
+    });
+
+    it('should handle doc with empty privacy_policies', async () => {
+      languagesService.getPrivacyPoliciesDoc.resolves({
+        _id: 'privacy-policies',
+        privacy_policies: {},
+        _attachments: {}
+      });
+      await component.ngOnInit();
+      component.privacyPolicyRows.forEach(row => expect(row.attachment).to.be.null);
+    });
+
+    it('should handle doc with undefined _attachments', async () => {
+      languagesService.getPrivacyPoliciesDoc.resolves({
+        _id: 'privacy-policies',
+        privacy_policies: {},
+      });
+      await component.ngOnInit();
+      component.privacyPolicyRows.forEach(row => expect(row.attachment).to.be.null);
+    });
+  });
+  describe('getAttachmentSize', () => {
+    it('should return string length when data is a string', () => {
+      const result = component.getAttachmentSize('PGh0bWw+PC9odG1sPg==');
+      expect(result).to.equal(20);
+    });
+
+    it('should return file size when data is a File', () => {
+      const file = new File(['hello'], 'test.html', { type: 'text/html' });
+      const result = component.getAttachmentSize(file);
+      expect(result).to.equal(file.size);
+    });
+  });
+  describe('deleteUpdate', () => {
+    it('should set stagedFile to null on the correct row', async () => {
+      await fixture.whenStable();
+      const file = new File([''], 'en.html', { type: 'text/html' });
+      const enRow = component.privacyPolicyRows.find(row => row.code === 'en');
+      enRow!.stagedFile = file;
+      component.deleteUpdate('en');
+      expect(enRow!.stagedFile).to.be.null;
+    });
+
+    it('should not affect other rows', async () => {
+      await fixture.whenStable();
+      const file = new File([''], 'en.html', { type: 'text/html' });
+      const enRow = component.privacyPolicyRows.find(row => row.code === 'en');
+      const esRow = component.privacyPolicyRows.find(row => row.code === 'es');
+      enRow!.stagedFile = file;
+      esRow!.stagedFile = file;
+      component.deleteUpdate('en');
+      expect(esRow!.stagedFile).to.equal(file);
+    });
+
+    it('should do nothing if row code does not exist', async () => {
+      await fixture.whenStable();
+      component.deleteUpdate('fr');
+      component.privacyPolicyRows.forEach(row => expect(row.stagedFile).to.be.null);
+    });
+  });
+  describe('submit', () => {
+    it('should set responseStatus to loading at start', async () => {
+      await fixture.whenStable();
+      const file = new File([''], 'en.html', { type: 'text/html' });
+      component.privacyPolicyRows[0].stagedFile = file;
+      component.submit();
+      expect(component.responseStatus.state).to.equal('loading');
+    });
+
+    it('should set noChanges message when no staged files and no deletes', async () => {
+      await fixture.whenStable();
+      await component.submit();
+      expect(component.responseStatus.msg).to.equal('display.privacy.policies.no.changes');
+    });
+
+    it('should not call savePrivacyPolicies when no changes', async () => {
+      await fixture.whenStable();
+      await component.submit();
+      expect(languagesService.savePrivacyPolicies.called).to.be.false;
+    });
+
+    it('should call getPrivacyPoliciesDoc without attachments on submit', async () => {
+      await fixture.whenStable();
+      const file = new File([''], 'en.html', { type: 'text/html' });
+      component.privacyPolicyRows[0].stagedFile = file;
+      await component.submit();
+      expect(languagesService.getPrivacyPoliciesDoc.calledWithExactly()).to.be.true;
+    });
+
+    it('should call savePrivacyPolicies on submit with staged files', async () => {
+      await fixture.whenStable();
+      const file = new File([''], 'en.html', { type: 'text/html' });
+      component.privacyPolicyRows[0].stagedFile = file;
+      await component.submit();
+      expect(languagesService.savePrivacyPolicies.calledOnce).to.be.true;
+    });
+
+    it('should ignore staged files with wrong content type', async () => {
+      await fixture.whenStable();
+      const file = new File([''], 'en.pdf', { type: 'application/pdf' });
+      component.privacyPolicyRows[0].stagedFile = file;
+      await component.submit();
+      expect(languagesService.savePrivacyPolicies.called).to.be.false;
+    });
+
+    it('should call savePrivacyPolicies when there are deletes', async () => {
+      await fixture.whenStable();
+      component.languagePolicyDeletes.push('en');
+      await component.submit();
+      expect(languagesService.savePrivacyPolicies.calledOnce).to.be.true;
+    });
+
+    it('should set success message after submit', async () => {
+      await fixture.whenStable();
+      const file = new File([''], 'en.html', { type: 'text/html' });
+      component.privacyPolicyRows[0].stagedFile = file;
+      await component.submit();
+      expect(component.responseStatus.msg).to.equal('display.privacy.policies.submit.success');
+    });
+
+    it('should call ngOnInit after successful submit', async () => {
+      await fixture.whenStable();
+      const file = new File([''], 'en.html', { type: 'text/html' });
+      component.privacyPolicyRows[0].stagedFile = file;
+      const ngOnInitSpy = sinon.spy(component, 'ngOnInit');
+      await component.submit();
+      expect(ngOnInitSpy.calledOnce).to.be.true;
+    });
+
+    it('should set error message when submit fails', async () => {
+      await fixture.whenStable();
+      const file = new File([''], 'en.html', { type: 'text/html' });
+      component.privacyPolicyRows[0].stagedFile = file;
+      languagesService.savePrivacyPolicies.rejects(new Error('error'));
+      sinon.stub(console, 'error');
+      await component.submit();
+      expect(component.responseStatus.state).to.equal('error');
+      expect(component.responseStatus.msg).to.equal('display.privacy.policies.failure');
+    });
+
+    it('should clear success status after 3 seconds', async () => {
+      await fixture.whenStable();
+      const clock = sinon.useFakeTimers();
+      const file = new File([''], 'en.html', { type: 'text/html' });
+      component.privacyPolicyRows[0].stagedFile = file;
+      await component.submit();
+      expect(component.responseStatus.state).to.equal('success');
+      clock.tick(3001);
+      expect(component.responseStatus).to.deep.equal({});
+      clock.restore();
+    });
+  });
+  describe('DOM', () => {
+    beforeEach(async () => {
+      await fixture.whenStable();
+      fixture.detectChanges();
+    });
+
+    it('should show loader when loadingPageStatus is true', () => {
+      component.loadingPageStatus = true;
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.loader')).to.exist;
+    });
+
+    it('should not show loader when loadingPageStatus is false', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.loader')).to.not.exist;
+    });
+
+    it('should render a row for each language', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
+      const rows = compiled.querySelectorAll('.privacy-policy-row');
+      expect(rows.length).to.equal(component.privacyPolicyRows.length);
+    });
+
+    it('should show current policy details when attachment has data', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.details')).to.exist;
+    });
+
+    it('should show Select button when no staged file', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
+      const selectButtons = compiled.querySelectorAll('.input-area');
+      expect(selectButtons.length).to.be.greaterThan(0);
+    });
+
+    it('should show staged file details when stagedFile is set', () => {
+      const file = new File([''], 'en.html', { type: 'text/html' });
+      component.privacyPolicyRows[0].stagedFile = file;
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const details = compiled.querySelectorAll('.details');
+      expect(details.length).to.be.greaterThan(1);
+    });
+
+    it('should show error when attachment content type is not text/html', () => {
+      component.privacyPolicyRows[0].attachment = {
+        content_type: 'application/pdf',
+        digest: 'md5-xxx',
+        data: 'somedata'
+      };
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.error')).to.exist;
+    });
+
+    it('should render Submit button', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('button.btn-primary')).to.exist;
+    });
+
+    it('should disable Submit button when loading', () => {
+      component.responseStatus = { state: 'loading' };
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const button = compiled.querySelector('button.btn-primary') as HTMLButtonElement;
+      expect(button.disabled).to.be.true;
+    });
+
+    it('should show loader inline when submitting', () => {
+      component.responseStatus = { state: 'loading' };
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.loader.inline')).to.exist;
+    });
+
+    it('should show success message when responseStatus is success', () => {
+      component.responseStatus = { state: 'success', msg: 'display.privacy.policies.submit.success' };
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.success')).to.exist;
+    });
+
+    it('should show error message when responseStatus is error', () => {
+      component.responseStatus = { state: 'error', msg: 'display.privacy.policies.failure' };
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.error')).to.exist;
     });
   });
 });

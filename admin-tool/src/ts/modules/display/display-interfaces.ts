@@ -72,8 +72,8 @@ export interface TranslationKeyValues {
  */
 export interface PrivacyPolicyAttachment {
   content_type: string;
-  digest: string;
-  data?: string;
+  digest?: string;
+  data?: string | File;
 }
 
 /**

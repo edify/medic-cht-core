@@ -34,7 +34,7 @@
                 </span>
                 <span class="detail">
                   <strong>{{ 'display.privacy.policies.size' | translate }}</strong>
-                  {{ row.attachment!.data!.length / 1024 | number: '1.2-2' }}KB
+                  {{ getAttachmentSize(row.attachment!.data!) / 1024 | number: '1.2-2' }}KB
                 </span>
                 @if (row.attachment!.content_type !== 'text/html') {
                   <span class="error">{{ 'display.privacy.policies.preview.wrong.type' | translate }}</span>
