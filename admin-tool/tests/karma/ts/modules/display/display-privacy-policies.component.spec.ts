@@ -2,7 +2,9 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { DisplayPrivacyPoliciesComponent } from '@admin-tool-modules/display/display-privacy-policies/display-privacy-policies.component';
+import { 
+  DisplayPrivacyPoliciesComponent 
+} from '@admin-tool-modules/display/display-privacy-policies/display-privacy-policies.component';
 import { LanguagesService } from '@admin-tool-services/languages.service';
 
 describe('DisplayPrivacyPoliciesComponent', () => {

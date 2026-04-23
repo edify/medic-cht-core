@@ -3,9 +3,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { BrowserModule } from '@angular/platform-browser';
-import {
-  DisplayPrivacyPoliciesPreviewComponent
-} from '@admin-tool-modules/display/display-privacy-policies/display-privacy-policies-preview/display-privacy-policies-preview.component';
+// eslint-disable-next-line max-len
+import { DisplayPrivacyPoliciesPreviewComponent } from '@admin-tool-modules/display/display-privacy-policies/display-privacy-policies-preview/display-privacy-policies-preview.component';
 
 describe('DisplayPrivacyPoliciesPreviewComponent', () => {
   let component: DisplayPrivacyPoliciesPreviewComponent;

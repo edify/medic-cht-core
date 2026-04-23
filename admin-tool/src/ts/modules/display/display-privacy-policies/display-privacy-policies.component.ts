@@ -72,8 +72,8 @@ export class DisplayPrivacyPoliciesComponent implements OnInit {
       const privacyPoliciesDoc = await this.languagesService.getPrivacyPoliciesDoc(true)
         .catch(error => {
           console.error('Error loading privacy policies', error);
-        return { _id: 'privacy-policies', privacy_policies: {}, _attachments: {} } as PrivacyPoliciesDoc;
-      });
+          return { _id: 'privacy-policies', privacy_policies: {}, _attachments: {} } as PrivacyPoliciesDoc;
+        });
 
       this.privacyPoliciesDoc = privacyPoliciesDoc;
       this.privacyPolicyRows = this.buildPrivacyPolicyRows(languageDocs, privacyPoliciesDoc);
@@ -105,7 +105,10 @@ export class DisplayPrivacyPoliciesComponent implements OnInit {
    * @param {PrivacyPoliciesDoc} privacyPoliciesDoc - the privacy-policies document from CouchDB
    * @returns {PrivacyPolicyRow[]} one row per language with attachment and stagedFile initialized
    */
-  private buildPrivacyPolicyRows(languageDocs: LanguageDoc[], privacyPoliciesDoc: PrivacyPoliciesDoc): PrivacyPolicyRow[] {
+  private buildPrivacyPolicyRows(
+    languageDocs: LanguageDoc[], 
+    privacyPoliciesDoc: PrivacyPoliciesDoc
+  ): PrivacyPolicyRow[] {
     const attachments = privacyPoliciesDoc._attachments || {};
     const policies = privacyPoliciesDoc.privacy_policies || {};
     
