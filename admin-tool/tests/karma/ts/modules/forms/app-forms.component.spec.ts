@@ -16,19 +16,19 @@ describe('AppFormsComponent', () => {
 
   const mockForms: FormDoc[] = [
     { 
-        _id: 'form:death_report', 
-        type: 'form', 
-        internalId: 'death_report', 
-        title: 'Death report', 
-        icon: 'icon-death-general' 
+      _id: 'form:death_report', 
+      type: 'form', 
+      internalId: 'death_report', 
+      title: 'Death report', 
+      icon: 'icon-death-general' 
     },
     { 
-        _id: 'form:pregnancy', 
-        type: 'form', 
-        internalId: 'pregnancy', 
-        title: 'Pregnancy registration', 
-        icon: 'icon-pregnancy', 
-        translation_key: 'pregnancy.title' 
+      _id: 'form:pregnancy', 
+      type: 'form', 
+      internalId: 'pregnancy', 
+      title: 'Pregnancy registration', 
+      icon: 'icon-pregnancy', 
+      translation_key: 'pregnancy.title' 
     },
   ];
 
@@ -210,7 +210,10 @@ describe('AppFormsComponent', () => {
 
     it('should render img when icon is not svg', async () => {
       await fixture.whenStable();
-      resourcesService.getIconContent.returns({ isSvg: false, content: `data:image/png;base64,${btoa('png-content')}` });
+      resourcesService.getIconContent.returns({ 
+        isSvg: false, 
+        content: `data:image/png;base64,${btoa('png-content')}` 
+      });
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('img')).to.exist;
