@@ -150,7 +150,7 @@ export class AppFormsService {
       });
 
     doc.title = title;
-    Object.assign(doc,meta);
+    Object.assign(doc, meta);
     doc.type = 'form';
     doc.internalId = internalId;
     

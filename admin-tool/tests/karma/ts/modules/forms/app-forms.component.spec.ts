@@ -170,15 +170,11 @@ describe('AppFormsComponent', () => {
     });
   });
   describe('upload', () => {
-    let xmlFileInput: HTMLInputElement;
-    let metaFileInput: HTMLInputElement;
 
     beforeEach(async () => {
       appFormsService.uploadForm = sinon.stub().resolves();
       await fixture.whenStable();
       fixture.detectChanges();
-      xmlFileInput = fixture.nativeElement.querySelectorAll('input[type="file"]')[0];
-      metaFileInput = fixture.nativeElement.querySelectorAll('input[type="file"]')[1];
     });
 
     const setFiles = (xmlFile: File | null, metaFile: File | null) => {
