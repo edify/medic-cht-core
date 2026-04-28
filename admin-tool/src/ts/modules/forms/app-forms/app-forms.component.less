@@ -6,6 +6,22 @@
 
 .form-actions {
   margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  .loader,
+  span {
+    margin-top: 0.5rem;
+  }
+}
+
+.loader {
+  &.inline {
+    width: 2.5rem;
+    height: 2.5rem;
+    margin: 0 0.5rem;
+  }
 }
 
 .error {

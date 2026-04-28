@@ -32,6 +32,11 @@
             <i class="fa fa-arrow-up" aria-hidden="true"></i>
             <span>{{'upload' | translate}}</span>
           </button>
+          @if (responseStatus.state === 'loading') {
+            <div class="loader inline"></div>
+          } @else if (responseStatus.state) {
+            <span [class]="responseStatus.state!">{{ responseStatus.msg! | translate }}</span>
+          }
         </div>
       </div>
 

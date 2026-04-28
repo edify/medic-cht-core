@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AppFormsService } from '@admin-tool-services/app-forms.service';
 import { ResourcesService } from '@admin-tool-services/resources.service';
@@ -23,6 +23,9 @@ import { ResponseStatus } from '@admin-tool-modules/global-modules-interfaces';
   styleUrl: './app-forms.component.less'
 })
 export class AppFormsComponent implements OnInit {
+
+  @ViewChild('xmlFile') xmlFileRef!: ElementRef<HTMLInputElement>;
+  @ViewChild('metaFile') metaFileRef!: ElementRef<HTMLInputElement>;
 
   /** List of form documents fetched from CouchDB for template iteration */
   forms: FormDoc[] = [];
@@ -72,8 +75,43 @@ export class AppFormsComponent implements OnInit {
     return iconContent;
   }
 
+  private async reloadForms(): Promise<void> {
+    try {
+      this.forms = await this.appFormsService.getForms();
+    } catch (error) {
+      console.error('Error fetching XForms for form config page.', error);
+    }
+  }
+
   //TODO
-  upload(): void{
-    
+  async upload(): Promise<void> {
+    const xmlFile = this.xmlFileRef.nativeElement.files?.[0];
+    const metaFile = this.metaFileRef.nativeElement.files?.[0];
+
+    if (!xmlFile && !metaFile) {
+      this.responseStatus = { state: 'error', msg: 'Upload failed: XML and JSON meta files not found' };
+      return;
+    }
+    if (!xmlFile) {
+      this.responseStatus = { state: 'error', msg: 'Upload failed: XML file not found' };
+      return;
+    }
+    if (!metaFile) {
+      this.responseStatus = { state: 'error', msg: 'Upload failed: JSON meta file not found' };
+      return;
+    }
+
+    this.responseStatus = { state: 'loading' };
+
+    try {
+      await this.appFormsService.uploadForm(xmlFile, metaFile);
+      this.xmlFileRef.nativeElement.value = '';
+      this.metaFileRef.nativeElement.value = '';
+      await this.reloadForms();
+      this.responseStatus = {};
+    } catch (error) {
+      console.error('Upload failed', error);
+      this.responseStatus = { state: 'error', msg: 'Upload failed: ' + error.message };
+    }
   }
 }
