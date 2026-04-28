@@ -24,7 +24,10 @@ import { ResponseStatus } from '@admin-tool-modules/global-modules-interfaces';
 })
 export class AppFormsComponent implements OnInit {
 
+  /** Reference to the XML file input element for reading the selected file and resetting after upload */
   @ViewChild('xmlFile') xmlFileRef!: ElementRef<HTMLInputElement>;
+
+  /** Reference to the JSON meta file input element for reading the selected file and resetting after upload */
   @ViewChild('metaFile') metaFileRef!: ElementRef<HTMLInputElement>;
 
   /** List of form documents fetched from CouchDB for template iteration */
@@ -75,6 +78,12 @@ export class AppFormsComponent implements OnInit {
     return iconContent;
   }
 
+  /**
+   * Reloads the list of form documents from CouchDB without triggering the full page loader.
+   * Called after a successful upload to reflect the newly added or updated form in the table.
+   *
+   * @returns {Promise<void>}
+   */
   private async reloadForms(): Promise<void> {
     try {
       this.forms = await this.appFormsService.getForms();
@@ -83,7 +92,15 @@ export class AppFormsComponent implements OnInit {
     }
   }
 
-  //TODO
+  /**
+   * Handles the XForm upload process.
+   * Validates that both files are present before proceeding.
+   * Sets responseStatus to loading during the upload and clears it on success.
+   * Reloads the forms table after a successful upload.
+   * Sets responseStatus to error with the server message if the upload fails.
+   *
+   * @returns {Promise<void>}
+   */
   async upload(): Promise<void> {
     const xmlFile = this.xmlFileRef.nativeElement.files?.[0];
     const metaFile = this.metaFileRef.nativeElement.files?.[0];

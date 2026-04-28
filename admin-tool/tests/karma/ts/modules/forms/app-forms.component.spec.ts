@@ -169,6 +169,115 @@ describe('AppFormsComponent', () => {
       expect(result.content).to.equal('<svg>test</svg>');
     });
   });
+  describe('upload', () => {
+    let xmlFileInput: HTMLInputElement;
+    let metaFileInput: HTMLInputElement;
+
+    beforeEach(async () => {
+      appFormsService.uploadForm = sinon.stub().resolves();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      xmlFileInput = fixture.nativeElement.querySelectorAll('input[type="file"]')[0];
+      metaFileInput = fixture.nativeElement.querySelectorAll('input[type="file"]')[1];
+    });
+
+    const setFiles = (xmlFile: File | null, metaFile: File | null) => {
+      Object.defineProperty(component.xmlFileRef.nativeElement, 'files', {
+        value: xmlFile ? [xmlFile] : [],
+        configurable: true,
+      });
+      Object.defineProperty(component.metaFileRef.nativeElement, 'files', {
+        value: metaFile ? [metaFile] : [],
+        configurable: true,
+      });
+    };
+
+    it('should set error if no files selected', async () => {
+      setFiles(null, null);
+      await component.upload();
+      expect(component.responseStatus.state).to.equal('error');
+      expect(component.responseStatus.msg).to.equal('Upload failed: XML and JSON meta files not found');
+    });
+
+    it('should set error if only meta file selected', async () => {
+      setFiles(null, new File(['{}'], 'test.json'));
+      await component.upload();
+      expect(component.responseStatus.state).to.equal('error');
+      expect(component.responseStatus.msg).to.equal('Upload failed: XML file not found');
+    });
+
+    it('should set error if only xml file selected', async () => {
+      setFiles(new File(['<xml/>'], 'test.xml'), null);
+      await component.upload();
+      expect(component.responseStatus.state).to.equal('error');
+      expect(component.responseStatus.msg).to.equal('Upload failed: JSON meta file not found');
+    });
+    it('should set responseStatus to loading during upload', async () => {
+      appFormsService.uploadForm.callsFake(() => {
+        expect(component.responseStatus.state).to.equal('loading');
+        return Promise.resolve();
+      });
+      setFiles(new File(['<xml/>'], 'test.xml'), new File(['{}'], 'test.json'));
+      await component.upload();
+    });
+
+    it('should call uploadForm with correct files', async () => {
+      const xmlFile = new File(['<xml/>'], 'test.xml');
+      const metaFile = new File(['{}'], 'test.json');
+      setFiles(xmlFile, metaFile);
+      await component.upload();
+      expect(appFormsService.uploadForm.calledWith(xmlFile, metaFile)).to.be.true;
+    });
+
+    it('should reset inputs after success', async () => {
+      setFiles(new File(['<xml/>'], 'test.xml'), new File(['{}'], 'test.json'));
+      await component.upload();
+      expect(component.xmlFileRef.nativeElement.value).to.equal('');
+      expect(component.metaFileRef.nativeElement.value).to.equal('');
+    });
+
+    it('should call getForms after success', async () => {
+      setFiles(new File(['<xml/>'], 'test.xml'), new File(['{}'], 'test.json'));
+      await component.upload();
+      expect(appFormsService.getForms.callCount).to.be.greaterThan(1);
+    });
+
+    it('should not touch loadingPageStatus after success', async () => {
+      setFiles(new File(['<xml/>'], 'test.xml'), new File(['{}'], 'test.json'));
+      await component.upload();
+      expect(component.loadingPageStatus).to.be.false;
+    });
+
+    it('should clear responseStatus after success', async () => {
+      setFiles(new File(['<xml/>'], 'test.xml'), new File(['{}'], 'test.json'));
+      await component.upload();
+      expect(component.responseStatus).to.deep.equal({});
+    });
+
+    it('should set responseStatus error if uploadForm fails', async () => {
+      appFormsService.uploadForm.rejects(new Error('server error'));
+      sinon.stub(console, 'error');
+      setFiles(new File(['<xml/>'], 'test.xml'), new File(['{}'], 'test.json'));
+      await component.upload();
+      expect(component.responseStatus.state).to.equal('error');
+    });
+
+    it('should set error message with Upload failed prefix if uploadForm fails', async () => {
+      appFormsService.uploadForm.rejects(new Error('server error'));
+      sinon.stub(console, 'error');
+      setFiles(new File(['<xml/>'], 'test.xml'), new File(['{}'], 'test.json'));
+      await component.upload();
+      expect(component.responseStatus.msg).to.equal('Upload failed: server error');
+    });
+
+    it('should call console.error if uploadForm fails', async () => {
+      appFormsService.uploadForm.rejects(new Error('server error'));
+      const consoleStub = sinon.stub(console, 'error');
+      setFiles(new File(['<xml/>'], 'test.xml'), new File(['{}'], 'test.json'));
+      await component.upload();
+      expect(consoleStub.calledWith('Upload failed', sinon.match.any)).to.be.true;
+    });
+  });
   describe('DOM', () => {
     it('should show loader when loadingPageStatus is true', () => {
       component.loadingPageStatus = true;
