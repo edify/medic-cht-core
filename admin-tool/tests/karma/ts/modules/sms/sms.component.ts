@@ -73,28 +73,24 @@ describe('SmsSettingsComponent', () => {
 
   // --- ZERO ---
   describe('Zero', () => {
-    it('should initialise with empty gateway number', () => {
-      expect(component.model.gateway_number).to.equal('');
+    it('should initialise with default empty model', () => {
+      expect(component.model.gatewayNumber).to.equal('');
+      expect(component.model.acceptMessages).to.equal(false);
+      expect(component.model.scheduleMorningHours).to.equal(0);
+      expect(component.model.scheduleMorningMinutes).to.equal(0);
+      expect(component.model.scheduleEveningHours).to.equal(0);
+      expect(component.model.scheduleEveningMinutes).to.equal(0);
+      expect(component.model.outgoingPhoneReplace).to.deep.equal({});
     });
 
-    it('should initialise with empty hours list', () => {
+    it('should initialise with empty hours and minutes lists', () => {
       expect(component.hours).to.have.length(0);
-    });
-
-    it('should initialise with empty minutes list', () => {
       expect(component.minutes).to.have.length(0);
     });
 
-    it('should initialise with no errors', () => {
+    it('should initialise with no errors and empty status', () => {
       expect(Object.keys(component.errors)).to.have.length(0);
-    });
-
-    it('should initialise with empty status', () => {
       expect(Object.keys(component.status)).to.have.length(0);
-    });
-
-    it('should initialise with accept_messages false', () => {
-      expect(component.model.accept_messages).to.equal(false);
     });
   });
 
@@ -103,66 +99,39 @@ describe('SmsSettingsComponent', () => {
     it('should load settings and populate the model', async () => {
       await stabilize();
       expect(settingsService.get.callCount).to.equal(1);
-      expect(component.model.gateway_number).to.equal('+1234567890');
+      expect(component.model.gatewayNumber).to.equal('+1234567890');
+      expect(component.model.scheduleMorningHours).to.equal(6);
+      expect(component.model.scheduleEveningHours).to.equal(18);
+      expect(component.model.outgoingPhoneReplace.replace).to.equal('0');
     });
 
-    it('should set accept_messages to true when forms_only_mode is false', async () => {
+    it('should set acceptMessages based on forms_only_mode', async () => {
+      settingsService.get.resolves(mockSettings({ forms_only_mode: false }));
       await stabilize();
-      expect(component.model.accept_messages).to.equal(true);
-    });
+      expect(component.model.acceptMessages).to.equal(true);
 
-    it('should set accept_messages to false when forms_only_mode is true', async () => {
       settingsService.get.resolves(mockSettings({ forms_only_mode: true }));
+      fixture = TestBed.createComponent(SmsSettingsComponent);
+      component = fixture.componentInstance;
       await stabilize();
-      expect(component.model.accept_messages).to.equal(false);
-    });
-
-    it('should populate morning hours from settings', async () => {
-      await stabilize();
-      expect(component.model.schedule_morning_hours).to.equal(6);
-    });
-
-    it('should populate evening hours from settings', async () => {
-      await stabilize();
-      expect(component.model.schedule_evening_hours).to.equal(18);
-    });
-
-    it('should populate outgoing_phone_replace from settings', async () => {
-      await stabilize();
-      expect(component.model.outgoing_phone_replace.replace).to.equal('0');
+      expect(component.model.acceptMessages).to.equal(false);
     });
   });
 
   // --- MANY ---
   describe('Many', () => {
-    it('should generate 24 hour options', async () => {
+    it('should generate correct hours and minutes options', async () => {
       await stabilize();
       expect(component.hours).to.have.length(24);
-    });
-
-    it('should generate 12 minute options (every 5 minutes)', async () => {
-      await stabilize();
       expect(component.minutes).to.have.length(12);
-    });
-
-    it('should pad single-digit hours with leading zero', async () => {
-      await stabilize();
       expect(component.hours[0].name).to.equal('00');
       expect(component.hours[9].name).to.equal('09');
-    });
-
-    it('should not pad double-digit hours', async () => {
-      await stabilize();
       expect(component.hours[10].name).to.equal('10');
     });
 
-    it('should call initStaticSelect twice for both dropdowns', async () => {
+    it('should call initStaticSelect twice with the countries list', async () => {
       await stabilize();
       expect(select2SearchService.initStaticSelect.callCount).to.equal(2);
-    });
-
-    it('should pass the countries list to initStaticSelect', async () => {
-      await stabilize();
       const firstCall = select2SearchService.initStaticSelect.getCall(0);
       expect(firstCall.args[1]).to.deep.equal(countriesService.list);
     });
@@ -170,113 +139,113 @@ describe('SmsSettingsComponent', () => {
 
   // --- BOUNDARIES ---
   describe('Boundaries', () => {
-    it('should default morning hours to 0 when not in settings', async () => {
+    it('should default missing settings fields to safe values', async () => {
       settingsService.get.resolves(
-        mockSettings({ schedule_morning_hours: undefined }),
+        mockSettings({
+          schedule_morning_hours: undefined,
+          outgoing_phone_replace: undefined,
+        }),
       );
       await stabilize();
-      expect(component.model.schedule_morning_hours).to.equal(0);
+      expect(component.model.scheduleMorningHours).to.equal(0);
+      expect(component.model.outgoingPhoneReplace).to.deep.equal({});
     });
 
-    it('should default outgoing_phone_replace to empty object when not in settings', async () => {
-      settingsService.get.resolves(
-        mockSettings({ outgoing_phone_replace: undefined }),
-      );
+    it('should set messagingWindow error when morning time is not earlier than evening', async () => {
       await stabilize();
-      expect(component.model.outgoing_phone_replace).to.deep.equal({});
-    });
 
-    it('should set messaging_window error when morning >= evening', async () => {
-      await stabilize();
-      component.model.schedule_morning_hours = 18;
-      component.model.schedule_morning_minutes = 0;
-      component.model.schedule_evening_hours = 6;
-      component.model.schedule_evening_minutes = 0;
+      // morning > evening
+      component.model.scheduleMorningHours = 18;
+      component.model.scheduleEveningHours = 6;
       component.submit();
-      expect(component.errors.messaging_window).to.exist;
+      expect(component.errors.messagingWindow).to.exist;
+
+      // morning === evening
+      component.errors = {};
+      component.model.scheduleMorningHours = 8;
+      component.model.scheduleEveningHours = 8;
+      component.submit();
+      expect(component.errors.messagingWindow).to.exist;
     });
 
-    it('should set messaging_window error when morning equals evening', async () => {
+    it('should not set messagingWindow error when morning is before evening', async () => {
       await stabilize();
-      component.model.schedule_morning_hours = 8;
-      component.model.schedule_morning_minutes = 0;
-      component.model.schedule_evening_hours = 8;
-      component.model.schedule_evening_minutes = 0;
+      component.model.scheduleMorningHours = 6;
+      component.model.scheduleEveningHours = 18;
       component.submit();
-      expect(component.errors.messaging_window).to.exist;
+      expect(component.errors.messagingWindow).to.not.exist;
     });
 
-    it('should not set messaging_window error when morning < evening', async () => {
+    it('should allow empty gateway number without validation error', async () => {
       await stabilize();
-      component.model.schedule_morning_hours = 6;
-      component.model.schedule_morning_minutes = 0;
-      component.model.schedule_evening_hours = 18;
-      component.model.schedule_evening_minutes = 0;
+      component.model.gatewayNumber = '';
       component.submit();
-      expect(component.errors.messaging_window).to.not.exist;
-    });
-
-    it('should allow empty gateway number without error', async () => {
-      await stabilize();
-      component.model.gateway_number = '';
-      component.submit();
-      expect(component.errors.gateway_number).to.not.exist;
+      expect(component.errors.gatewayNumber).to.not.exist;
     });
   });
 
   // --- INTERFACE ---
   describe('Interface', () => {
-    it('should call updateSettings on valid submit', async () => {
+    it('should call updateSettings with correct API fields on valid submit', async () => {
       await stabilize();
       component.submit();
       expect(settingsService.updateSettings.callCount).to.equal(1);
+      const callArg = settingsService.updateSettings.getCall(0).args[0];
+      expect(callArg.forms_only_mode).to.equal(false);
+      expect(callArg.schedule_morning_hours).to.equal(6);
+      expect(callArg.schedule_evening_hours).to.equal(18);
     });
 
-    it('should set status loading true while submitting', async () => {
+    it('should map acceptMessages correctly to forms_only_mode', async () => {
       await stabilize();
+
+      component.model.acceptMessages = false;
+      component.submit();
+      expect(
+        settingsService.updateSettings.getCall(0).args[0].forms_only_mode,
+      ).to.equal(true);
+
+      settingsService.updateSettings.reset();
+      component.model.acceptMessages = true;
+      component.submit();
+      expect(
+        settingsService.updateSettings.getCall(0).args[0].forms_only_mode,
+      ).to.equal(false);
+    });
+
+    it('should set loading while submitting then success or error after', async () => {
+      await stabilize();
+
+      // loading state
       settingsService.updateSettings.returns(new Promise(() => {}));
       component.submit();
       expect(component.status.loading).to.equal(true);
     });
 
-    it('should set status success true after successful submit', async () => {
+    it('should set success status after successful submit', async () => {
       await stabilize();
       settingsService.updateSettings.resolves();
       component.submit();
       await fixture.whenStable();
       await new Promise((resolve) => setTimeout(resolve, 0));
       expect(component.status.success).to.equal(true);
+      expect(component.status.error).to.not.exist;
     });
 
-    it('should set status error true after failed submit', async () => {
+    it('should set error status after failed submit', async () => {
       await stabilize();
       settingsService.updateSettings.rejects(new Error('Server error'));
       component.submit();
       await fixture.whenStable();
       await new Promise((resolve) => setTimeout(resolve, 0));
       expect(component.status.error).to.equal(true);
-    });
-
-    it('should include forms_only_mode as inverse of accept_messages', async () => {
-      await stabilize();
-      component.model.accept_messages = false;
-      component.submit();
-      const callArg = settingsService.updateSettings.getCall(0).args[0];
-      expect(callArg.forms_only_mode).to.equal(true);
-    });
-
-    it('should include forms_only_mode false when accept_messages is true', async () => {
-      await stabilize();
-      component.model.accept_messages = true;
-      component.submit();
-      const callArg = settingsService.updateSettings.getCall(0).args[0];
-      expect(callArg.forms_only_mode).to.equal(false);
+      expect(component.status.success).to.not.exist;
     });
 
     it('should not call updateSettings when validation fails', async () => {
       await stabilize();
-      component.model.schedule_morning_hours = 18;
-      component.model.schedule_evening_hours = 6;
+      component.model.scheduleMorningHours = 18;
+      component.model.scheduleEveningHours = 6;
       component.submit();
       expect(settingsService.updateSettings.callCount).to.equal(0);
     });
@@ -284,20 +253,16 @@ describe('SmsSettingsComponent', () => {
 
   // --- EXCEPTIONS ---
   describe('Exceptions', () => {
-    it('should log error when settings fail to load', async () => {
+    it('should log error and keep default model when settings fail to load', async () => {
       const consoleStub = sinon.stub(console, 'error');
       settingsService.get.rejects(new Error('Network error'));
       await stabilize();
       expect(consoleStub.callCount).to.be.greaterThan(0);
+      expect(component.model.gatewayNumber).to.equal('');
+      expect(component.hours).to.have.length(0);
     });
 
-    it('should keep model defaults when settings fail to load', async () => {
-      settingsService.get.rejects(new Error('Network error'));
-      await stabilize();
-      expect(component.model.gateway_number).to.equal('');
-    });
-
-    it('should log error when updateSettings fails', async () => {
+    it('should log error and set error status when updateSettings fails', async () => {
       const consoleStub = sinon.stub(console, 'error');
       await stabilize();
       settingsService.updateSettings.rejects(new Error('Save failed'));
@@ -305,6 +270,7 @@ describe('SmsSettingsComponent', () => {
       await fixture.whenStable();
       await new Promise((resolve) => setTimeout(resolve, 0));
       expect(consoleStub.callCount).to.be.greaterThan(0);
+      expect(component.status.error).to.equal(true);
     });
   });
 
@@ -312,17 +278,15 @@ describe('SmsSettingsComponent', () => {
   describe('Scenarios', () => {
     it('should complete full load → edit → submit flow', async () => {
       await stabilize();
+      expect(component.model.gatewayNumber).to.equal('+1234567890');
 
-      expect(component.model.gateway_number).to.equal('+1234567890');
-
-      component.model.gateway_number = '';
-      component.model.accept_messages = false;
-      component.model.schedule_morning_hours = 7;
-      component.model.schedule_evening_hours = 20;
+      component.model.gatewayNumber = '';
+      component.model.acceptMessages = false;
+      component.model.scheduleMorningHours = 7;
+      component.model.scheduleEveningHours = 20;
 
       settingsService.updateSettings.resolves();
       component.submit();
-
       await fixture.whenStable();
       await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -330,17 +294,18 @@ describe('SmsSettingsComponent', () => {
       expect(component.status.success).to.equal(true);
     });
 
-    it('should clear errors on each submit attempt', async () => {
+    it('should clear errors and retry successfully after a failed validation', async () => {
       await stabilize();
-      component.model.schedule_morning_hours = 18;
-      component.model.schedule_evening_hours = 6;
-      component.submit();
-      expect(component.errors.messaging_window).to.exist;
 
-      component.model.schedule_morning_hours = 6;
-      component.model.schedule_evening_hours = 18;
+      component.model.scheduleMorningHours = 18;
+      component.model.scheduleEveningHours = 6;
       component.submit();
-      expect(component.errors.messaging_window).to.not.exist;
+      expect(component.errors.messagingWindow).to.exist;
+
+      component.model.scheduleMorningHours = 6;
+      component.model.scheduleEveningHours = 18;
+      component.submit();
+      expect(component.errors.messagingWindow).to.not.exist;
     });
 
     it('should disable submit button while loading', async () => {

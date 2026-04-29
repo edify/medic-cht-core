@@ -23,8 +23,10 @@ const phoneNumber = require('@medic/phone-number');
 
 declare const $: any;
 
+const MINUTES_PER_HOUR = 60;
+
 @Component({
-  selector: 'sms-settings',
+  selector: 'mm-sms',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './sms-settings.component.html',
@@ -36,19 +38,27 @@ export class SmsSettingsComponent implements AfterViewInit, OnDestroy {
   @ViewChild('outgoingPhoneMatch')
   outgoingPhoneMatchRef!: ElementRef<HTMLSelectElement>;
 
+  /** Form model representing the SMS settings fields */
   model: SmsSettingsModel = {
-    gateway_number: '',
-    schedule_morning_hours: 0,
-    schedule_morning_minutes: 0,
-    schedule_evening_hours: 0,
-    schedule_evening_minutes: 0,
-    outgoing_phone_replace: {},
-    accept_messages: false,
+    gatewayNumber: '',
+    scheduleMorningHours: 0,
+    scheduleMorningMinutes: 0,
+    scheduleEveningHours: 0,
+    scheduleEveningMinutes: 0,
+    outgoingPhoneReplace: {},
+    acceptMessages: false,
   };
 
+  /** Validation errors for the SMS settings form */
   errors: SmsSettingsErrors = {};
+
+  /** Options for the hours dropdowns (0-23) */
   hours: TimeOption[] = [];
+
+  /** Options for the minutes dropdowns (every 5 minutes) */
   minutes: TimeOption[] = [];
+
+  /** Tracks the state of save operations for the submit action */
   status: {
     loading?: boolean;
     success?: boolean;
@@ -75,6 +85,10 @@ export class SmsSettingsComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Validates the form and submits the SMS settings to the API.
+   * Maps camelCase model fields back to snake_case API fields.
+   */
   submit(): void {
     this.errors = {};
     if (!this.validate()) {
@@ -82,16 +96,16 @@ export class SmsSettingsComponent implements AfterViewInit, OnDestroy {
     }
 
     const settings = {
-      gateway_number: this.model.gateway_number,
+      gateway_number: this.model.gatewayNumber,
       default_country_code: $(this.countryCodeRef.nativeElement).val(),
-      forms_only_mode: !this.model.accept_messages,
-      schedule_morning_hours: this.model.schedule_morning_hours,
-      schedule_morning_minutes: this.model.schedule_morning_minutes,
-      schedule_evening_hours: this.model.schedule_evening_hours,
-      schedule_evening_minutes: this.model.schedule_evening_minutes,
+      forms_only_mode: !this.model.acceptMessages,
+      schedule_morning_hours: this.model.scheduleMorningHours,
+      schedule_morning_minutes: this.model.scheduleMorningMinutes,
+      schedule_evening_hours: this.model.scheduleEveningHours,
+      schedule_evening_minutes: this.model.scheduleEveningMinutes,
       outgoing_phone_replace: {
         match: $(this.outgoingPhoneMatchRef.nativeElement).val(),
-        replace: this.model.outgoing_phone_replace.replace,
+        replace: this.model.outgoingPhoneReplace.replace,
       },
     };
 
@@ -117,39 +131,54 @@ export class SmsSettingsComponent implements AfterViewInit, OnDestroy {
       });
   }
 
+  /**
+   * Validates the messaging window times and gateway number.
+   * Morning time must be earlier than evening time.
+   * Gateway number must be a valid phone number if provided.
+   *
+   * @returns {boolean} true if the form is valid
+   */
   private validate(): boolean {
     const morning =
-      this.model.schedule_morning_hours * 60 +
-      this.model.schedule_morning_minutes;
+      this.model.scheduleMorningHours * MINUTES_PER_HOUR +
+      this.model.scheduleMorningMinutes;
     const evening =
-      this.model.schedule_evening_hours * 60 +
-      this.model.schedule_evening_minutes;
+      this.model.scheduleEveningHours * MINUTES_PER_HOUR +
+      this.model.scheduleEveningMinutes;
 
     if (morning >= evening) {
-      this.errors.messaging_window = this.translateService.instant(
+      this.errors.messagingWindow = this.translateService.instant(
         'The first time must be earlier than the second time',
       );
       return false;
     }
 
-    const gatewayNumber = this.model.gateway_number;
+    const gatewayNumber = this.model.gatewayNumber;
     if (gatewayNumber) {
       const info = {
         default_country_code: $(this.countryCodeRef.nativeElement).val(),
         phone_validation: 'none',
       };
       if (!phoneNumber.validate(info, gatewayNumber)) {
-        this.errors.gateway_number = this.translateService.instant(
+        this.errors.gatewayNumber = this.translateService.instant(
           'Phone number not valid',
         );
         return false;
       }
-      this.model.gateway_number = phoneNumber.normalize(info, gatewayNumber);
+      this.model.gatewayNumber = phoneNumber.normalize(info, gatewayNumber);
     }
 
     return true;
   }
 
+  /**
+   * Generates an array of time options for use in hour or minute dropdowns.
+   * Values are padded with a leading zero when below 10.
+   *
+   * @param {number} max - the exclusive upper bound
+   * @param {number} increment - step between values, defaults to 1
+   * @returns {TimeOption[]}
+   */
   private generateTimeModels(max: number, increment = 1): TimeOption[] {
     const result: TimeOption[] = [];
     for (let i = 0; i < max; i += increment) {
@@ -158,22 +187,27 @@ export class SmsSettingsComponent implements AfterViewInit, OnDestroy {
     return result;
   }
 
+  /**
+   * Fetches SMS settings from the API and populates the form model.
+   * Maps snake_case API fields to camelCase model properties.
+   * Initialises the country code Select2 dropdowns after settings load.
+   */
   private loadSettings(): void {
     this.settingsService
       .get()
       .then((res) => {
         this.model = {
-          gateway_number: res.gateway_number || '',
-          schedule_morning_hours: res.schedule_morning_hours ?? 0,
-          schedule_morning_minutes: res.schedule_morning_minutes ?? 0,
-          schedule_evening_hours: res.schedule_evening_hours ?? 0,
-          schedule_evening_minutes: res.schedule_evening_minutes ?? 0,
-          outgoing_phone_replace: res.outgoing_phone_replace || {},
-          accept_messages: !res.forms_only_mode,
+          gatewayNumber: res.gateway_number || '',
+          scheduleMorningHours: res.schedule_morning_hours ?? 0,
+          scheduleMorningMinutes: res.schedule_morning_minutes ?? 0,
+          scheduleEveningHours: res.schedule_evening_hours ?? 0,
+          scheduleEveningMinutes: res.schedule_evening_minutes ?? 0,
+          outgoingPhoneReplace: res.outgoing_phone_replace || {},
+          acceptMessages: !res.forms_only_mode,
         };
 
         this.hours = this.generateTimeModels(24);
-        this.minutes = this.generateTimeModels(60, 5);
+        this.minutes = this.generateTimeModels(MINUTES_PER_HOUR, 5);
 
         this.initSelect2Dropdowns(
           res.default_country_code,
@@ -183,6 +217,13 @@ export class SmsSettingsComponent implements AfterViewInit, OnDestroy {
       .catch((err) => console.error('Error loading settings', err));
   }
 
+  /**
+   * Initialises the country code Select2 dropdowns once Select2 is available.
+   * Polls every 100ms if Select2 has not yet attached to jQuery.
+   *
+   * @param {string} defaultCountryCode - the currently saved default country code
+   * @param {string} outgoingMatch - the currently saved outgoing phone match value
+   */
   private initSelect2Dropdowns(
     defaultCountryCode?: string,
     outgoingMatch?: string,
