@@ -41,10 +41,15 @@
     padding: 0.75rem 0;
     border-bottom: 0.0625rem solid @gray-light;
 
-    img, svg {
+    img {
       width: 3.75rem;
       height: 3.75rem;
       object-fit: contain;
+      display: block;
+    }
+    ::ng-deep span svg {
+      width: 3.75rem;
+      height: 3.75rem;
       display: block;
     }
   }

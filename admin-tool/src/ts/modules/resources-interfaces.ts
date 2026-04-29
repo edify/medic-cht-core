@@ -5,9 +5,9 @@
  */
 export interface ResourcesDoc {
   _id: string;
-  _rev?: string;
   resources: Record<string, string>;
   _attachments: Record<string, ResourceAttachment>;
+  _rev?: string;
 }
 
 /**
