@@ -5,6 +5,7 @@ import { ResourcesService } from '@admin-tool-services/resources.service';
 import { FormDoc } from '@admin-tool-modules/forms/app-forms-interfaces';
 import { ResourcesDoc } from '@admin-tool-modules/resources-interfaces';
 import { ResponseStatus } from '@admin-tool-modules/global-modules-interfaces';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 /**
  * Component for managing XForm documents in the CHT instance.
@@ -44,7 +45,8 @@ export class AppFormsComponent implements OnInit {
 
   constructor(
     private appFormsService: AppFormsService,
-    private resourcesService: ResourcesService
+    private resourcesService: ResourcesService,
+    private sanitizer: DomSanitizer
   ) {}
 
   /**
@@ -70,12 +72,18 @@ export class AppFormsComponent implements OnInit {
    * @param {string} iconName - the icon name as stored in the form document
    * @returns {{ isSvg: boolean; content: string }}
    */
-  getFormIcon(iconName: string): { isSvg: boolean; content: string } {
+  getFormIcon(iconName: string): { isSvg: boolean; content: string | SafeHtml } {
     if (!this.resourcesDoc || !iconName) {
       return { isSvg: false, content: '' };
     }
-    const iconContent = this.resourcesService.getIconContent(iconName, this.resourcesDoc);
-    return iconContent;
+    const result = this.resourcesService.getIconContent(iconName, this.resourcesDoc);
+    if (result.isSvg) {
+      return {
+        isSvg: true,
+        content: this.sanitizer.bypassSecurityTrustHtml(result.content)
+      };
+    }
+    return result;
   }
 
   /**

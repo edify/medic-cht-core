@@ -5,9 +5,9 @@
  */
 export interface FormDoc {
   _id: string;
-  _rev?: string;
   type: string;
   internalId: string;
+  _rev?: string;
   title?: string;
   icon?: string;
   translation_key?: string;

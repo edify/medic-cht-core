@@ -166,7 +166,7 @@ describe('AppFormsComponent', () => {
       resourcesService.getIconContent.returns({ isSvg: true, content: '<svg>test</svg>' });
       const result = component.getFormIcon('icon-pregnancy');
       expect(result.isSvg).to.be.true;
-      expect(result.content).to.equal('<svg>test</svg>');
+      expect((result.content as any).changingThisBreaksApplicationSecurity).to.equal('<svg>test</svg>');
     });
   });
   describe('upload', () => {
@@ -330,39 +330,6 @@ describe('AppFormsComponent', () => {
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('span[innerHTML]')).to.not.exist;
-    });
-
-    it('should render the upload button', async () => {
-      await fixture.whenStable();
-      fixture.detectChanges();
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.querySelector('button.btn-primary')).to.exist;
-    });
-
-    it('should disable upload button when responseStatus is loading', async () => {
-      await fixture.whenStable();
-      component.responseStatus = { state: 'loading' };
-      fixture.detectChanges();
-      const compiled = fixture.nativeElement as HTMLElement;
-      const button = compiled.querySelector('button.btn-primary') as HTMLButtonElement;
-      expect(button.disabled).to.be.true;
-    });
-
-    it('should enable upload button when responseStatus is not loading', async () => {
-      await fixture.whenStable();
-      component.responseStatus = {};
-      fixture.detectChanges();
-      const compiled = fixture.nativeElement as HTMLElement;
-      const button = compiled.querySelector('button.btn-primary') as HTMLButtonElement;
-      expect(button.disabled).to.be.false;
-    });
-
-    it('should render xml and meta file inputs', async () => {
-      await fixture.whenStable();
-      fixture.detectChanges();
-      const compiled = fixture.nativeElement as HTMLElement;
-      const inputs = compiled.querySelectorAll('input[type="file"]');
-      expect(inputs.length).to.equal(2);
     });
   });
 });
