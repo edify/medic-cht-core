@@ -63,7 +63,7 @@ describe("AppRoutingModule", () => {
     it("sms routes should point to /sms with SmsHeaderComponent", () => {
       expect(smsRoutes).to.have.length(1);
       expect(smsRoutes[0].path).to.equal("sms");
-      expect(smsRoutes[0].component).to.equal(SmsHeaderComponent);
+      expect(smsRoutes[0].component).to.equal(SmsComponent);
     });
 
     it("forms routes should point to /forms with FormsComponent", () => {
