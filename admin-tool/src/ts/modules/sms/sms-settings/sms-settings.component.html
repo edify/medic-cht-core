@@ -1,0 +1,134 @@
+<form role="form">
+  <div class="form-group" [ngClass]="{ 'has-error': errors.gateway_number }">
+    <label for="default-country-code">{{
+      "Default country cone" | translate
+    }}</label>
+    <div>
+      <select
+        #countryCodeSelect
+        id="default-country-code"
+        name="default-country-code"
+      >
+        <option></option>
+      </select>
+    </div>
+    <p class="help-block">{{ "Default country code help" | translate }}</p>
+  </div>
+
+  <div class="form-group" [ngClass]="{ 'has-error': errors.gateway_number }">
+    <label for="gateway-number">{{ "Gateway number" | translate }}</label>
+    <input
+      type="text"
+      class="form-control small"
+      id="gateway-number"
+      [(ngModel)]="model.gateway_number"
+      name="gateway_number"
+    />
+    <p class="help-block">{{ "Gateway number help" | translate }}</p>
+    @if (errors.gateway_number) {
+      <p class="help-block">{{ errors.gateway_number }}</p>
+    }
+  </div>
+
+  <div class="form-group">
+    <label for="accept-messages">{{
+      "Accept plain-text messages" | translate
+    }}</label>
+    <div class="checkbox">
+      <label>
+        <input
+          type="checkbox"
+          id="accept-messages"
+          [(ngModel)]="model.accept_messages"
+          name="accept_messages"
+        />
+        {{ "Accept plain-text messages help" | translate }}
+      </label>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>{{ "Phone number conversion" | translate }}</label>
+    <p>
+      {{ "Replace country code for" | translate }}&nbsp;
+      <select #outgoingPhoneMatch id="outgoing-phone-replace-match"></select
+      >&nbsp;
+      {{ "with" | translate }}
+      <input
+        type="text"
+        class="form-control tiny inline"
+        [(ngModel)]="model.outgoing_phone_replace.replace"
+        name="outgoing_phone_replace_replace"
+      />
+    </p>
+  </div>
+
+  <div class="form-group" [ngClass]="{ 'has-error': errors.messaging_window }">
+    <label>{{ "Messaging window" | translate }}</label>
+    <p>
+      {{ "Send scheduled messages between" | translate }}&nbsp;
+      <select
+        class="form-control tiny inline"
+        [(ngModel)]="model.schedule_morning_hours"
+        name="schedule_morning_hours"
+      >
+        <option *ngFor="let hour of hours" [value]="hour.value">
+          {{ hour.name }}
+        </option>
+      </select>
+      &nbsp;:&nbsp;
+      <select
+        class="form-control tiny inline"
+        [(ngModel)]="model.schedule_morning_minutes"
+        name="schedule_morning_minutes"
+      >
+        <option *ngFor="let minute of minutes" [value]="minute.value">
+          {{ minute.name }}
+        </option>
+      </select>
+      &nbsp;{{ "and" | translate }}&nbsp;
+      <select
+        class="form-control tiny inline"
+        [(ngModel)]="model.schedule_evening_hours"
+        name="schedule_evening_hours"
+      >
+        <option *ngFor="let hour of hours" [value]="hour.value">
+          {{ hour.name }}
+        </option>
+      </select>
+      &nbsp;:&nbsp;
+      <select
+        class="form-control tiny inline"
+        [(ngModel)]="model.schedule_evening_minutes"
+        name="schedule_evening_minutes"
+      >
+        <option *ngFor="let minute of minutes" [value]="minute.value">
+          {{ minute.name }}
+        </option>
+      </select>
+    </p>
+    @if (errors.messaging_window) {
+      <p class="error">{{ errors.messaging_window }}</p>
+    }
+  </div>
+
+  <div class="form-actions">
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="submit()"
+      [disabled]="status.loading"
+    >
+      {{ "Submit" | translate }}
+    </button>
+    @if (status.success) {
+      <span class="success">{{ status.msg }}</span>
+    }
+    @if (status.error) {
+      <span class="error">{{ status.msg }}</span>
+    }
+    @if (status.loading) {
+      <div class="loader inline"></div>
+    }
+  </div>
+</form>

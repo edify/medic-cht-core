@@ -43,6 +43,14 @@ export interface CHTSettings {
   locale_outgoing?: string;
   token_login?: { enabled: boolean };
   oidc_provider?: string;
+  gateway_number?: string;
+  default_country_code?: string;
+  forms_only_mode?: boolean;
+  schedule_morning_hours?: number;
+  schedule_morning_minutes?: number;
+  schedule_evening_hours?: number;
+  schedule_evening_minutes?: number;
+  outgoing_phone_replace?: { match?: string; replace?: string };
 }
 /**
  * Service responsible for reading and writing CHT instance settings

@@ -66,7 +66,7 @@ describe('Select2SearchService', () => {
       find: sinon.stub().returns({ length: 0 }),
       append: sinon.stub().returnsThis(),
       trigger: sinon.stub().returnsThis(),
-      val: sinon.stub().returns(''),
+      val: sinon.stub().returnsThis(),
     };
     jqueryStub = sinon.stub().returns(jqueryInstance);
     (window as any).$ = jqueryStub;
@@ -135,18 +135,22 @@ describe('Select2SearchService', () => {
     });
 
     it('should return true when contact parent matches the place', async () => {
-      chtApi.v1.contact.getByUuid.resolves(mockContact({
-        parent: { _id: 'place-1', parent: null },
-      }));
+      chtApi.v1.contact.getByUuid.resolves(
+        mockContact({
+          parent: { _id: 'place-1', parent: null },
+        }),
+      );
 
       const result = await service.isContactInPlace('contact-1', ['place-1']);
       expect(result).to.equal(true);
     });
 
     it('should return false when contact parent does not match the place', async () => {
-      chtApi.v1.contact.getByUuid.resolves(mockContact({
-        parent: { _id: 'other-place', parent: null },
-      }));
+      chtApi.v1.contact.getByUuid.resolves(
+        mockContact({
+          parent: { _id: 'other-place', parent: null },
+        }),
+      );
 
       const result = await service.isContactInPlace('contact-1', ['place-1']);
       expect(result).to.equal(false);
@@ -181,23 +185,31 @@ describe('Select2SearchService', () => {
     });
 
     it('should return true when contact is a grandchild of the place', async () => {
-      chtApi.v1.contact.getByUuid.resolves(mockContact({
-        parent: {
-          _id: 'child-place',
-          parent: { _id: 'place-1', parent: null },
-        },
-      }));
+      chtApi.v1.contact.getByUuid.resolves(
+        mockContact({
+          parent: {
+            _id: 'child-place',
+            parent: { _id: 'place-1', parent: null },
+          },
+        }),
+      );
 
       const result = await service.isContactInPlace('contact-1', ['place-1']);
       expect(result).to.equal(true);
     });
 
     it('should return true when contact matches one of multiple place ids', async () => {
-      chtApi.v1.contact.getByUuid.resolves(mockContact({
-        parent: { _id: 'place-2', parent: null },
-      }));
+      chtApi.v1.contact.getByUuid.resolves(
+        mockContact({
+          parent: { _id: 'place-2', parent: null },
+        }),
+      );
 
-      const result = await service.isContactInPlace('contact-1', ['place-1', 'place-2', 'place-3']);
+      const result = await service.isContactInPlace('contact-1', [
+        'place-1',
+        'place-2',
+        'place-3',
+      ]);
       expect(result).to.equal(true);
     });
   });
@@ -212,22 +224,26 @@ describe('Select2SearchService', () => {
     });
 
     it('should return false when contact parent chain ends without matching place', async () => {
-      chtApi.v1.contact.getByUuid.resolves(mockContact({
-        parent: {
-          _id: 'level-1',
+      chtApi.v1.contact.getByUuid.resolves(
+        mockContact({
           parent: {
-            _id: 'level-2',
-            parent: null,
+            _id: 'level-1',
+            parent: {
+              _id: 'level-2',
+              parent: null,
+            },
           },
-        },
-      }));
+        }),
+      );
 
       const result = await service.isContactInPlace('contact-1', ['place-1']);
       expect(result).to.equal(false);
     });
 
     it('should preselect place when initialValue is provided', async () => {
-      chtApi.v1.place.getByUuid.resolves(mockPlace({ _id: 'place-1', name: 'District Hospital' }));
+      chtApi.v1.place.getByUuid.resolves(
+        mockPlace({ _id: 'place-1', name: 'District Hospital' }),
+      );
 
       await service.initPlaceSelect(mockSelectEl, { initialValue: 'place-1' });
 
@@ -236,9 +252,13 @@ describe('Select2SearchService', () => {
     });
 
     it('should preselect person when initialValue is provided', async () => {
-      chtApi.v1.person.getByUuid.resolves(mockPerson({ _id: 'person-1', name: 'Bruce Wayne' }));
+      chtApi.v1.person.getByUuid.resolves(
+        mockPerson({ _id: 'person-1', name: 'Bruce Wayne' }),
+      );
 
-      await service.initPersonSelect(mockSelectEl, { initialValue: 'person-1' });
+      await service.initPersonSelect(mockSelectEl, {
+        initialValue: 'person-1',
+      });
 
       expect(chtApi.v1.person.getByUuid.callCount).to.equal(1);
       expect(chtApi.v1.person.getByUuid.calledWith('person-1')).to.equal(true);
@@ -269,7 +289,9 @@ describe('Select2SearchService', () => {
 
     it('should call contact.getByUuid with the contactId', async () => {
       await service.isContactInPlace('contact-1', ['place-1']);
-      expect(chtApi.v1.contact.getByUuid.calledWith('contact-1')).to.equal(true);
+      expect(chtApi.v1.contact.getByUuid.calledWith('contact-1')).to.equal(
+        true,
+      );
     });
 
     it('should initialise Select2 with multiple: true for place select', async () => {
@@ -289,6 +311,44 @@ describe('Select2SearchService', () => {
       const config = jqueryInstance.select2.getCall(0).args[0];
       expect(config.minimumInputLength).to.equal(3);
     });
+    it('should initialise Select2 with the provided static data', () => {
+      const data = [
+        { id: '1', text: 'United States (+1)' },
+        { id: '506', text: 'Costa Rica (+506)' },
+      ];
+      service.initStaticSelect(mockSelectEl, data);
+      const config = jqueryInstance.select2.getCall(0).args[0];
+      expect(config.data).to.deep.equal(data);
+    });
+
+    it('should initialise Select2 with default width when none provided', () => {
+      service.initStaticSelect(mockSelectEl, []);
+      const config = jqueryInstance.select2.getCall(0).args[0];
+      expect(config.width).to.equal('20em');
+    });
+
+    it('should initialise Select2 with custom width when provided', () => {
+      service.initStaticSelect(mockSelectEl, [], { width: '30em' });
+      const config = jqueryInstance.select2.getCall(0).args[0];
+      expect(config.width).to.equal('30em');
+    });
+
+    it('should initialise Select2 with allowClear true when provided', () => {
+      service.initStaticSelect(mockSelectEl, [], { allowClear: true });
+      const config = jqueryInstance.select2.getCall(0).args[0];
+      expect(config.allowClear).to.equal(true);
+    });
+
+    it('should set the initial value when initialValue is provided', () => {
+      service.initStaticSelect(mockSelectEl, [], { initialValue: '506' });
+      expect(jqueryInstance.val.calledWith('506')).to.equal(true);
+      expect(jqueryInstance.trigger.calledWith('change')).to.equal(true);
+    });
+
+    it('should not call val when no initialValue is provided', () => {
+      service.initStaticSelect(mockSelectEl, []);
+      expect(jqueryInstance.val.callCount).to.equal(0);
+    });
   });
 
   // --- EXCEPTIONS ---
@@ -303,22 +363,25 @@ describe('Select2SearchService', () => {
     it('should not throw when preselect place fetch fails', async () => {
       chtApi.v1.place.getByUuid.rejects(new Error('Not found'));
 
-      await expect(service.initPlaceSelect(mockSelectEl, { initialValue: 'place-1' }))
-        .to.not.be.rejected;
+      await expect(
+        service.initPlaceSelect(mockSelectEl, { initialValue: 'place-1' }),
+      ).to.not.be.rejected;
     });
 
     it('should not throw when preselect person fetch fails', async () => {
       chtApi.v1.person.getByUuid.rejects(new Error('Not found'));
 
-      await expect(service.initPersonSelect(mockSelectEl, { initialValue: 'person-1' }))
-        .to.not.be.rejected;
+      await expect(
+        service.initPersonSelect(mockSelectEl, { initialValue: 'person-1' }),
+      ).to.not.be.rejected;
     });
 
     it('should not throw when preselect returns null', async () => {
       chtApi.v1.place.getByUuid.resolves(null);
 
-      await expect(service.initPlaceSelect(mockSelectEl, { initialValue: 'place-1' }))
-        .to.not.be.rejected;
+      await expect(
+        service.initPlaceSelect(mockSelectEl, { initialValue: 'place-1' }),
+      ).to.not.be.rejected;
     });
   });
 
@@ -341,24 +404,39 @@ describe('Select2SearchService', () => {
     });
 
     it('should correctly validate a contact three levels deep in the hierarchy', async () => {
-      chtApi.v1.contact.getByUuid.resolves(mockContact({
-        parent: {
-          _id: 'clinic-1',
+      chtApi.v1.contact.getByUuid.resolves(
+        mockContact({
           parent: {
-            _id: 'health-center-1',
+            _id: 'clinic-1',
             parent: {
-              _id: 'district-1',
-              parent: null,
+              _id: 'health-center-1',
+              parent: {
+                _id: 'district-1',
+                parent: null,
+              },
             },
           },
-        },
-      }));
+        }),
+      );
 
-      const validResult = await service.isContactInPlace('contact-1', ['district-1']);
+      const validResult = await service.isContactInPlace('contact-1', [
+        'district-1',
+      ]);
       expect(validResult).to.equal(true);
 
-      const invalidResult = await service.isContactInPlace('contact-1', ['other-district']);
+      const invalidResult = await service.isContactInPlace('contact-1', [
+        'other-district',
+      ]);
       expect(invalidResult).to.equal(false);
+    });
+    it('should complete static select init with data and initial value', () => {
+      const data = [{ id: '506', text: 'Costa Rica (+506)' }];
+      service.initStaticSelect(mockSelectEl, data, {
+        width: '20em',
+        initialValue: '506',
+      });
+      expect(jqueryInstance.select2.callCount).to.equal(1);
+      expect(jqueryInstance.val.calledWith('506')).to.equal(true);
     });
   });
 });

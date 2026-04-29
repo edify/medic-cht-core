@@ -64,9 +64,9 @@ export class Select2SearchService {
         );
         const docs: any[] = response?.data ?? [];
         const filtered = term
-          ? docs.filter((d) => d.name?.toLowerCase().includes(term.toLowerCase()),)
+          ? docs.filter((d) => d.name?.toLowerCase().includes(term.toLowerCase()))
           : docs;
-        filtered.forEach((doc) => results.push({ id: doc._id, text: doc.name }),);
+        filtered.forEach((doc) => results.push({ id: doc._id, text: doc.name }));
       }
 
       return results;
@@ -75,7 +75,7 @@ export class Select2SearchService {
     this.initSelect2(el, search, { multiple: true });
 
     if (options.initialValue) {
-      await this.preselectById(el, options.initialValue, (id) => chtApi.v1.place.getByUuid(id),);
+      await this.preselectById(el, options.initialValue, (id) => chtApi.v1.place.getByUuid(id));
     }
   }
 
@@ -108,9 +108,9 @@ export class Select2SearchService {
         );
         const docs: any[] = response?.data ?? [];
         const filtered = term
-          ? docs.filter((d) => d.name?.toLowerCase().includes(term.toLowerCase()),)
+          ? docs.filter((d) => d.name?.toLowerCase().includes(term.toLowerCase()))
           : docs;
-        filtered.forEach((doc) => results.push({ id: doc._id, text: doc.name }),);
+        filtered.forEach((doc) => results.push({ id: doc._id, text: doc.name }));
       }
 
       return results;
@@ -119,7 +119,7 @@ export class Select2SearchService {
     this.initSelect2(el, search, { multiple: false });
 
     if (options.initialValue) {
-      await this.preselectById(el, options.initialValue, (id) => chtApi.v1.person.getByUuid(id),);
+      await this.preselectById(el, options.initialValue, (id) => chtApi.v1.person.getByUuid(id));
     }
   }
 
@@ -145,6 +145,30 @@ export class Select2SearchService {
     } catch (err) {
       console.error('Error validating contact hierarchy', err);
       return true;
+    }
+  }
+
+  /**
+   * Initialises a Select2 dropdown with a static list of options.
+   * Used for dropdowns backed by a fixed dataset (e.g. country codes).
+   * @param el the native <select> element to enhance
+   * @param data static list of { id, text } options
+   * @param options optional config — width, placeholder, allowClear, initialValue
+   */
+  initStaticSelect(
+    el: HTMLSelectElement,
+    data: Select2Doc[],
+    options: { width?: string; placeholder?: string; allowClear?: boolean; initialValue?: string } = {},
+  ): void {
+    ($(el) as any).select2({
+      width: options.width ?? '20em',
+      data,
+      placeholder: options.placeholder ?? ' ',
+      allowClear: options.allowClear ?? false,
+    });
+
+    if (options.initialValue) {
+      $(el).val(options.initialValue).trigger('change');
     }
   }
 
@@ -185,7 +209,7 @@ export class Select2SearchService {
             .then((results) => success({
               results,
               pagination: { more: results.length === PAGE_SIZE },
-            }),)
+            }))
             .catch(failure);
         },
       },
