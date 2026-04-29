@@ -6,7 +6,7 @@
       <div class="section">
         <p>
           <span>{{ 'images.icons.description' | translate }}</span>
-          <a href="https://github.com/medic/icon-library">{{ 'icon.library' | translate }}</a>
+          <a href="https://github.com/medic/icon-library" target="_blank" rel="noopener">{{ 'icon.library' | translate }}</a>
         </p>
       </div>
 
@@ -58,16 +58,16 @@
 
       <div class="section">
         <legend>{{ 'icons' | translate }}</legend>
-        @for (iconName of icons; track iconName) {
+        @for (iconKey of icons; track iconKey) {
           <div class="row">
             <div class="col-sm-1">
-              @if (getIconContent(iconName).isSvg) {
-                <span [innerHTML]="getIconContent(iconName).content"></span>
-              } @else if (getIconContent(iconName).content) {
-                <img [src]="getIconContent(iconName).content" />
+              @if (getIconContent(iconKey).isSvg) {
+                <span [innerHTML]="getIconContent(iconKey).content"></span>
+              } @else if (getIconContent(iconKey).content) {
+                <img [src]="getIconContent(iconKey).content" />
               }
             </div>
-            <div class="col-sm-11">{{ iconName }}</div>
+            <div class="col-sm-11">{{ iconKey }}</div>
           </div>
         }
       </div>

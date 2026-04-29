@@ -8,7 +8,7 @@ export const routes: Routes = [
     component: ImagesHeaderComponent,
     children: [
       {
-        path: 'icons',
+        path: '',
         redirectTo: 'icons',
         pathMatch: 'full',
       },

@@ -48,10 +48,15 @@
   .row {
     padding: 0.75rem 0;
     border-bottom: 0.0625rem solid @gray-light;
-    img, svg {
+    img {
       height: 3.75rem;
       display: inline-block;
       object-fit: contain;
+    }
+    ::ng-deep span svg {
+      width: 3.75rem;
+      height: 3.75rem;
+      display: block;
     }
   }
 }
