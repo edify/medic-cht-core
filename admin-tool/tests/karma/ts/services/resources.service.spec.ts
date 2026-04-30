@@ -31,6 +31,7 @@ describe('ResourcesService', () => {
     dbService = {
       get: sinon.stub().returns({
         get: sinon.stub().resolves(mockResourcesDoc),
+        put: sinon.stub().resolves(),
       }),
     };
 
@@ -117,6 +118,52 @@ describe('ResourcesService', () => {
       const result = service.getIconContent('icon-death-general', emptyDoc);
       expect(result.content).to.equal('');
       expect(result.isSvg).to.be.false;
+    });
+  });
+  describe('uploadIcon', () => {
+    it('should call getResources to fetch the current doc', async () => {
+      await service.uploadIcon('icon-test', new File([''], 'icon-test.png', { type: 'image/png' }));
+      expect(dbService.get().get.calledWith('resources', { attachments: true })).to.be.true;
+    });
+
+    it('should add the file as an inline attachment', async () => {
+      const file = new File([''], 'icon-test.png', { type: 'image/png' });
+      await service.uploadIcon('icon-test', file);
+      const doc = dbService.get().put.args[0][0];
+      expect(doc._attachments['icon-test.png'].content_type).to.equal('image/png');
+      expect(doc._attachments['icon-test.png'].data).to.equal(file);
+    });
+
+    it('should add the name to the resources map', async () => {
+      const file = new File([''], 'icon-test.png', { type: 'image/png' });
+      await service.uploadIcon('icon-test', file);
+      const doc = dbService.get().put.args[0][0];
+      expect(doc.resources['icon-test']).to.equal('icon-test.png');
+    });
+
+    it('should call db.put with the updated doc', async () => {
+      await service.uploadIcon('icon-test', new File([''], 'icon-test.png', { type: 'image/png' }));
+      expect(dbService.get().put.calledOnce).to.be.true;
+    });
+
+    it('should propagate error if getResources fails', async () => {
+      dbService.get().get.rejects(new Error('error'));
+      try {
+        await service.uploadIcon('icon-test', new File([''], 'icon-test.png', { type: 'image/png' }));
+        expect.fail('should have thrown');
+      } catch (error: any) {
+        expect(error.message).to.equal('error');
+      }
+    });
+
+    it('should propagate error if db.put fails', async () => {
+      dbService.get().put.rejects(new Error('put error'));
+      try {
+        await service.uploadIcon('icon-test', new File([''], 'icon-test.png', { type: 'image/png' }));
+        expect.fail('should have thrown');
+      } catch (error: any) {
+        expect(error.message).to.equal('put error');
+      }
     });
   });
 });

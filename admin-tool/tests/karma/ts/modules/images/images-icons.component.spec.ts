@@ -33,6 +33,7 @@ describe('ImagesIconsComponent', () => {
     resourcesService = {
       getResources: sinon.stub().resolves(mockResourcesDoc),
       getIconContent: sinon.stub().returns({ isSvg: false, content: '' }),
+      uploadIcon: sinon.stub().resolves(),
     };
 
     return TestBed.configureTestingModule({
@@ -145,6 +146,119 @@ describe('ImagesIconsComponent', () => {
       expect((result.content as any).changingThisBreaksApplicationSecurity).to.equal('<svg>test</svg>');
     });
   });
+  describe('upload', () => {
+    beforeEach(async () => {
+      await fixture.whenStable();
+      fixture.detectChanges();
+    });
+
+    const setFiles = (file: File | null) => {
+      Object.defineProperty(component.iconFileRef.nativeElement, 'files', {
+        value: file ? [file] : [],
+        configurable: true,
+      });
+    };
+
+    it('should set error if resourcesDoc is null', async () => {
+      component.resourcesDoc = null;
+      await component.upload();
+      expect(component.responseStatus.state).to.equal('error');
+      expect(component.responseStatus.msg).to.equal('Error saving settings');
+    });
+
+    it('should set error if no file and no name', async () => {
+      setFiles(null);
+      component.iconName = '';
+      await component.upload();
+      expect(component.responseStatus.state).to.equal('error');
+    });
+
+    it('should set error if no file selected', async () => {
+      setFiles(null);
+      component.iconName = 'icon-test';
+      await component.upload();
+      expect(component.responseStatus.state).to.equal('error');
+    });
+
+    it('should set error if iconName is empty', async () => {
+      setFiles(new File([''], 'icon-test.png', { type: 'image/png' }));
+      component.iconName = '';
+      await component.upload();
+      expect(component.responseStatus.state).to.equal('error');
+    });
+
+    it('should set responseStatus to loading during upload', async () => {
+      resourcesService.uploadIcon.callsFake(() => {
+        expect(component.responseStatus.state).to.equal('loading');
+        return Promise.resolve();
+      });
+      setFiles(new File([''], 'icon-test.png', { type: 'image/png' }));
+      component.iconName = 'icon-test';
+      await component.upload();
+    });
+
+    it('should call uploadIcon with correct arguments', async () => {
+      const file = new File([''], 'icon-test.png', { type: 'image/png' });
+      setFiles(file);
+      component.iconName = 'icon-test';
+      await component.upload();
+      expect(resourcesService.uploadIcon.calledWith('icon-test', file)).to.be.true;
+    });
+
+    it('should reset iconFileRef after success', async () => {
+      setFiles(new File([''], 'icon-test.png', { type: 'image/png' }));
+      component.iconName = 'icon-test';
+      await component.upload();
+      expect(component.iconFileRef.nativeElement.value).to.equal('');
+    });
+
+    it('should reset nameInputRef after success', async () => {
+      setFiles(new File([''], 'icon-test.png', { type: 'image/png' }));
+      component.iconName = 'icon-test';
+      await component.upload();
+      expect(component.nameInputRef.nativeElement.value).to.equal('');
+    });
+
+    it('should reset iconName after success', async () => {
+      setFiles(new File([''], 'icon-test.png', { type: 'image/png' }));
+      component.iconName = 'icon-test';
+      await component.upload();
+      expect(component.iconName).to.equal('');
+    });
+
+    it('should call getResources more than once after success', async () => {
+      setFiles(new File([''], 'icon-test.png', { type: 'image/png' }));
+      component.iconName = 'icon-test';
+      await component.upload();
+      expect(resourcesService.getResources.callCount).to.be.greaterThan(1);
+    });
+
+    it('should clear responseStatus after success', async () => {
+      setFiles(new File([''], 'icon-test.png', { type: 'image/png' }));
+      component.iconName = 'icon-test';
+      await component.upload();
+      expect(component.responseStatus).to.deep.equal({});
+    });
+
+    it('should set error if uploadIcon fails', async () => {
+      resourcesService.uploadIcon.rejects(new Error('error'));
+      sinon.stub(console, 'error');
+      setFiles(new File([''], 'icon-test.png', { type: 'image/png' }));
+      component.iconName = 'icon-test';
+      await component.upload();
+      expect(component.responseStatus.state).to.equal('error');
+      expect(component.responseStatus.msg).to.equal('Error saving settings');
+    });
+
+    it('should call console.error if uploadIcon fails', async () => {
+      resourcesService.uploadIcon.rejects(new Error('error'));
+      const consoleStub = sinon.stub(console, 'error');
+      setFiles(new File([''], 'icon-test.png', { type: 'image/png' }));
+      component.iconName = 'icon-test';
+      await component.upload();
+      expect(consoleStub.calledWith('Error uploading image', sinon.match.any)).to.be.true;
+    });
+  });
   describe('DOM', () => {
     it('should show loader when loadingPageStatus is true', () => {
       component.loadingPageStatus = true;
@@ -229,6 +343,31 @@ describe('ImagesIconsComponent', () => {
       const compiled = fixture.nativeElement as HTMLElement;
       const button = compiled.querySelector('button.btn-primary') as HTMLButtonElement;
       expect(button.disabled).to.be.false;
+    });
+
+    it('should show loader when responseStatus is loading', async () => {
+      await fixture.whenStable();
+      component.responseStatus = { state: 'loading' };
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.loader.inline')).to.exist;
+    });
+
+    it('should show error message when responseStatus is error', async () => {
+      await fixture.whenStable();
+      component.responseStatus = { state: 'error', msg: 'Error saving settings' };
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.error')).to.exist;
+    });
+
+    it('should disable choose file button when responseStatus is loading', async () => {
+      await fixture.whenStable();
+      component.responseStatus = { state: 'loading' };
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const button = compiled.querySelector('button.btn-default') as HTMLButtonElement;
+      expect(button.disabled).to.be.true;
     });
   });
 });

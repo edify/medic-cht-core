@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ResourcesService } from '@admin-tool-services/resources.service';
 import { ResourcesDoc } from '@admin-tool-modules/resources-interfaces';
 import { ResponseStatus } from '@admin-tool-modules/global-modules-interfaces';
@@ -47,7 +47,8 @@ export class ImagesIconsComponent implements OnInit {
 
   constructor(
     private resourcesService: ResourcesService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private translate: TranslateService
   ){}
 
   /**
@@ -103,9 +104,66 @@ export class ImagesIconsComponent implements OnInit {
     return result;
   }
 
-  //TODO
-  async upload(): Promise<void> {
-    
-  }
+  /**
+   * Validates the upload form fields before submitting.
+   * Checks in order: resources document loaded, icon file selected, icon name provided.
+   * Sets responseStatus to error with the appropriate message on the first failing validation.
+   * When both file and name are missing, the icon error takes priority.
+   *
+   * @param {File | undefined} file - the file selected from the file input
+   * @returns {boolean} true if all validations pass, false otherwise
+   */
+  private validateUpload(file: File | undefined): boolean {
+    if (!this.resourcesDoc) {
+      this.responseStatus = { state: 'error', msg: 'Error saving settings'};
+      return false;
+    }
 
+    if (!file) {
+      this.responseStatus = { state: 'error', msg: this.translate.instant('field is required', {
+        field: this.translate.instant('icon')
+      })};
+      return false;
+    }
+
+    if (!this.iconName) {
+      this.responseStatus = { state: 'error', msg: this.translate.instant('field is required', {
+        field: this.translate.instant('Name')
+      })};
+      return false;
+    }
+
+    return true;
+  }
+  
+  /**
+   * Handles the icon upload process.
+   * Validates the form fields before proceeding.
+   * Sets responseStatus to loading during the upload and clears it on success.
+   * Resets both input fields and the iconName model after a successful upload.
+   * Reloads the icons list to reflect the newly added icon.
+   * Sets responseStatus to error if the upload fails.
+   *
+   * @returns {Promise<void>}
+   */
+  async upload(): Promise<void> {
+    const file = this.iconFileRef.nativeElement.files?.[0];
+    
+    if(!this.validateUpload(file)) {
+      return;
+    }
+    this.responseStatus = { state: 'loading' };
+    
+    try {
+      await this.resourcesService.uploadIcon(this.iconName, file!);
+      this.nameInputRef.nativeElement.value = '';
+      this.iconFileRef.nativeElement.value = '';
+      this.iconName = '';
+      await this.reloadIcons();
+      this.responseStatus = {};
+    } catch (error) {
+      console.error('Error uploading image', error);
+      this.responseStatus = { state: 'error', msg: 'Error saving settings' };
+    }
+  }
 }

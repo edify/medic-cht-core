@@ -56,4 +56,24 @@ export class ResourcesService {
 
     return { isSvg: false, content: `data:${attachment.content_type};base64,${attachment.data}` };
   }
+
+  /**
+   * Uploads a new icon to the resources document in CouchDB.
+   * Fetches the current document with attachments to obtain the latest _rev,
+   * adds the file directly to the document attachments, updates the resources map,
+   * and saves everything in a single put operation.
+   *
+   * @param {string} name - the logical icon name to register in the resources map
+   * @param {File} file - the icon file to attach
+   * @returns {Promise<void>}
+   */
+  async uploadIcon(name: string, file: File): Promise<void> {
+    const doc = await this.getResources();
+    doc._attachments[file.name] = {
+      content_type: file.type,
+      data: file as any,
+    };
+    doc.resources[name] = file.name;
+    await this.db.get().put(doc);
+  }
 }
