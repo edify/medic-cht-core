@@ -12,9 +12,15 @@ import { TranslatePipe } from '@ngx-translate/core';
  * permission, enforced by the authGuard in sms.routes.ts.
  */
 @Component({
-  selector: 'sms-header',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, AuthDirective, TranslatePipe],
-  templateUrl: './sms-header.component.html',
-  styleUrl: './sms-header.component.less',
+  selector: 'mm-sms',
+  imports: [
+    RouterLink,
+    RouterLinkActive,
+    RouterOutlet,
+    AuthDirective,
+    TranslatePipe,
+  ],
+  templateUrl: './sms.component.html',
+  styleUrl: './sms.component.less',
 })
-export class SmsHeaderComponent {}
+export class SmsComponent {}

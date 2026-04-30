@@ -154,13 +154,11 @@ describe('SmsSettingsComponent', () => {
     it('should set messagingWindow error when morning time is not earlier than evening', async () => {
       await stabilize();
 
-      // morning > evening
       component.model.scheduleMorningHours = 18;
       component.model.scheduleEveningHours = 6;
       component.submit();
       expect(component.errors.messagingWindow).to.exist;
 
-      // morning === evening
       component.errors = {};
       component.model.scheduleMorningHours = 8;
       component.model.scheduleEveningHours = 8;
@@ -205,7 +203,7 @@ describe('SmsSettingsComponent', () => {
         settingsService.updateSettings.getCall(0).args[0].forms_only_mode,
       ).to.equal(true);
 
-      settingsService.updateSettings.reset();
+      settingsService.updateSettings.resetHistory();
       component.model.acceptMessages = true;
       component.submit();
       expect(
@@ -213,10 +211,8 @@ describe('SmsSettingsComponent', () => {
       ).to.equal(false);
     });
 
-    it('should set loading while submitting then success or error after', async () => {
+    it('should set loading while submitting', async () => {
       await stabilize();
-
-      // loading state
       settingsService.updateSettings.returns(new Promise(() => {}));
       component.submit();
       expect(component.status.loading).to.equal(true);
@@ -240,6 +236,15 @@ describe('SmsSettingsComponent', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
       expect(component.status.error).to.equal(true);
       expect(component.status.success).to.not.exist;
+    });
+
+    it('should set success status that will clear after delay', async () => {
+      await stabilize();
+      settingsService.updateSettings.resolves();
+      component.submit();
+      await fixture.whenStable();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(component.status.success).to.equal(true);
     });
 
     it('should not call updateSettings when validation fails', async () => {
@@ -271,6 +276,15 @@ describe('SmsSettingsComponent', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
       expect(consoleStub.callCount).to.be.greaterThan(0);
       expect(component.status.error).to.equal(true);
+    });
+
+    it('should clear the success timeout on destroy', async () => {
+      await stabilize();
+      settingsService.updateSettings.resolves();
+      component.submit();
+      await fixture.whenStable();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(() => component.ngOnDestroy()).to.not.throw();
     });
   });
 

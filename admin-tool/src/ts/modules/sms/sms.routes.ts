@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { SmsHeaderComponent } from './sms-header/sms-header.component';
+import { SmsComponent } from './sms.component';
 import { SmsSettingsComponent } from './sms-settings/sms-settings.component';
 
 /**
@@ -12,7 +12,7 @@ import { SmsSettingsComponent } from './sms-settings/sms-settings.component';
 export const routes: Routes = [
   {
     path: 'sms',
-    component: SmsHeaderComponent,
+    component: SmsComponent,
     children: [
       {
         path: '',
