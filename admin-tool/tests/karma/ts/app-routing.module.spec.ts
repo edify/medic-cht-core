@@ -16,7 +16,9 @@ import { routes as backupRoutes } from '@admin-tool-modules/backup/backup.routes
 
 import { AppRoutingModule } from '../../../src/ts/app-routing.module';
 import { UsersComponent } from '@admin-tool-modules/users/users.component';
-import { AuthorizationHeaderComponent } from '@admin-tool-modules/authorization/authorization-header/authorization-header.component';
+import {
+  AuthorizationHeaderComponent
+} from '@admin-tool-modules/authorization/authorization-header/authorization-header.component';
 import { SmsComponent } from '@admin-tool-modules/sms/sms.component';
 import { AppFormsComponent } from '@admin-tool-modules/forms/app-forms/app-forms.component';
 import { TargetsComponent } from '@admin-tool-modules/targets/targets.component';
