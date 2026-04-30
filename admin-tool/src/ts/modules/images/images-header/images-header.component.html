@@ -1,17 +1,19 @@
-<nav aria-label="Images Navigation">
-  <ul class="nav nav-tabs custom-tabs">
-    <li class="nav-item" routerLinkActive="active">
-      <a routerLink="/images/icons">{{ 'icons' | translate }}</a>
-    </li>
-    <li class="nav-item" routerLinkActive="active">
-      <a routerLink="/images/branding">{{ 'branding' | translate }}</a>
-    </li>
-    <li class="nav-item" routerLinkActive="active">
-      <a routerLink="/images/partners">{{ 'partner.tab.partners' | translate }}</a>
-    </li>
-    <li class="nav-item" routerLinkActive="active">
-      <a routerLink="/images/header-tabs-icons">{{ 'images.header.tabs.icons' | translate }}</a>
-    </li>
-  </ul>
-</nav>
-<router-outlet></router-outlet>
+<div>
+  <nav aria-label="Images Navigation">
+    <ul class="nav nav-tabs custom-tabs">
+      <li class="nav-item" routerLinkActive="active">
+        <a routerLink="/images/icons">{{ 'icons' | translate }}</a>
+      </li>
+      <li class="nav-item" routerLinkActive="active">
+        <a routerLink="/images/branding">{{ 'branding' | translate }}</a>
+      </li>
+      <li class="nav-item" routerLinkActive="active">
+        <a routerLink="/images/partners">{{ 'partner.tab.partners' | translate }}</a>
+      </li>
+      <li class="nav-item" routerLinkActive="active">
+        <a routerLink="/images/header-tabs-icons">{{ 'images.header.tabs.icons' | translate }}</a>
+      </li>
+    </ul>
+  </nav>
+  <router-outlet></router-outlet>
+</div>

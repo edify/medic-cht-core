@@ -212,13 +212,6 @@ describe('ImagesIconsComponent', () => {
       expect(component.iconFileRef.nativeElement.value).to.equal('');
     });
 
-    it('should reset nameInputRef after success', async () => {
-      setFiles(new File([''], 'icon-test.png', { type: 'image/png' }));
-      component.iconName = 'icon-test';
-      await component.upload();
-      expect(component.nameInputRef.nativeElement.value).to.equal('');
-    });
-
     it('should reset iconName after success', async () => {
       setFiles(new File([''], 'icon-test.png', { type: 'image/png' }));
       component.iconName = 'icon-test';

@@ -24,9 +24,6 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 })
 export class ImagesIconsComponent implements OnInit {
 
-  /** Reference to the name input element for resetting its value after a successful upload */
-  @ViewChild('nameInput') nameInputRef!: ElementRef<HTMLInputElement>;
-
   /** Reference to the file input element for resetting its value after a successful upload */
   @ViewChild('iconFile') iconFileRef!: ElementRef<HTMLInputElement>;
 
@@ -156,7 +153,6 @@ export class ImagesIconsComponent implements OnInit {
     
     try {
       await this.resourcesService.uploadIcon(this.iconName, file!);
-      this.nameInputRef.nativeElement.value = '';
       this.iconFileRef.nativeElement.value = '';
       this.iconName = '';
       await this.reloadIcons();
