@@ -149,7 +149,7 @@ export class ImagesIconsComponent implements OnInit {
   async upload(): Promise<void> {
     const file = this.iconFileRef.nativeElement.files?.[0];
     
-    if(!this.validateUpload(file)) {
+    if (!this.validateUpload(file)) {
       return;
     }
     this.responseStatus = { state: 'loading' };
