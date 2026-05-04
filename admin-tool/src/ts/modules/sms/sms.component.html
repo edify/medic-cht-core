@@ -1,0 +1,31 @@
+<div class="sms-configuration-container">
+  <nav aria-label="SMS Navigation">
+    <ul class="nav nav-tabs custom-tabs">
+      <li
+        class="nav-item"
+        routerLinkActive="active"
+        routerLink="/sms/settings"
+        [mmAuth]="'can_configure'"
+      >
+        <a>{{ "configuration.sms.settings" | translate }}</a>
+      </li>
+      <li
+        class="nav-item"
+        routerLinkActive="active"
+        routerLink="/sms/forms"
+        [mmAuth]="'can_configure'"
+      >
+        <a>{{ "configuration.sms.forms" | translate }}</a>
+      </li>
+      <li
+        class="nav-item"
+        routerLinkActive="active"
+        routerLink="/sms/test"
+        [mmAuth]="'can_configure'"
+      >
+        <a>{{ "configuration.sms.test.title" | translate }}</a>
+      </li>
+    </ul>
+  </nav>
+  <router-outlet></router-outlet>
+</div>
