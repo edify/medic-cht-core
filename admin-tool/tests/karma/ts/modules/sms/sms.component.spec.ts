@@ -1,36 +1,50 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 import { expect } from 'chai';
-
+import sinon from 'sinon';
+import { TranslateModule } from '@ngx-translate/core';
 import { SmsComponent } from '@admin-tool-modules/sms/sms.component';
+import { AuthService } from '@admin-tool-services/auth.service';
 
 describe('SmsComponent', () => {
   let component: SmsComponent;
   let fixture: ComponentFixture<SmsComponent>;
 
-  beforeEach(waitForAsync(() => {
-    return TestBed
-      .configureTestingModule({
-        imports: [SmsComponent],
-      })
-      .compileComponents()
-      .then(() => {
-        fixture = TestBed.createComponent(SmsComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
-      });
-  }));
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [SmsComponent, TranslateModule.forRoot(), RouterTestingModule],
+      providers: [
+        {
+          provide: AuthService,
+          useValue: { has: sinon.stub().resolves(true) },
+        },
+      ],
+    }).compileComponents();
 
-  it('should create the SMS component', () => {
+    fixture = TestBed.createComponent(SmsComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  afterEach(() => sinon.restore());
+
+  it('should create the sms component', () => {
     expect(component).to.exist;
   });
 
-  it('should render the SMS heading', () => {
+  it('should render the settings tab link', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h2')!.textContent).to.contain('SMS');
+    const tabs = compiled.querySelectorAll('.nav-item');
+    expect(tabs.length).to.be.greaterThan(0);
   });
 
-  it('should render a placeholder description paragraph', () => {
+  it('should render the router outlet', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('p')).to.exist;
+    expect(compiled.querySelector('router-outlet')).to.exist;
+  });
+
+  it('should render inside a sms-configuration-container', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.sms-configuration-container')).to.exist;
   });
 });

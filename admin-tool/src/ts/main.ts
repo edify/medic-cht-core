@@ -6,11 +6,11 @@ import { AppComponent } from './app.component';
 import { appConfig } from './app.config';
 
 window.$ = window.jQuery = require('jquery');
+require('select2');
 window.PouchDB = require('pouchdb-browser').default;
 
 if (environment.production) {
   enableProdMode();
 }
 
-bootstrapApplication(AppComponent, appConfig)
-  .catch(err => console.error('Error bootstrapping admin-tool', err));
+bootstrapApplication(AppComponent, appConfig).catch((err) => console.error('Error bootstrapping admin-tool', err),);

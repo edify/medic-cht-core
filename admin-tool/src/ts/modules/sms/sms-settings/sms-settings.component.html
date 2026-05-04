@@ -1,0 +1,136 @@
+<div class="sms-configuration-container">
+  <form role="form">
+    <div class="form-group" [ngClass]="{ 'has-error': errors.gatewayNumber }">
+      <label for="default-country-code">{{
+        "Default country code" | translate
+      }}</label>
+      <div>
+        <select
+          #countryCodeSelect
+          id="default-country-code"
+          name="default-country-code"
+        >
+          <option></option>
+        </select>
+      </div>
+      <p class="help-block">{{ "Default country code help" | translate }}</p>
+    </div>
+
+    <div class="form-group" [ngClass]="{ 'has-error': errors.gatewayNumber }">
+      <label for="gateway-number">{{ "Gateway number" | translate }}</label>
+      <input
+        type="text"
+        class="form-control small"
+        id="gateway-number"
+        [(ngModel)]="model.gatewayNumber"
+        name="gateway_number"
+      />
+      <p class="help-block">{{ "Gateway number help" | translate }}</p>
+      @if (errors.gatewayNumber) {
+        <p class="help-block">{{ errors.gatewayNumber }}</p>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="accept-messages">{{
+        "Accept plain-text messages" | translate
+      }}</label>
+      <div class="checkbox">
+        <label>
+          <input
+            type="checkbox"
+            id="accept-messages"
+            [(ngModel)]="model.acceptMessages"
+            name="accept_messages"
+          />
+          {{ "Accept plain-text messages help" | translate }}
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>{{ "Phone number conversion" | translate }}</label>
+      <p>
+        {{ "Replace country code for" | translate }}&nbsp;
+        <select #outgoingPhoneMatch id="outgoing-phone-replace-match"></select
+        >&nbsp;
+        {{ "with" | translate }}
+        <input
+          type="text"
+          class="form-control tiny inline"
+          [(ngModel)]="model.outgoingPhoneReplace.replace"
+          name="outgoing_phone_replace_replace"
+        />
+      </p>
+    </div>
+
+    <div class="form-group" [ngClass]="{ 'has-error': errors.messagingWindow }">
+      <label>{{ "Messaging window" | translate }}</label>
+      <p>
+        {{ "Send scheduled messages between" | translate }}&nbsp;
+        <select
+          class="form-control tiny inline"
+          [(ngModel)]="model.scheduleMorningHours"
+          name="schedule_morning_hours"
+        >
+          @for (hour of hours; track hour.value) {
+            <option [value]="hour.value">{{ hour.name }}</option>
+          }
+        </select>
+        &nbsp;:&nbsp;
+        <select
+          class="form-control tiny inline"
+          [(ngModel)]="model.scheduleMorningMinutes"
+          name="schedule_morning_minutes"
+        >
+          @for (minute of minutes; track minute.value) {
+            <option [value]="minute.value">{{ minute.name }}</option>
+          }
+        </select>
+        &nbsp;{{ "and" | translate }}&nbsp;
+        <select
+          class="form-control tiny inline"
+          [(ngModel)]="model.scheduleEveningHours"
+          name="schedule_evening_hours"
+        >
+          @for (hour of hours; track hour.value) {
+            <option [value]="hour.value">{{ hour.name }}</option>
+          }
+        </select>
+        &nbsp;:&nbsp;
+        <select
+          class="form-control tiny inline"
+          [(ngModel)]="model.scheduleEveningMinutes"
+          name="schedule_evening_minutes"
+        >
+          @for (minute of minutes; track minute.value) {
+            <option [value]="minute.value">{{ minute.name }}</option>
+          }
+        </select>
+      </p>
+      @if (errors.messagingWindow) {
+        <p class="error">{{ errors.messagingWindow }}</p>
+      }
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="submit()"
+        [disabled]="status.loading"
+      >
+        {{ "Submit" | translate }}
+      </button>
+      @if (status.success) {
+        <span class="success">{{ status.msg }}</span>
+      }
+      @if (status.error) {
+        <span class="error">{{ status.msg }}</span>
+      }
+      @if (status.loading) {
+        <div class="loader inline"></div>
+      }
+    </div>
+  </form>
+</div>
