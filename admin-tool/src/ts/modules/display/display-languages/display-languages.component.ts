@@ -73,11 +73,8 @@ export class DisplayLanguagesComponent implements OnInit, OnDestroy{
   /** Error message shown when the initial page load fails */
   loadingError: string | null = null;
 
-  /** Code of the language that failed to enable/disable */
-  languageError: string | null = null;
-
-  /** Error message for enable/disable failure */
-  languageErrorMsg: string | null = null;
+  /** Error for the language that failed to enable/disable, contains the code and message */
+  languageError: { code: string, message: string } | null = null;
 
   /** Subscription to CouchDB changes feed, cleaned up on destroy */
   private changesSubscription: { unsubscribe: () => void } | null = null;
@@ -157,8 +154,7 @@ export class DisplayLanguagesComponent implements OnInit, OnDestroy{
       await this.ngOnInit();
     } catch (error) {
       console.error('Error disabling language', error);
-      this.languageError = doc.code;
-      this.languageErrorMsg = 'Error disabling language';
+      this.languageError = { code: doc.code, message: 'Error disabling language' };
     }
   }
 
@@ -174,8 +170,7 @@ export class DisplayLanguagesComponent implements OnInit, OnDestroy{
       await this.ngOnInit();
     } catch (error) {
       console.error('Error enabling language', error);
-      this.languageError = doc.code;
-      this.languageErrorMsg = 'Error enabling language';
+      this.languageError = { code: doc.code, message: 'Error enabling language' };
     }
   }
 

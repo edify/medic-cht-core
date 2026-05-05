@@ -86,9 +86,9 @@
                       {{ 'Missing translations' | translate: { missing: languageModel.missing } }}
                     </div>
                   }
-                  @if (languageError === languageModel.doc.code) {
+                  @if (languageError?.code === languageModel.doc.code) {
                     <div class="alert alert-danger" role="alert">
-                      {{ languageErrorMsg! | translate }}
+                      {{ languageError!.message | translate }}
                     </div>
                   }
                   <div>
