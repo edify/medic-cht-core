@@ -22,12 +22,12 @@ import {
 import { SmsComponent } from '@admin-tool-modules/sms/sms.component';
 import { AppFormsComponent } from '@admin-tool-modules/forms/app-forms/app-forms.component';
 import { TargetsComponent } from '@admin-tool-modules/targets/targets.component';
-import { ImagesComponent } from '@admin-tool-modules/images/images.component';
 import { MessageQueueComponent } from '@admin-tool-modules/message-queue/message-queue.component';
 import { UpgradeComponent } from '@admin-tool-modules/upgrade/upgrade.component';
 import { ExportComponent } from '@admin-tool-modules/export/export.component';
 import { BackupComponent } from '@admin-tool-modules/backup/backup.component';
 import { DisplayHeaderComponent } from '@admin-tool-modules/display/display-header/display-header.component';
+import { ImagesHeaderComponent } from '@admin-tool-modules/images/images-header/images-header.component';
 
 describe('AppRoutingModule', () => {
   beforeEach(() => {
@@ -83,7 +83,7 @@ describe('AppRoutingModule', () => {
     it('images routes should point to /images with ImagesComponent', () => {
       expect(imagesRoutes).to.have.length(1);
       expect(imagesRoutes[0].path).to.equal('images');
-      expect(imagesRoutes[0].component).to.equal(ImagesComponent);
+      expect(imagesRoutes[0].component).to.equal(ImagesHeaderComponent);
     });
 
     it('message-queue routes should point to /message-queue with MessageQueueComponent', () => {

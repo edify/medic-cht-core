@@ -1,0 +1,74 @@
+<div>
+  @if (loadingPageStatus) {
+    <div class="loader"></div>
+  } @else {
+    <div class="tab-content container-fluid">
+      <div class="section">
+        <p>
+          <span>{{ 'images.icons.description' | translate }}</span>
+          <a href="https://github.com/medic/icon-library" target="_blank" rel="noopener">{{ 'icon.library' | translate }}</a>
+        </p>
+      </div>
+      <div class="section">
+        <legend>{{ 'upload.icon' | translate }}</legend>
+        <div class="form-group required">
+          <label for="name">{{ 'Name' | translate }}</label>
+          <input
+            #nameInput
+            id="name"
+            type="text"
+            class="form-control small"
+            [(ngModel)]="iconName"
+          />
+        </div>
+        <div class="form-group required">
+          <label>{{ 'icon' | translate }}</label>
+          <div>
+            <button
+              type="button"
+              class="btn btn-default"
+              (click)="iconFileRef.nativeElement.click()"
+              [disabled]="responseStatus.state === 'loading'">
+              <i class="fa fa-arrow-up" aria-hidden="true"></i>
+              <span>{{ 'Choose file' | translate }}</span>
+            </button>
+            <input
+              #iconFile
+              type="file"
+              class="hidden-input"
+            />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="upload()"
+            [disabled]="responseStatus.state === 'loading'">
+            <span>{{ 'submit.icon' | translate }}</span>
+          </button>
+          @if (responseStatus.state === 'loading') {
+            <div class="loader inline"></div>
+          } @else if (responseStatus.state) {
+            <span [class]="responseStatus.state!">{{ responseStatus.msg! | translate }}</span>
+          }
+        </div>
+      </div>
+      <div class="section">
+        <legend>{{ 'icons' | translate }}</legend>
+        @for (iconKey of icons; track iconKey) {
+          <div class="row">
+            <div class="col-sm-1">
+              @if (getIconContent(iconKey).isSvg) {
+                <span [innerHTML]="getIconContent(iconKey).content"></span>
+              } @else if (getIconContent(iconKey).content) {
+                <img [src]="getIconContent(iconKey).content" />
+              }
+            </div>
+            <div class="col-sm-11">{{ iconKey }}</div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

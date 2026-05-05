@@ -1,0 +1,63 @@
+@import (reference) "../../../../css/variables.less";
+
+.section {
+  margin-bottom: 1rem;
+}
+
+.form-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  span {
+    margin-top: 0.25rem;
+    width: 100%;
+  }
+}
+
+.loader {
+  &.inline {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-width: 0.25rem;
+  }
+}
+
+.error {
+  color: @red;
+  font-weight: bold;
+}
+
+.hidden-input {
+  display: none;
+}
+
+.form-group.required label::after {
+  content: '*';
+  margin-left: 0.25rem;
+}
+
+.tab-content {
+  legend {
+    font-size: 1.625rem;
+    color: @gray-dark;
+    border-bottom: 0.0625rem solid @gray-light;
+    margin-bottom: 1.5rem;
+  }
+
+  .row {
+    padding: 0.75rem 0;
+    border-bottom: 0.0625rem solid @gray-light;
+    img {
+      height: 3.75rem;
+      display: inline-block;
+      object-fit: contain;
+    }
+    ::ng-deep span svg {
+      width: 3.75rem;
+      height: 3.75rem;
+      display: block;
+    }
+  }
+}
