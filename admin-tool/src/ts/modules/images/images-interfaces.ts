@@ -4,8 +4,8 @@
  * When writing via put, data can be a File object — PouchDB handles the conversion to base64.
  */
 export interface BrandingAttachment {
-    content_type: string;
-    data?: string | File;
+  content_type: string;
+  data?: string | File;
 }
 
 /**
@@ -15,9 +15,9 @@ export interface BrandingAttachment {
  * resources maps logical names (logo, favicon, icon) to their attachment filenames.
  */
 export interface BrandingDoc {
-    _id: string;
-    title: string;
-    resources: Record<string, string>;
-    _attachments: Record<string, BrandingAttachment>;
-    _rev?: string;
+  _id: string;
+  title: string;
+  resources: Record<string, string>;
+  _attachments: Record<string, BrandingAttachment>;
+  _rev?: string;
 }

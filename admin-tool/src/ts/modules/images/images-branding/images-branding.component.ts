@@ -80,7 +80,80 @@ export class ImagesBrandingComponent implements OnInit{
     return this.brandingService.getImageContent(key, this.brandingDoc);
   }
 
-  //TODO
-  async submit(): Promise<void> {}
+  /**
+   * Reloads the branding document from CouchDB without triggering the full page loader.
+   * Called after a successful submit to reflect the updated title and images.
+   */
+  private async reloadBranding(): Promise<void> {
+    try {
+      this.brandingDoc = await this.brandingService.getBranding();
+      this.title = this.brandingDoc.title;
+    } catch (error) {
+      console.error('Error fetching branding document', error);
+    }
+  }
+
+  /**
+   * Validates the upload form fields before submitting.
+   * Checks that the title is not empty and that no file exceeds the 100KB size limit.
+   * Sets responseStatus to error with the appropriate message on the first failing validation.
+   *
+   * @param {File} [logo] - optional logo file to validate
+   * @param {File} [favicon] - optional favicon file to validate
+   * @param {File} [icon] - optional icon file to validate
+   * @returns {boolean} true if all validations pass, false otherwise
+   */
+  private validateUpload(logo?: File, favicon?: File, icon?: File): boolean {
+    if (!this.title) {
+      this.responseStatus = {
+        state: 'error',
+        msg: this.translate.instant('field is required', {
+          field: this.translate.instant('branding.title.field')
+        })
+      };
+      return false;
+    }
+    const maxSize = 100000;
+    const files = [logo, favicon, icon].filter((file): file is File => !!file);
+    for (const file of files) {
+      if (file.size > maxSize) {
+        this.responseStatus = {
+          state: 'error',
+          msg: this.translate.instant('error.file.size', { size: '100KB' })
+        };
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Saves the branding configuration to CouchDB.
+   * Validates the title and file sizes before proceeding.
+   * Resets all file inputs and reloads the branding document after a successful save.
+   * Sets responseStatus to error if the save fails.
+   */
+  async submit(): Promise<void> {
+    const logo = this.logoFileRef.nativeElement.files?.[0];
+    const favicon = this.faviconFileRef.nativeElement.files?.[0];
+    const icon = this.iconFileRef.nativeElement.files?.[0];
+
+    if (!this.validateUpload(logo, favicon, icon)) {
+      return;
+    }
+
+    this.responseStatus = { state: 'loading' };
+    try {
+      await this.brandingService.updateBranding(this.title, this.brandingDoc!, logo, favicon, icon);
+      this.logoFileRef.nativeElement.value = '';
+      this.faviconFileRef.nativeElement.value = '';
+      this.iconFileRef.nativeElement.value = '';
+      await this.reloadBranding();
+      this.responseStatus = {};
+    } catch (error) {
+      console.error('Error saving branding document', error);
+      this.responseStatus = { state: 'error', msg: 'Error saving settings' };
+    }
+  }
 
 }

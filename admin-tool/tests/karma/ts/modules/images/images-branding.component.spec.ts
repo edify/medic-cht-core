@@ -35,6 +35,7 @@ describe('ImagesBrandingComponent', () => {
     brandingService = {
       getBranding: sinon.stub().resolves(mockBrandingDoc),
       getImageContent: sinon.stub().returns(null),
+      updateBranding: sinon.stub().resolves(),
     };
 
     return TestBed.configureTestingModule({
@@ -126,6 +127,113 @@ describe('ImagesBrandingComponent', () => {
       brandingService.getImageContent.returns(dataUri);
       const result = component.getImageContent('logo');
       expect(result).to.equal(dataUri);
+    });
+  });
+  describe('submit', () => {
+    beforeEach(async () => {
+      await fixture.whenStable();
+      fixture.detectChanges();
+    });
+
+    const setFiles = (logoFile: File | null, faviconFile: File | null, iconFile: File | null) => {
+      Object.defineProperty(component.logoFileRef.nativeElement, 'files', {
+        value: logoFile ? [logoFile] : [],
+        configurable: true,
+      });
+      Object.defineProperty(component.faviconFileRef.nativeElement, 'files', {
+        value: faviconFile ? [faviconFile] : [],
+        configurable: true,
+      });
+      Object.defineProperty(component.iconFileRef.nativeElement, 'files', {
+        value: iconFile ? [iconFile] : [],
+        configurable: true,
+      });
+    };
+
+    it('should set error if title is empty', async () => {
+      component.title = '';
+      await component.submit();
+      expect(component.responseStatus.state).to.equal('error');
+    });
+
+    it('should set error if logo file is larger than 100KB', async () => {
+      const file = new File([new ArrayBuffer(100001)], 'logo.png', { type: 'image/png' });
+      setFiles(file, null, null);
+      await component.submit();
+      expect(component.responseStatus.state).to.equal('error');
+    });
+
+    it('should set error if favicon file is larger than 100KB', async () => {
+      const file = new File([new ArrayBuffer(100001)], 'favicon.ico', { type: 'image/x-icon' });
+      setFiles(null, file, null);
+      await component.submit();
+      expect(component.responseStatus.state).to.equal('error');
+    });
+
+    it('should set error if icon file is larger than 100KB', async () => {
+      const file = new File([new ArrayBuffer(100001)], 'icon.png', { type: 'image/png' });
+      setFiles(null, null, file);
+      await component.submit();
+      expect(component.responseStatus.state).to.equal('error');
+    });
+
+    it('should set responseStatus to loading during submit', async () => {
+      brandingService.updateBranding.callsFake(() => {
+        expect(component.responseStatus.state).to.equal('loading');
+        return Promise.resolve();
+      });
+      setFiles(null, null, null);
+      await component.submit();
+    });
+
+    it('should call updateBranding with correct arguments', async () => {
+      const logo = new File([''], 'new-logo.png', { type: 'image/png' });
+      setFiles(logo, null, null);
+      await component.submit();
+      expect(brandingService.updateBranding.calledWith(
+        'Community Health Toolkit',
+        mockBrandingDoc,
+        logo,
+        undefined,
+        undefined
+      )).to.be.true;
+    });
+
+    it('should reset file inputs after success', async () => {
+      setFiles(null, null, null);
+      await component.submit();
+      expect(component.logoFileRef.nativeElement.value).to.equal('');
+      expect(component.faviconFileRef.nativeElement.value).to.equal('');
+      expect(component.iconFileRef.nativeElement.value).to.equal('');
+    });
+
+    it('should call getBranding more than once after success', async () => {
+      setFiles(null, null, null);
+      await component.submit();
+      expect(brandingService.getBranding.callCount).to.be.greaterThan(1);
+    });
+
+    it('should clear responseStatus after success', async () => {
+      setFiles(null, null, null);
+      await component.submit();
+      expect(component.responseStatus).to.deep.equal({});
+    });
+
+    it('should set error responseStatus if updateBranding fails', async () => {
+      brandingService.updateBranding.rejects(new Error('error'));
+      sinon.stub(console, 'error');
+      setFiles(null, null, null);
+      await component.submit();
+      expect(component.responseStatus.state).to.equal('error');
+      expect(component.responseStatus.msg).to.equal('Error saving settings');
+    });
+
+    it('should call console.error if updateBranding fails', async () => {
+      brandingService.updateBranding.rejects(new Error('error'));
+      const consoleStub = sinon.stub(console, 'error');
+      setFiles(null, null, null);
+      await component.submit();
+      expect(consoleStub.calledWith('Error saving branding document', sinon.match.any)).to.be.true;
     });
   });
   describe('DOM', () => {
