@@ -1,0 +1,28 @@
+@import (reference) "../../../../css/variables.less";
+
+.hidden-input {
+  display: none;
+}
+
+.form-group {
+  img {
+    display: block;
+    max-height: 3.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .navbar-inverse {
+    display: block;
+    width: fit-content;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+
+    img {
+      max-height: 3.75rem;
+    }
+  }
+
+  &.required label::after {
+    content: ' *';
+  }
+}
