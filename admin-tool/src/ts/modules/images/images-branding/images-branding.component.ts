@@ -5,6 +5,8 @@ import { BrandingService } from '@admin-tool-services/branding.service';
 import { BrandingDoc } from '@admin-tool-modules/images/images-interfaces';
 import { ResponseStatus } from '@admin-tool-modules/global-modules-interfaces';
 
+const MAX_BRANDING_FILE_SIZE = 100000;
+
 /**
  * Component for managing the application branding configuration in the CHT instance.
  *
@@ -56,8 +58,7 @@ export class ImagesBrandingComponent implements OnInit{
     this.loadingPageStatus = true;
     
     try {
-      this.brandingDoc = await this.brandingService.getBranding();
-      this.title = this.brandingDoc.title;
+      await this.reloadBranding();
     } catch (error) {
       console.error('Error fetching branding document', error);
     } finally {
@@ -85,12 +86,8 @@ export class ImagesBrandingComponent implements OnInit{
    * Called after a successful submit to reflect the updated title and images.
    */
   private async reloadBranding(): Promise<void> {
-    try {
-      this.brandingDoc = await this.brandingService.getBranding();
-      this.title = this.brandingDoc.title;
-    } catch (error) {
-      console.error('Error fetching branding document', error);
-    }
+    this.brandingDoc = await this.brandingService.getBranding();
+    this.title = this.brandingDoc.title;
   }
 
   /**
@@ -113,13 +110,12 @@ export class ImagesBrandingComponent implements OnInit{
       };
       return false;
     }
-    const maxSize = 100000;
     const files = [logo, favicon, icon].filter((file): file is File => !!file);
     for (const file of files) {
-      if (file.size > maxSize) {
+      if (file.size > MAX_BRANDING_FILE_SIZE) {
         this.responseStatus = {
           state: 'error',
-          msg: this.translate.instant('error.file.size', { size: '100KB' })
+          msg: this.translate.instant('error.file.size', { size: `${MAX_BRANDING_FILE_SIZE / 1000}KB` })
         };
         return false;
       }
