@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { SmsComponent } from './sms.component';
 import { SmsSettingsComponent } from './sms-settings/sms-settings.component';
+import { SmsTestComponent } from './sms-test/sms-test.component';
 
 /**
  * Routes for the SMS module.
@@ -22,6 +23,10 @@ export const routes: Routes = [
       {
         path: 'settings',
         component: SmsSettingsComponent,
+      },
+      {
+        path: 'test',
+        component: SmsTestComponent,
       },
     ],
   },
