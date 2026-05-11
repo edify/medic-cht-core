@@ -1,0 +1,49 @@
+<div class="sms-configuration-container">
+  <div class="col-xs-8 configuration-form">
+    <p>{{ 'configuration.sms.test.description' | translate }}</p>
+
+    <div class="form-group required" [ngClass]="{ 'has-error': errors.message }">
+      <label for="message">{{ 'Message Body' | translate }}</label>
+      <input
+        id="message"
+        type="text"
+        class="form-control"
+        [(ngModel)]="message"
+        name="message"
+      />
+      <span class="help-block">{{ 'configuration.sms.test.message.description' | translate }}</span>
+      @if (errors.message) {
+        <span class="help-block">{{ errors.message | translate }}</span>
+      }
+    </div>
+
+    <div class="form-group required" [ngClass]="{ 'has-error': errors.from }">
+      <label for="from">{{ 'configuration.sms.test.from.number' | translate }}</label>
+      <input
+        id="from"
+        type="text"
+        class="form-control small"
+        [(ngModel)]="from"
+        name="from"
+      />
+      <span class="help-block">{{ 'configuration.sms.test.number.validation.description' | translate }}</span>
+      @if (errors.from) {
+        <span class="help-block">{{ errors.from | translate }}</span>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="submit()"
+      [disabled]="saving"
+    >{{ 'Send Message' | translate }}</button>
+
+    @if (success) {
+      <span>{{ 'report.created' | translate }}</span>
+    }
+    @if (failure) {
+      <span>{{ 'Error sending message' | translate }}</span>
+    }
+  </div>
+</div>
