@@ -140,7 +140,7 @@ export class ImagesBrandingComponent implements OnInit{
 
     this.responseStatus = { state: 'loading' };
     try {
-      await this.brandingService.updateBranding(this.title, this.brandingDoc!, logo, favicon, icon);
+      await this.brandingService.updateBranding(this.title, logo, favicon, icon);
       this.logoFileRef.nativeElement.value = '';
       this.faviconFileRef.nativeElement.value = '';
       this.iconFileRef.nativeElement.value = '';

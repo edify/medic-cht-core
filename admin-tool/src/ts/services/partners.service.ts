@@ -55,8 +55,28 @@ export class PartnersService {
     if (!attachment?.data || typeof attachment.data !== 'string') {
       return null;
     }
-
+    
     const content = `data:${attachment.content_type};base64,${attachment.data}`;
     return content;
+  }
+
+  /**
+   * Uploads a new partner logo to the partners document in CouchDB.
+   * Fetches the current document with attachments to obtain the latest _rev,
+   * adds the file directly to the document attachments, updates the resources map,
+   * and saves everything in a single put operation.
+   *
+   * @param {string} name - the logical partner name to register in the resources map
+   * @param {File} file - the logo file to attach
+   * @returns {Promise<void>}
+   */
+  async uploadPartner(name: string, file: File): Promise<void> {
+    const doc = await this.getPartners();
+    doc._attachments[file.name] = {
+      content_type: file.type,
+      data: file as any,
+    };
+    doc.resources[name] = file.name;
+    await this.db.get().put(doc);
   }
 }

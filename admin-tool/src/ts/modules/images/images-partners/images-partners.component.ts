@@ -5,6 +5,7 @@ import { PartnersService } from '@admin-tool-services/partners.service';
 import { PartnersDoc } from '@admin-tool-modules/images/images-interfaces';
 import { ResponseStatus } from '@admin-tool-modules/global-modules-interfaces';
 
+/** Maximum allowed file size for partner logos in bytes (1MB) */
 const MAX_PARTNERS_FILE_SIZE = 1000000;
 
 /**
@@ -86,10 +87,67 @@ export class ImagesPartnersComponent implements OnInit {
     }
     return this.partnersService.getImageContent(key, this.partnersDoc);
   }
+  /**
+   * Validates the upload form fields before submitting.
+   * Checks in order: name provided, file selected, file size under 1MB.
+   * Sets responseStatus to error with the appropriate message on the first failing validation.
+   *
+   * @param {File | undefined} file - the file selected from the file input
+   * @returns {boolean} true if all validations pass, false otherwise
+   */
+  private validateUpload(file: File | undefined): boolean {
+    if (!this.name) {
+      this.responseStatus = {
+        state: 'error',
+        msg: this.translate.instant('field is required', {
+          field: this.translate.instant('partner.name.field')
+        })
+      };
+      return false;
+    }
+    if (!file) {
+      this.responseStatus = {
+        state: 'error',
+        msg: this.translate.instant('field is required', {
+          field: this.translate.instant('partner.logo.field')
+        })
+      };
+      return false;
+    }
+    if (file.size > MAX_PARTNERS_FILE_SIZE) {
+      this.responseStatus = {
+        state: 'error',
+        msg: `File must be less than ${MAX_PARTNERS_FILE_SIZE / 1000000}MB`
+      };
+      return false;
+    }
+    return true;
+  }
 
-  //TODO
-  async submit(): Promise<void> {}
+  /**
+   * Saves a new partner logo to CouchDB.
+   * Validates the name and file before proceeding.
+   * Resets the file input and name after a successful save.
+   * Reloads the partners list to reflect the newly added logo.
+   * Sets responseStatus to error if the save fails.
+   */
+  async submit(): Promise<void> {
+    const file = this.logoFileRef.nativeElement.files?.[0];
+    
+    if (!this.validateUpload(file)) {
+      return;
+    }
 
-
-
+    this.responseStatus = { state: 'loading'};
+    try {
+      await this.partnersService.uploadPartner(this.name, file!);
+      this.logoFileRef.nativeElement.value = '';
+      this.name = '';
+      await this.reloadPartners();
+      this.responseStatus = {};
+    } catch (error) {
+      console.error('Error uploading partner logo', error);
+      this.responseStatus = { state: 'error', msg: 'Error saving settings' };
+    }
+  }
 }

@@ -125,4 +125,50 @@ describe('PartnersService', () => {
       expect(result).to.be.null;
     });
   });
+  describe('uploadPartner', () => {
+    it('should call getPartners to fetch the current doc', async () => {
+      await service.uploadPartner('apple', new File([''], 'apple.png', { type: 'image/png' }));
+      expect(dbService.get().get.calledWith('partners', { attachments: true })).to.be.true;
+    });
+
+    it('should add the file as an inline attachment', async () => {
+      const file = new File([''], 'apple.png', { type: 'image/png' });
+      await service.uploadPartner('apple', file);
+      const doc = dbService.get().put.args[0][0];
+      expect(doc._attachments['apple.png'].content_type).to.equal('image/png');
+      expect(doc._attachments['apple.png'].data).to.equal(file);
+    });
+
+    it('should add the name to the resources map', async () => {
+      const file = new File([''], 'apple.png', { type: 'image/png' });
+      await service.uploadPartner('apple', file);
+      const doc = dbService.get().put.args[0][0];
+      expect(doc.resources['apple']).to.equal('apple.png');
+    });
+
+    it('should call db.put with the updated doc', async () => {
+      await service.uploadPartner('apple', new File([''], 'apple.png', { type: 'image/png' }));
+      expect(dbService.get().put.calledOnce).to.be.true;
+    });
+
+    it('should propagate error if getPartners fails', async () => {
+      dbService.get().get.rejects(new Error('error'));
+      try {
+        await service.uploadPartner('apple', new File([''], 'apple.png', { type: 'image/png' }));
+        expect.fail('should have thrown');
+      } catch (error: any) {
+        expect(error.message).to.equal('error');
+      }
+    });
+
+    it('should propagate error if db.put fails', async () => {
+      dbService.get().put.rejects(new Error('put error'));
+      try {
+        await service.uploadPartner('apple', new File([''], 'apple.png', { type: 'image/png' }));
+        expect.fail('should have thrown');
+      } catch (error: any) {
+        expect(error.message).to.equal('put error');
+      }
+    });
+  });
 });

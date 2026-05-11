@@ -34,6 +34,7 @@ describe('ImagesPartnersComponent', () => {
     partnersService = {
       getPartners: sinon.stub().resolves(mockPartnersDoc),
       getImageContent: sinon.stub().returns(null),
+      uploadPartner: sinon.stub().resolves(),
     };
 
     return TestBed.configureTestingModule({
@@ -127,6 +128,143 @@ describe('ImagesPartnersComponent', () => {
       partnersService.getImageContent.returns(dataUri);
       const result = component.getImageContent('apple');
       expect(result).to.equal(dataUri);
+    });
+  });
+  describe('submit', () => {
+    beforeEach(async () => {
+      await fixture.whenStable();
+      fixture.detectChanges();
+    });
+
+    const setFiles = (file: File | null) => {
+      Object.defineProperty(component.logoFileRef.nativeElement, 'files', {
+        value: file ? [file] : [],
+        configurable: true,
+      });
+    };
+
+    it('should set error if name is empty', async () => {
+      component.name = '';
+      setFiles(new File([''], 'apple.png', { type: 'image/png' }));
+      await component.submit();
+      expect(component.responseStatus.state).to.equal('error');
+    });
+
+    it('should set error message if name is empty', async () => {
+      component.name = '';
+      setFiles(new File([''], 'apple.png', { type: 'image/png' }));
+      await component.submit();
+      expect(component.responseStatus.msg).to.equal('field is required');
+    });
+
+    it('should set error if no file selected', async () => {
+      component.name = 'apple';
+      setFiles(null);
+      await component.submit();
+      expect(component.responseStatus.state).to.equal('error');
+    });
+
+    it('should set error message if no file selected', async () => {
+      component.name = 'apple';
+      setFiles(null);
+      await component.submit();
+      expect(component.responseStatus.msg).to.equal('field is required');
+    });
+
+    it('should set error if file is larger than 1MB', async () => {
+      component.name = 'apple';
+      const file = new File([new ArrayBuffer(1000001)], 'apple.png', { type: 'image/png' });
+      setFiles(file);
+      await component.submit();
+      expect(component.responseStatus.state).to.equal('error');
+    });
+
+    it('should set error message if file is larger than 1MB', async () => {
+      component.name = 'apple';
+      const file = new File([new ArrayBuffer(1000001)], 'apple.png', { type: 'image/png' });
+      setFiles(file);
+      await component.submit();
+      expect(component.responseStatus.msg).to.equal('File must be less than 1MB');
+    });
+
+    it('should not call uploadPartner if name is empty', async () => {
+      component.name = '';
+      setFiles(new File([''], 'apple.png', { type: 'image/png' }));
+      await component.submit();
+      expect(partnersService.uploadPartner.called).to.be.false;
+    });
+
+    it('should not call uploadPartner if no file selected', async () => {
+      component.name = 'apple';
+      setFiles(null);
+      await component.submit();
+      expect(partnersService.uploadPartner.called).to.be.false;
+    });
+
+    it('should set responseStatus to loading during submit', async () => {
+      component.name = 'apple';
+      const file = new File([''], 'apple.png', { type: 'image/png' });
+      setFiles(file);
+      partnersService.uploadPartner.callsFake(() => {
+        expect(component.responseStatus.state).to.equal('loading');
+        return Promise.resolve();
+      });
+      await component.submit();
+    });
+
+    it('should call uploadPartner with correct arguments', async () => {
+      component.name = 'apple';
+      const file = new File([''], 'apple.png', { type: 'image/png' });
+      setFiles(file);
+      await component.submit();
+      expect(partnersService.uploadPartner.calledWith('apple', file)).to.be.true;
+    });
+
+    it('should reset file input after success', async () => {
+      component.name = 'apple';
+      setFiles(new File([''], 'apple.png', { type: 'image/png' }));
+      await component.submit();
+      expect(component.logoFileRef.nativeElement.value).to.equal('');
+    });
+
+    it('should reset name after success', async () => {
+      component.name = 'apple';
+      setFiles(new File([''], 'apple.png', { type: 'image/png' }));
+      await component.submit();
+      expect(component.name).to.equal('');
+    });
+
+    it('should call getPartners more than once after success', async () => {
+      component.name = 'apple';
+      setFiles(new File([''], 'apple.png', { type: 'image/png' }));
+      await component.submit();
+      expect(partnersService.getPartners.callCount).to.be.greaterThan(1);
+    });
+
+    it('should clear responseStatus after success', async () => {
+      component.name = 'apple';
+      setFiles(new File([''], 'apple.png', { type: 'image/png' }));
+      await component.submit();
+      expect(component.responseStatus).to.deep.equal({});
+    });
+
+    it('should set error responseStatus if uploadPartner fails', async () => {
+      partnersService.uploadPartner.rejects(new Error('error'));
+      sinon.stub(console, 'error');
+      component.name = 'apple';
+      setFiles(new File([''], 'apple.png', { type: 'image/png' }));
+      await component.submit();
+      expect(component.responseStatus.state).to.equal('error');
+      expect(component.responseStatus.msg).to.equal('Error saving settings');
+    });
+
+    it('should call console.error if uploadPartner fails', async () => {
+      partnersService.uploadPartner.rejects(new Error('error'));
+      const consoleStub = sinon.stub(console, 'error');
+      component.name = 'apple';
+      setFiles(new File([''], 'apple.png', { type: 'image/png' }));
+      await component.submit();
+      expect(consoleStub.calledWith('Error uploading partner logo', sinon.match.any)).to.be.true;
     });
   });
   describe('DOM', () => {
