@@ -87,6 +87,7 @@ export class ImagesPartnersComponent implements OnInit {
     }
     return this.partnersService.getImageContent(key, this.partnersDoc);
   }
+  
   /**
    * Validates the upload form fields before submitting.
    * Checks in order: name provided, file selected, file size under 1MB.

@@ -36,6 +36,7 @@ export class PartnersService {
       });
     return doc;
   }
+  
   /**
    * Resolves a partner name to its data URI using the partners document.
    * Returns null if the key does not exist in the resources map, if the attachment
@@ -55,7 +56,7 @@ export class PartnersService {
     if (!attachment?.data || typeof attachment.data !== 'string') {
       return null;
     }
-    
+
     const content = `data:${attachment.content_type};base64,${attachment.data}`;
     return content;
   }
