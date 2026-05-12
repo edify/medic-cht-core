@@ -92,13 +92,12 @@ export class BrandingService {
    * All changes are saved in a single put operation.
    *
    * @param {string} title - the new application title
-   * @param {BrandingDoc} doc - the current branding document
    * @param {File} [logo] - optional new logo file
    * @param {File} [favicon] - optional new favicon file
    * @param {File} [icon] - optional new icon file
    * @returns {Promise<void>}
    */
-  async updateBranding(title: string, doc: BrandingDoc, logo?: File, favicon?: File, icon?: File): Promise<void> {
+  async updateBranding(title: string, logo?: File, favicon?: File, icon?: File): Promise<void> {
     const freshDoc = await this.getBranding();
     freshDoc.title = title;
 

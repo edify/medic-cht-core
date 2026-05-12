@@ -192,7 +192,6 @@ describe('ImagesBrandingComponent', () => {
       await component.submit();
       expect(brandingService.updateBranding.calledWith(
         'Community Health Toolkit',
-        mockBrandingDoc,
         logo,
         undefined,
         undefined

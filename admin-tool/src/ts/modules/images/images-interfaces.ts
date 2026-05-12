@@ -21,3 +21,16 @@ export interface BrandingDoc {
   _attachments: Record<string, BrandingAttachment>;
   _rev?: string;
 }
+
+/**
+ * Represents the partners document as stored in CouchDB.
+ * Contains a map of partner names to attachment filenames and the attachments themselves.
+ * resources maps partner names (e.g. 'apple') to their attachment filenames (e.g. 'apple-logo.png').
+ * If the document does not exist in CouchDB, an empty doc is returned instead of throwing.
+ */
+export interface PartnersDoc {
+  _id: string;
+  resources: Record<string, string>;
+  _attachments: Record<string, BrandingAttachment>;
+  _rev?: string;
+}

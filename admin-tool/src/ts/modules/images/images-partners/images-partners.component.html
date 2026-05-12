@@ -1,0 +1,69 @@
+<div>
+  @if (loadingPageStatus) {
+    <div class="loader"></div>
+  } @else {
+    <div class="tab-content container-fluid">
+      <p>{{ 'images.partners.description' | translate }}</p>
+      <div class="section">
+        <legend>{{ 'partner.logo.upload' | translate }}</legend>
+        <form class="custom-form">
+          <div class="form-group required">
+            <label for="name">{{ 'partner.name.field' | translate }}</label>
+            <input
+              id="name"
+              type="text"
+              name="name"
+              class="form-control medium"
+              [(ngModel)]="name"
+            />
+          </div>
+          <div class="form-group required">
+            <label>{{ 'partner.logo.field' | translate }}</label>
+            <div>
+              <button
+                type="button"
+                class="btn btn-default"
+                (click)="logoFileRef.nativeElement.click()"
+                [disabled]="responseStatus.state === 'loading'">
+                <i class="fa fa-arrow-up" aria-hidden="true"></i>
+                <span>{{ 'Choose file' | translate }}</span>
+              </button>
+              <input
+                #logoFile
+                type="file"
+                accept="image/*"
+                class="hidden-input"
+              />
+            </div>
+          </div>
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="submit()"
+              [disabled]="responseStatus.state === 'loading'">
+              <span>{{ 'Submit' | translate }}</span>
+            </button>
+            @if (responseStatus.state === 'loading') {
+              <div class="loader inline"></div>
+            } @else if (responseStatus.state) {
+              <span [class]="responseStatus.state!">{{ responseStatus.msg! | translate }}</span>
+            }
+          </div>
+        </form>
+      </div>
+      @if (partners.length) {
+        <div class="section">
+          <legend>{{ 'partner.tab.partners' | translate }}</legend>
+          <ul class="list-inline">
+            @for (key of partners; track key) {
+              <li>
+                <img [src]="getImageContent(key)" [alt]="" />
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+  }
+</div>

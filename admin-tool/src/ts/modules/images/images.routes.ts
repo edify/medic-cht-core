@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { ImagesHeaderComponent } from './images-header/images-header.component';
 import { ImagesIconsComponent } from './images-icons/images-icons.component';
 import { ImagesBrandingComponent } from './images-branding/images-branding.component';
+import { ImagesPartnersComponent } from './images-partners/images-partners.component';
 
 /**
  * Routes for the Images module.
@@ -28,6 +29,10 @@ export const routes: Routes = [
       {
         path: 'branding',
         component: ImagesBrandingComponent,
+      },
+      {
+        path: 'partners',
+        component: ImagesPartnersComponent,
       },
     ],
   },

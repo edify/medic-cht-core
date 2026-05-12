@@ -132,24 +132,24 @@ describe('BrandingService', () => {
   });
   describe('updateBranding', () => {
     it('should call getBranding to fetch the current doc', async () => {
-      await service.updateBranding('New Title', mockBrandingDoc);
+      await service.updateBranding('New Title');
       expect(dbService.get().get.calledWith('branding', { attachments: true })).to.be.true;
     });
 
     it('should update the title in the doc', async () => {
-      await service.updateBranding('New Title', mockBrandingDoc);
+      await service.updateBranding('New Title');
       const doc = dbService.get().put.args[0][0];
       expect(doc.title).to.equal('New Title');
     });
 
     it('should call db.put with the updated doc', async () => {
-      await service.updateBranding('New Title', mockBrandingDoc);
+      await service.updateBranding('New Title');
       expect(dbService.get().put.calledOnce).to.be.true;
     });
 
     it('should add logo attachment when logo file is provided', async () => {
       const file = new File([''], 'new-logo.png', { type: 'image/png' });
-      await service.updateBranding('New Title', mockBrandingDoc, file);
+      await service.updateBranding('New Title', file);
       const doc = dbService.get().put.args[0][0];
       expect(doc._attachments['new-logo.png'].content_type).to.equal('image/png');
       expect(doc.resources['logo']).to.equal('new-logo.png');
@@ -157,7 +157,7 @@ describe('BrandingService', () => {
 
     it('should add favicon attachment when favicon file is provided', async () => {
       const file = new File([''], 'new-favicon.ico', { type: 'image/x-icon' });
-      await service.updateBranding('New Title', mockBrandingDoc, undefined, file);
+      await service.updateBranding('New Title', undefined, file);
       const doc = dbService.get().put.args[0][0];
       expect(doc._attachments['new-favicon.ico'].content_type).to.equal('image/x-icon');
       expect(doc.resources['favicon']).to.equal('new-favicon.ico');
@@ -165,7 +165,7 @@ describe('BrandingService', () => {
 
     it('should add icon attachment when icon file is provided', async () => {
       const file = new File([''], 'new-icon.png', { type: 'image/png' });
-      await service.updateBranding('New Title', mockBrandingDoc, undefined, undefined, file);
+      await service.updateBranding('New Title', undefined, undefined, file);
       const doc = dbService.get().put.args[0][0];
       expect(doc._attachments['new-icon.png'].content_type).to.equal('image/png');
       expect(doc.resources['icon']).to.equal('new-icon.png');
@@ -173,13 +173,13 @@ describe('BrandingService', () => {
 
     it('should remove obsolete attachments after update', async () => {
       const file = new File([''], 'new-logo.png', { type: 'image/png' });
-      await service.updateBranding('New Title', mockBrandingDoc, file);
+      await service.updateBranding('New Title', file);
       const doc = dbService.get().put.args[0][0];
       expect(doc._attachments['cht-logo.png']).to.be.undefined;
     });
 
     it('should keep existing attachments that are still referenced', async () => {
-      await service.updateBranding('New Title', mockBrandingDoc);
+      await service.updateBranding('New Title');
       const doc = dbService.get().put.args[0][0];
       expect(doc._attachments['cht-logo.png']).to.exist;
       expect(doc._attachments['favicon.ico']).to.exist;
@@ -188,7 +188,7 @@ describe('BrandingService', () => {
     it('should propagate error if getBranding fails', async () => {
       dbService.get().get.rejects(new Error('error'));
       try {
-        await service.updateBranding('New Title', mockBrandingDoc);
+        await service.updateBranding('New Title');
         expect.fail('should have thrown');
       } catch (error: any) {
         expect(error.message).to.equal('error');
@@ -198,7 +198,7 @@ describe('BrandingService', () => {
     it('should propagate error if db.put fails', async () => {
       dbService.get().put.rejects(new Error('put error'));
       try {
-        await service.updateBranding('New Title', mockBrandingDoc);
+        await service.updateBranding('New Title');
         expect.fail('should have thrown');
       } catch (error: any) {
         expect(error.message).to.equal('put error');
