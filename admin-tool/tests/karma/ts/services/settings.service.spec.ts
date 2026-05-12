@@ -372,4 +372,51 @@ describe('SettingsService', () => {
       await result.catch(err => expect(err).to.deep.equal({ status: 500 }));
     });
   });
+  describe('getHeaderTabsSettings', () => {
+    it('should return header_tabs from settings', async () => {
+      dbService.get().get.resolves({
+        settings: {
+          header_tabs: {
+            messages: { icon: 'fa-envelope', resource_icon: 'icon-pregnancy' }
+          }
+        }
+      });
+      const result = await service.getHeaderTabsSettings();
+      expect(result).to.deep.equal({
+        messages: { icon: 'fa-envelope', resource_icon: 'icon-pregnancy' }
+      });
+    });
+
+    it('should return empty object when header_tabs is undefined', async () => {
+      dbService.get().get.resolves({ settings: {} });
+      const result = await service.getHeaderTabsSettings();
+      expect(result).to.deep.equal({});
+    });
+
+    it('should propagate error when get fails', async () => {
+      dbService.get().get.rejects({ status: 500 });
+      const result = service.getHeaderTabsSettings();
+      await result.catch(err => expect(err).to.deep.equal({ status: 500 }));
+    });
+  });
+  describe('updateHeaderTabsSettings', () => {
+    it('should call updateSettings with header_tabs', async () => {
+      http.put.returns(of(void 0));
+      const headerTabs = { messages: { icon: 'fa-envelope', resource_icon: '' } };
+      await service.updateHeaderTabsSettings(headerTabs);
+      expect(http.put.args[0][1]).to.deep.equal({ header_tabs: headerTabs });
+    });
+
+    it('should send replace=false', async () => {
+      http.put.returns(of(void 0));
+      await service.updateHeaderTabsSettings({});
+      expect(http.put.args[0][2].params).to.deep.include({ replace: 'false' });
+    });
+
+    it('should propagate error when request fails', async () => {
+      http.put.returns(throwError(() => ({ status: 500 })));
+      const result = service.updateHeaderTabsSettings({});
+      await result.catch(err => expect(err).to.deep.equal({ status: 500 }));
+    });
+  });
 });

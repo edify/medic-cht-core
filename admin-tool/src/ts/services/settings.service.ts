@@ -221,11 +221,25 @@ export class SettingsService {
     });
   }
 
+  /**
+   * Retrieves the header tabs icon configuration from settings,
+   * returning the full header_tabs map.
+   * Returns an empty object if header_tabs has never been configured.
+   *
+   * @returns {Promise<HeaderTabsMap>}
+   */
   async getHeaderTabsSettings(): Promise<HeaderTabsMap> {
     const res = await this.get();
     return res.header_tabs || {};
   }
   
+  /**
+   * Persists the header tabs icon configuration to the API.
+   * Uses replace=false to merge without overwriting other settings.
+   *
+   * @param {HeaderTabsMap} headerTabs - the complete header tabs configuration to save
+   * @returns {Promise<void>}
+   */
   async updateHeaderTabsSettings(headerTabs: HeaderTabsMap): Promise<void> {
     return this.updateSettings({ header_tabs: headerTabs });
   }

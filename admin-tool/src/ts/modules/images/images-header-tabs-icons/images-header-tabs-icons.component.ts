@@ -8,6 +8,13 @@ import { SettingsService } from '@admin-tool-services/settings.service';
 import { ResourcesDoc } from '@admin-tool-modules/resources-interfaces';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
+/**
+ * Hardcoded list of CHT application navigation tabs.
+ * Defines the name, translation key and default FontAwesome icon for each tab.
+ * name is the key used in settings.header_tabs.
+ * This list mirrors the tabs defined in the CHT webapp and must be updated
+ * manually if tabs are added or removed from the application.
+ */
 const HEADER_TABS: HeaderTab[] = [
   { name: 'messages', translation: 'Messages', defaultIcon: 'fa-envelope' },
   { name: 'tasks', translation: 'Tasks', defaultIcon: 'fa-flag' },
@@ -16,6 +23,19 @@ const HEADER_TABS: HeaderTab[] = [
   { name: 'analytics', translation: 'Analytics', defaultIcon: 'fa-bar-chart-o' },
 ];
 
+/**
+ * Component for managing the icon configuration of the CHT application
+ * navigation tabs.
+ *
+ * Loads the available SVG resource icons and the current header tabs
+ * configuration from settings on init.
+ * Displays a table with one row per tab showing the default icon,
+ * a customizable FontAwesome icon field, and a select for SVG resource icons.
+ * Allows administrators to configure custom icons for each navigation tab
+ * and save the configuration to settings via a single submit operation.
+ *
+ * Part of the Images module.
+ */
 @Component({
   selector: 'images-header-tabs-icons',
   imports: [TranslatePipe, FormsModule],
@@ -24,12 +44,25 @@ const HEADER_TABS: HeaderTab[] = [
 })
 export class ImagesHeaderTabsIconsComponent implements OnInit{
 
+  /** List of navigation tabs for template iteration, sourced from the HEADER_TABS constant */
   tabs: HeaderTab[] = HEADER_TABS;
+
+  /** List of SVG icon names available for selection, filtered from the resources document */
   resourceIcons: string[] = [];
+
+  /** Icon configuration map for all tabs, keyed by tab name */
   tabsConfig: HeaderTabsMap = {};
+
+  /** Resources document loaded from CouchDB, used to resolve SVG icon previews */
   resourcesDoc: ResourcesDoc | null = null;
+
+  /** Controls visibility of the loader while resources and settings are being fetched */
   loadingPageStatus = false;
+
+  /** Tracks the state of the submit operation for loading and error feedback */
   responseStatus: ResponseStatus = {};
+
+  /** Set to true when the initial data load fails, shows the error alert and hides the table */
   loadingError = false;
 
   constructor( 
@@ -38,6 +71,11 @@ export class ImagesHeaderTabsIconsComponent implements OnInit{
     private sanitizer: DomSanitizer,
   ) {}
 
+  /**
+   * Fetches the resources document and settings on init.
+   * Loads SVG resource icons and the current header tabs configuration.
+   * Sets loadingError to true if either request fails.
+   */
   async ngOnInit(): Promise<void> {
     this.loadingPageStatus = true;
 
@@ -52,6 +90,12 @@ export class ImagesHeaderTabsIconsComponent implements OnInit{
     }
   }
 
+  /**
+   * Fetches the resources document from CouchDB and filters
+   * the available icons to only include SVG types.
+   * Called by ngOnInit before loadTabsConfig to ensure resourceIcons
+   * is populated before the obsolete icon cleanup runs.
+   */
   private async loadResourceIcons(): Promise<void> {
     this.resourcesDoc = await this.resourcesService.getResources();
     this.resourceIcons = Object.keys(this.resourcesDoc.resources).filter(key => {
@@ -61,6 +105,12 @@ export class ImagesHeaderTabsIconsComponent implements OnInit{
     });
   }
 
+  /**
+   * Fetches the header tabs configuration from settings and initializes
+   * all tabs that have no saved configuration with empty values.
+   * Clears any resource_icon that no longer exists in the available SVG icons.
+   * Depends on loadResourceIcons having run first.
+   */
   private async loadTabsConfig(): Promise<void> {
     const headerTabsConfig = await this.settingsService.getHeaderTabsSettings();
     HEADER_TABS.forEach(tab => {
@@ -77,6 +127,15 @@ export class ImagesHeaderTabsIconsComponent implements OnInit{
     this.tabsConfig = headerTabsConfig;
   }
 
+  /**
+   * Resolves an SVG resource icon name to its sanitized inline HTML content
+   * for preview rendering in the template.
+   * Returns null if the resources document has not loaded yet,
+   * if the key is empty, or if the icon has no content.
+   *
+   * @param {string} key - the resource icon name (e.g. 'icon-pregnancy')
+   * @returns {SafeHtml | null}
+   */
   getIconContent(key: string): SafeHtml | null {
     if (!this.resourcesDoc || !key) {
       return null;
