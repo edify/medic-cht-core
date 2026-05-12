@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { DOC_IDS } from '@medic/constants';
 import { DbService } from '@admin-tool-services/db.service';
 import { ChangesService } from '@admin-tool-services/changes.service';
+import { HeaderTabsMap } from '@admin-tool-modules/images/images-interfaces';
 
 /**
  * Interface representing the date and datetime display format settings.
@@ -51,6 +52,7 @@ export interface CHTSettings {
   schedule_evening_hours?: number;
   schedule_evening_minutes?: number;
   outgoing_phone_replace?: { match?: string; replace?: string };
+  header_tabs?: HeaderTabsMap;
 }
 /**
  * Service responsible for reading and writing CHT instance settings
@@ -218,4 +220,14 @@ export class SettingsService {
       locale_outgoing: changes.localeOutgoing,
     });
   }
+
+  async getHeaderTabsSettings(): Promise<HeaderTabsMap> {
+    const res = await this.get();
+    return res.header_tabs || {};
+  }
+  
+  async updateHeaderTabsSettings(headerTabs: HeaderTabsMap): Promise<void> {
+    return this.updateSettings({ header_tabs: headerTabs });
+  }
+  
 }

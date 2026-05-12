@@ -34,3 +34,16 @@ export interface PartnersDoc {
   _attachments: Record<string, BrandingAttachment>;
   _rev?: string;
 }
+
+export type HeaderTabsMap = Record<string, HeaderTabConfig>;
+
+export interface HeaderTab {
+  name: string;
+  translation: string;
+  defaultIcon: string;
+}
+
+export interface HeaderTabConfig {
+  icon: string;
+  resource_icon: string;
+}
