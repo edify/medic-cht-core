@@ -152,13 +152,13 @@ export class ImagesHeaderTabsIconsComponent implements OnInit{
    * Shows a loader during the operation and displays success or error feedback.
    */
   async submit(): Promise<void> {
-    this.responseStatus = { state:'loading' };
+    this.responseStatus = { state: 'loading' };
     try {
       await this.settingsService.updateHeaderTabsSettings(this.tabsConfig);
-      this.responseStatus = { state:'success', msg: 'images.header.tabs.icons.submit.success' };
+      this.responseStatus = { state: 'success', msg: 'images.header.tabs.icons.submit.success' };
     } catch (error) {
       console.error('Error updating settings', error);
-      this.responseStatus = { state:'error', msg: 'images.header.tabs.icons.submit.failure' };
+      this.responseStatus = { state: 'error', msg: 'images.header.tabs.icons.submit.failure' };
     }
   }
 }
