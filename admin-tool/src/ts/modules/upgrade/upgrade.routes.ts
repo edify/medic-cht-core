@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { UpgradeComponent } from './upgrade.component';
+import { UpgradeComponent } from './upgrade/upgrade.component';
 
 export const routes: Routes = [
   {

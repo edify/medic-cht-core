@@ -23,7 +23,7 @@ import { SmsComponent } from '@admin-tool-modules/sms/sms.component';
 import { AppFormsComponent } from '@admin-tool-modules/forms/app-forms/app-forms.component';
 import { TargetsComponent } from '@admin-tool-modules/targets/targets.component';
 import { MessageQueueComponent } from '@admin-tool-modules/message-queue/message-queue.component';
-import { UpgradeComponent } from '@admin-tool-modules/upgrade/upgrade.component';
+import { UpgradeComponent } from '@admin-tool-modules/upgrade/upgrade/upgrade.component';
 import { ExportComponent } from '@admin-tool-modules/export/export.component';
 import { BackupComponent } from '@admin-tool-modules/backup/backup.component';
 import { DisplayHeaderComponent } from '@admin-tool-modules/display/display-header/display-header.component';

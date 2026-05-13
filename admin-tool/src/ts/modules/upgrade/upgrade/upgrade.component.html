@@ -1,0 +1,28 @@
+<div>
+  @if (loadingPageStatus) {
+    <div class="loader"></div>
+  } @else {
+    <div class="tab-content container-fluid">
+      @if (loadingError) {
+        <p class="alert alert-danger" role="alert">
+          {{ 'instance.upgrade.error.deploy_info_fetch' | translate }}
+        </p>
+      } @else {
+      <div class="section">
+          <legend>{{ 'instance.upgrade.current_version' | translate }}</legend>
+          <dl class="horizontal">
+          <dt>{{ 'instance.upgrade.version' | translate }}</dt>
+          <dd>{{ deployInfo?.base_version }}</dd>
+          <dt>{{ 'instance.upgrade.build.version' | translate }}</dt>
+          <dd>{{ deployInfo?.version }}</dd>
+          <dt>{{ 'instance.upgrade.deployed_by' | translate }}</dt>
+          <dd>{{ deployInfo?.user }}</dd>
+          <dt>{{ 'instance.upgrade.at' | translate }}</dt>
+          <dd>{{ deployInfo?.time | date:'mediumDate' }}</dd>
+          </dl>
+      </div>
+      <p>{{ 'upgrade.description' | translate }}</p>
+      }
+    </div>
+  }
+</div>
