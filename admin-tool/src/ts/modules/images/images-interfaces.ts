@@ -34,3 +34,41 @@ export interface PartnersDoc {
   _attachments: Record<string, BrandingAttachment>;
   _rev?: string;
 }
+
+/**
+ * The full header tabs configuration map as stored in settings.header_tabs.
+ * The key is the tab name (e.g. 'messages', 'tasks').
+ * Only tabs that have been configured at least once appear as keys.
+ *
+ * Example:
+ * {
+ *   messages: { icon: 'fa-envelope', resource_icon: 'icon-pregnancy' },
+ *   tasks:    { icon: '', resource_icon: '' }
+ * }
+ */
+export type HeaderTabsMap = Record<string, HeaderTabConfig>;
+
+/**
+ * Represents a navigation tab in the CHT application header.
+ * Used in the admin tool to display and configure tab icons.
+ * name is the key used in settings.header_tabs.
+ * translation is the i18n key shown in the tab column.
+ * defaultIcon is the FontAwesome class used by default when no custom icon is configured.
+ */
+export interface HeaderTab {
+  name: string;
+  translation: string;
+  defaultIcon: string;
+}
+
+/**
+ * Represents the icon configuration for a single navigation tab
+ * as stored in settings.header_tabs.
+ * icon is a FontAwesome class (e.g. 'fa-envelope') set by the administrator.
+ * resource_icon is the name of an SVG resource from the resources document.
+ * Empty string means no custom configuration — the app uses the default.
+ */
+export interface HeaderTabConfig {
+  icon: string;
+  resource_icon: string;
+}

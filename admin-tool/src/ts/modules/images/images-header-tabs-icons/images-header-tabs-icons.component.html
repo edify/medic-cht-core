@@ -1,0 +1,95 @@
+<div>
+  @if (loadingPageStatus) {
+    <div class="loader"></div>
+  } @else {
+    <div class="tab-content container-fluid">
+      <p>{{ 'images.header.tabs.icons.description' | translate }}</p>
+      <a href="https://fontawesome.com/v4.7.0/" target="_blank" rel="noopener noreferrer">
+        {{ 'images.header.tabs.icons.fontawesome.link' | translate }}
+      </a>
+      @if (loadingError) {
+        <p class="alert alert-danger" role="alert">
+          {{ 'images.header.tabs.icons.request.error' | translate }}
+        </p>
+      } @else {
+        <div class="row selection-heading">
+          <div class="col-sm-3">{{ 'images.header.tabs.icons.tab' | translate }}</div>
+          <div class="col-sm-3">{{ 'images.header.tabs.icons.default' | translate }}</div>
+          <div class="col-sm-3">{{ 'images.header.tabs.icons.fa.icon' | translate }}</div>
+          <div class="col-sm-3">{{ 'images.header.tabs.icons.resource.icon' | translate }}</div>
+        </div>
+        <form class="custom-form" (ngSubmit)="submit()">
+          <ul class="list">
+            @for (tab of tabs; track tab.name) {
+              <li class="row">
+                <div class="col-sm-3">
+                  {{ tab.translation | translate }}
+                </div>
+                <div class="col-sm-3">
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      readonly
+                      [value]="tab.defaultIcon"
+                      class="form-control"
+                      [attr.aria-label]="tab.translation + ' default icon'"/>
+                    <span class="input-group-addon">
+                      <span class="fa {{ tab.defaultIcon }}"></span>
+                    </span>
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="input-group">
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      [(ngModel)]="tabsConfig[tab.name].icon" 
+                      [name]="tab.name + '-icon'" 
+                      [attr.aria-label]="tab.translation + ' fontawesome icon'" />
+                    <span class="input-group-addon">
+                      @if (tabsConfig[tab.name].icon) {
+                        <span class="fa {{ tabsConfig[tab.name].icon }}"></span>
+                      }
+                    </span>
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="input-group">
+                    <select 
+                      class="form-control" 
+                      [(ngModel)]="tabsConfig[tab.name].resource_icon" 
+                      [name]="tab.name + '-resource-icon'" 
+                      [attr.aria-label]="tab.translation + ' resource icon'">
+                      <option value="">-</option>
+                      @for (resourceIcon of resourceIcons; track resourceIcon) {
+                        <option [value]="resourceIcon">{{ resourceIcon }}</option>
+                      }
+                    </select>
+                    <span class="input-group-addon">
+                      @if (tabsConfig[tab.name].resource_icon) {
+                        <span [innerHTML]="getIconContent(tabsConfig[tab.name].resource_icon)"></span>
+                      }
+                    </span>
+                  </div>
+                </div>
+              </li>
+            }
+          </ul>
+          <div class="form-actions">
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="responseStatus.state === 'loading'">
+              {{ 'Submit' | translate }}
+            </button>
+            @if (responseStatus.state === 'loading') {
+              <div class="loader inline"></div>
+            } @else if (responseStatus.state) {
+              <span [class]="responseStatus.state!">{{ responseStatus.msg! | translate }}</span>
+            }
+          </div>
+        </form>
+      }
+    </div>
+  }
+</div>
