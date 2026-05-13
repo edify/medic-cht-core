@@ -1,0 +1,67 @@
+<div class="sms-configuration-container">
+
+  <form>
+    <p>{{ 'configuration.sms.forms.title' | translate }}</p>
+    <legend>{{ 'upload.sms.forms' | translate }}</legend>
+
+    <div class="form-actions">
+      <a class="btn btn-primary" [class.disabled]="status.uploading" (click)="onChooseClick($event)">
+        <i class="fa fa-arrow-up"></i>
+        <span>{{ 'upload' | translate }}</span>
+      </a>
+      @if (status.error) {
+        <div class="error">{{ 'Upload failed' | translate }}</div>
+      }
+      @if (status.uploading) {
+        <div class="loader"></div>
+      }
+      <span class="help-block">{{ 'upload.json.forms.help' | translate }}</span>
+      <div class="hide">
+        <input #fileInput type="file" accept="application/json" />
+      </div>
+    </div>
+  </form>
+
+  <div class="section">
+    <fieldset>
+      <legend>{{ 'Installed Forms' | translate }}</legend>
+      <a
+        class="btn btn-primary"
+        [attr.download]="download.name"
+        [href]="download.url"
+      >
+        <i class="fa fa-arrow-down"></i>
+        <span>{{ 'Download' | translate }}</span>
+      </a>
+
+      <div class="row selection-heading">
+        <div class="col-sm-2">{{ 'icon' | translate }}</div>
+        <div class="col-sm-5">{{ 'unique.id' | translate }}</div>
+        <div class="col-sm-5">{{ 'title' | translate }}</div>
+      </div>
+
+      <div>
+        <ul>
+          @for (form of formsList; track form.meta.code) {
+            <li class="row">
+              <div class="col-sm-2">
+                @if (getIconContent(form.meta.icon).isSvg) {
+                  <span [innerHTML]="getIconContent(form.meta.icon).content"></span>
+                } @else if (getIconContent(form.meta.icon).content) {
+                  <img [src]="getIconContent(form.meta.icon).content" />
+                }
+              </div>
+              <div class="col-sm-5">{{ form.meta.code }}</div>
+              @if (form.meta.translation_key) {
+                <div class="col-sm-5">{{ form.meta.translation_key | translate }}</div>
+              } @else {
+                <div class="col-sm-5">{{ form.meta.label }}</div>
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    </fieldset>
+  </div>
+
+</div>
