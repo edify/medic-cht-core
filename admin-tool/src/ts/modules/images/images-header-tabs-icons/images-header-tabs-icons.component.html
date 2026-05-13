@@ -18,7 +18,7 @@
           <div class="col-sm-3">{{ 'images.header.tabs.icons.fa.icon' | translate }}</div>
           <div class="col-sm-3">{{ 'images.header.tabs.icons.resource.icon' | translate }}</div>
         </div>
-        <form class="custom-form">
+        <form class="custom-form" (ngSubmit)="submit()">
           <ul class="list">
             @for (tab of tabs; track tab.name) {
               <li class="row">
@@ -77,9 +77,8 @@
           </ul>
           <div class="form-actions">
             <button
-              type="button"
+              type="submit"
               class="btn btn-primary"
-              (click)="submit()"
               [disabled]="responseStatus.state === 'loading'">
               {{ 'Submit' | translate }}
             </button>

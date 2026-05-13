@@ -193,6 +193,53 @@ describe('ImagesHeaderTabsIconsComponent', () => {
       expect(result).to.be.null;
     });
   });
+  describe('submit', () => {
+    it('should set loading state during submit', async () => {
+      settingsService.updateHeaderTabsSettings = sinon.stub().callsFake(() => {
+        expect(component.responseStatus.state).to.equal('loading');
+        return Promise.resolve();
+      });
+      await component.submit();
+    });
+
+    it('should call updateHeaderTabsSettings with tabsConfig', async () => {
+      settingsService.updateHeaderTabsSettings = sinon.stub().resolves();
+      await fixture.whenStable();
+      await component.submit();
+      expect(settingsService.updateHeaderTabsSettings.calledWith(component.tabsConfig)).to.be.true;
+    });
+
+    it('should set success responseStatus after submit', async () => {
+      settingsService.updateHeaderTabsSettings = sinon.stub().resolves();
+      await component.submit();
+      expect(component.responseStatus.state).to.equal('success');
+      expect(component.responseStatus.msg).to.equal('images.header.tabs.icons.submit.success');
+    });
+
+    it('should set error responseStatus if updateHeaderTabsSettings fails', async () => {
+      settingsService.updateHeaderTabsSettings = sinon.stub().rejects(new Error('error'));
+      sinon.stub(console, 'error');
+      await component.submit();
+      expect(component.responseStatus.state).to.equal('error');
+      expect(component.responseStatus.msg).to.equal('images.header.tabs.icons.submit.failure');
+    });
+
+    it('should call console.error if updateHeaderTabsSettings fails', async () => {
+      settingsService.updateHeaderTabsSettings = sinon.stub().rejects(new Error('error'));
+      const consoleStub = sinon.stub(console, 'error');
+      await component.submit();
+      expect(consoleStub.calledWith('Error updating settings', sinon.match.any)).to.be.true;
+    });
+
+    it('should disable submit button when responseStatus is loading', async () => {
+      await fixture.whenStable();
+      component.responseStatus = { state: 'loading' };
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const button = compiled.querySelector('button[type="submit"]') as HTMLButtonElement;
+      expect(button.disabled).to.be.true;
+    });
+  });
   describe('DOM', () => {
     it('should show loader when loadingPageStatus is true', () => {
       component.loadingPageStatus = true;

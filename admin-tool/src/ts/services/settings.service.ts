@@ -243,5 +243,4 @@ export class SettingsService {
   async updateHeaderTabsSettings(headerTabs: HeaderTabsMap): Promise<void> {
     return this.updateSettings({ header_tabs: headerTabs });
   }
-  
 }
