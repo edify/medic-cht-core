@@ -22,3 +22,25 @@ export interface DeployInfo {
   namespace?: string;
   schema_version?: number;
 }
+
+export interface Build {
+  build: string;
+  version: string;
+  time: string;
+  base_version?: string;
+}
+
+export interface VersionGroups {
+  releases: Build[];
+  betas: Build[];
+  branches: Build[];
+  featureReleases: Build[];
+}
+
+export interface ParsedVersion {
+  major: number;
+  minor: number;
+  patch: number;
+  beta?: number;
+  featureRelease?: string;
+}
