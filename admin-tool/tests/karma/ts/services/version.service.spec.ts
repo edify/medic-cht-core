@@ -12,32 +12,32 @@ describe('VersionService', () => {
 
   describe('parse', () => {
     it('should return undefined for undefined input', () => {
-        expect(service.parse(undefined)).to.be.undefined;
+      expect(service.parse(undefined)).to.be.undefined;
     });
 
     it('should return undefined for empty string', () => {
-        expect(service.parse('')).to.be.undefined;
+      expect(service.parse('')).to.be.undefined;
     });
 
     it('should return undefined for branch name', () => {
-        expect(service.parse('master')).to.be.undefined;
+      expect(service.parse('master')).to.be.undefined;
     });
 
     it('should return undefined for branch with numbers', () => {
-        expect(service.parse('10695-interaction-log')).to.be.undefined;
+      expect(service.parse('10695-interaction-log')).to.be.undefined;
     });
 
     it('should parse a release version', () => {
-        expect(service.parse('5.1.2')).to.deep.equal({ major: 5, minor: 1, patch: 2 });
+      expect(service.parse('5.1.2')).to.deep.equal({ major: 5, minor: 1, patch: 2 });
     });
 
     it('should parse a beta version', () => {
-        expect(service.parse('5.1.2-beta.2')).to.deep.equal({ major: 5, minor: 1, patch: 2, beta: 2 });
+      expect(service.parse('5.1.2-beta.2')).to.deep.equal({ major: 5, minor: 1, patch: 2, beta: 2 });
     });
 
     it('should parse a feature release version', () => {
-        const result = service.parse('5.1.0-FR-myfeature');
-        expect(result).to.deep.equal({ major: 5, minor: 1, patch: 0, featureRelease: 'FR-myfeature' });
+      const result = service.parse('5.1.0-FR-myfeature');
+      expect(result).to.deep.equal({ major: 5, minor: 1, patch: 0, featureRelease: 'FR-myfeature' });
     });
 
     it('should parse a feature release beta version', () => {
@@ -49,61 +49,71 @@ describe('VersionService', () => {
     it('should return 0 for equal versions', () => {
       expect(service.compare(
         { major: 5, minor: 1, patch: 2 }, 
-        { major: 5, minor: 1, patch: 2 })).to.equal(0);
+        { major: 5, minor: 1, patch: 2 }
+      )).to.equal(0);
     });
 
     it('should return positive when version1 major is greater', () => {
       expect(service.compare(
         { major: 6, minor: 0, patch: 0 }, 
-        { major: 5, minor: 0, patch: 0 })).to.be.greaterThan(0);
+        { major: 5, minor: 0, patch: 0 }
+      )).to.be.greaterThan(0);
     });
 
     it('should return negative when version1 major is lesser', () => {
       expect(service.compare(
         { major: 4, minor: 0, patch: 0 }, 
-        { major: 5, minor: 0, patch: 0 })).to.be.lessThan(0);
+        { major: 5, minor: 0, patch: 0 }
+      )).to.be.lessThan(0);
     });
 
     it('should return positive when version1 minor is greater', () => {
       expect(service.compare(
         { major: 5, minor: 2, patch: 0 }, 
-        { major: 5, minor: 1, patch: 0 })).to.be.greaterThan(0);
+        { major: 5, minor: 1, patch: 0 }
+      )).to.be.greaterThan(0);
     });
 
     it('should return positive when version1 patch is greater', () => {
       expect(service.compare(
         { major: 5, minor: 1, patch: 2 }, 
-        { major: 5, minor: 1, patch: 1 })).to.be.greaterThan(0);
+        { major: 5, minor: 1, patch: 1 }
+      )).to.be.greaterThan(0);
     });
 
     it('should return 0 when both have no beta', () => {
       expect(service.compare(
         { major: 5, minor: 1, patch: 0 }, 
-        { major: 5, minor: 1, patch: 0 })).to.equal(0);
+        { major: 5, minor: 1, patch: 0 }
+      )).to.equal(0);
     });
 
     it('should return negative when version1 has no beta and version2 has beta', () => {
       expect(service.compare(
         { major: 5, minor: 1, patch: 0 }, 
-        { major: 5, minor: 1, patch: 0, beta: 1 })).to.be.lessThan(0);
+        { major: 5, minor: 1, patch: 0, beta: 1 }
+      )).to.be.lessThan(0);
     });
 
     it('should return positive when version1 has beta and version2 has no beta', () => {
       expect(service.compare(
         { major: 5, minor: 1, patch: 0, beta: 1 }, 
-        { major: 5, minor: 1, patch: 0 })).to.be.greaterThan(0);
+        { major: 5, minor: 1, patch: 0 }
+      )).to.be.greaterThan(0);
     });
 
     it('should return positive when version1 beta is greater', () => {
       expect(service.compare(
         { major: 5, minor: 1, patch: 0, beta: 2 }, 
-        { major: 5, minor: 1, patch: 0, beta: 1 })).to.be.greaterThan(0);
+        { major: 5, minor: 1, patch: 0, beta: 1 }
+      )).to.be.greaterThan(0);
     });
 
     it('should return negative when version1 beta is lesser', () => {
       expect(service.compare(
         { major: 5, minor: 1, patch: 0, beta: 1 }, 
-        { major: 5, minor: 1, patch: 0, beta: 2 })).to.be.lessThan(0);
+        { major: 5, minor: 1, patch: 0, beta: 2 }
+      )).to.be.lessThan(0);
     });
   });
   describe('minimumNextRelease', () => {

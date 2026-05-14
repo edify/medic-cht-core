@@ -92,7 +92,7 @@ export class VersionService {
    */
   minimumNextRelease(version: string | undefined): ParsedVersion {
     const minVersion = this.parse(version);
-    if(!minVersion) {
+    if (!minVersion) {
       return {} as ParsedVersion;
     }
     if (minVersion.beta !== undefined) {
