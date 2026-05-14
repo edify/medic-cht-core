@@ -1,0 +1,23 @@
+@import (reference) "../../../../css/variables.less";
+
+.section {
+  margin-bottom: 1.5rem;
+}
+
+legend {
+  color: @gray-dark;
+  border-bottom: 0.0625rem solid @gray-light;
+  margin-bottom: 1rem;
+}
+
+dl.horizontal {
+  display: grid;
+  grid-template-columns: 10rem 1fr;
+  gap: 0.50rem 1rem;
+  margin-left: 3rem;
+
+  dt {
+    font-weight: bold;
+    text-align: right;
+  }
+}
