@@ -72,6 +72,12 @@ export const MOCK_VERSION_GROUPS: VersionGroups = {
       time: '2026-04-30T14:36:50.238Z',
       base_version: '5.1.2',
     },
+    {
+      build: '5.0.3-5.0.x.23947254248-1775221949913',
+      version: '5.0.x',
+      time: '2026-04-03T13:12:29.938Z',
+      base_version: '5.0.3',
+    },
   ],
   featureReleases: [],
 };

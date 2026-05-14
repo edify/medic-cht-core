@@ -85,7 +85,12 @@
                           <span class="label label-info">{{ beta.version }}</span>
                         </div>
                         <div class="col-sm-3">{{ beta.time | date:'mediumDate' }}</div>
-                        <div class="col-sm-2">{{ beta.base_version }}</div>
+                        <div class="col-sm-2">
+                          {{ beta.base_version }}
+                          @if (potentiallyIncompatible(beta)) {
+                            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                          }
+                        </div>
                         <div class="col-sm-2">
                           <button type="button" class="btn btn-default">
                             {{ 'instance.upgrade.stage' | translate }}
@@ -112,7 +117,12 @@
                           <span class="label label-info">{{ branch.version }}</span>
                         </div>
                         <div class="col-sm-3">{{ branch.time | date:'medium' }}</div>
-                        <div class="col-sm-2">{{ branch.base_version }}</div>
+                        <div class="col-sm-2">
+                          {{ branch.base_version }}
+                          @if (potentiallyIncompatible(branch)) {
+                            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                          }
+                        </div>
                         <div class="col-sm-2">
                           <button type="button" class="btn btn-default">
                             {{ 'instance.upgrade.stage' | translate }}

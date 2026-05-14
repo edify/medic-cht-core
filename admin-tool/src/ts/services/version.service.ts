@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Build, DeployInfo, ParsedVersion } from '@admin-tool-modules/upgrade/upgrade-interfaces';
 
+/**
+ * Service responsible for parsing and comparing CHT version strings.
+ * Provides utilities to determine version compatibility and calculate
+ * the minimum next release for a given version.
+ * Contains no external dependencies — all methods are pure functions.
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -8,6 +14,17 @@ export class VersionService {
 
   constructor() {}
 
+  /**
+   * Parses a version string into a structured object.
+   * Accepts release (e.g. '5.1.2'), beta (e.g. '5.1.2-beta.2'),
+   * and Feature Release (e.g. '5.1.0-FR-myfeature') formats.
+   * Returns undefined if the string is undefined, empty, or does not
+   * match the expected semver format — branch names like 'master' or
+   * '10695-interaction-log' will return undefined.
+   *
+   * @param {string | undefined} versionString - the version string to parse
+   * @returns {ParsedVersion | undefined}
+   */
   parse(versionString: string | undefined): ParsedVersion | undefined {
     if (!versionString) {
       return undefined;
@@ -35,6 +52,15 @@ export class VersionService {
     return version;
   }
 
+  /**
+   * Compares two parsed versions and returns a number indicating their relative order.
+   * Returns negative if version1 is greater than version2, positive if version1 is lesser,
+   * and 0 if they are equal. A release is considered greater than a beta of the same version.
+   *
+   * @param {ParsedVersion} version1 - the first version to compare
+   * @param {ParsedVersion} version2 - the second version to compare
+   * @returns {number}
+   */
   compare(version1: ParsedVersion, version2: ParsedVersion): number {
     const parts: (keyof ParsedVersion)[] = ['major', 'minor', 'patch'];
     for (const part of parts) {
@@ -54,6 +80,16 @@ export class VersionService {
     return version1.beta! - version2.beta!;
   }
 
+  /**
+   * Calculates the minimum version that would be a valid next release
+   * given the currently installed version string.
+   * If the current version is a beta, increments the beta number.
+   * If the current version is a release, increments the patch number.
+   * Returns an empty ParsedVersion if the version string cannot be parsed.
+   *
+   * @param {string | undefined} version - the current version string
+   * @returns {ParsedVersion}
+   */
   minimumNextRelease(version: string | undefined): ParsedVersion {
     const minVersion = this.parse(version);
     if(!minVersion) {
@@ -67,6 +103,17 @@ export class VersionService {
     return minVersion;
   }
 
+  /**
+   * Determines whether a given build is potentially incompatible with the current deploy.
+   * Returns true if the build version is older than the current deploy version,
+   * if the build has no base_version and its version string is not parseable,
+   * or if the current deploy version cannot be parsed.
+   * Used to display a warning icon next to potentially incompatible builds in the UI.
+   *
+   * @param {Build} release - the build to check
+   * @param {DeployInfo} currentDeploy - the currently running deploy information
+   * @returns {boolean}
+   */
   potentiallyIncompatible(release: Build, currentDeploy: DeployInfo): boolean {
     if (!release.base_version && !this.parse(release.version)) {
       return true;
@@ -78,6 +125,4 @@ export class VersionService {
     const releaseVersion = this.parse(release.base_version || release.version);
     return this.compare(currentVersion, releaseVersion!) > 0;
   }
-
-
 }
