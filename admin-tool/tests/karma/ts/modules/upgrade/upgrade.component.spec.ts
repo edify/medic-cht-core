@@ -4,6 +4,7 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 import { UpgradeComponent } from '@admin-tool-modules/upgrade/upgrade/upgrade.component';
 import { UpgradeService } from '@admin-tool-services/upgrade.service';
+import { MOCK_VERSION_GROUPS } from '@admin-tool-modules/upgrade/upgrade-mock-data';
 
 describe('UpgradeComponent', () => {
   let component: UpgradeComponent;
@@ -111,6 +112,62 @@ describe('UpgradeComponent', () => {
       await component.ngOnInit();
       expect(component.loadingError).to.be.false;
     });
+
+    it('should set versionGroups after init', async () => {
+      await fixture.whenStable();
+      expect(component.versionGroups.releases.length).to.be.greaterThan(0);
+    });
+
+    it('should set releases after init', async () => {
+      await fixture.whenStable();
+      expect(component.versionGroups.releases).to.deep.equal(MOCK_VERSION_GROUPS.releases);
+    });
+
+    it('should set betas after init', async () => {
+      await fixture.whenStable();
+      expect(component.versionGroups.betas).to.deep.equal(MOCK_VERSION_GROUPS.betas);
+    });
+
+    it('should set branches after init', async () => {
+      await fixture.whenStable();
+      expect(component.versionGroups.branches).to.deep.equal(MOCK_VERSION_GROUPS.branches);
+    });
+  });
+  describe('potentiallyIncompatible', () => {
+    beforeEach(async () => {
+      await fixture.whenStable();
+    });
+
+    it('should return false when deployInfo is null', () => {
+      component.deployInfo = null;
+      const release = MOCK_VERSION_GROUPS.releases[0];
+      expect(component.potentiallyIncompatible(release)).to.be.false;
+    });
+
+    it('should return false for a newer release', () => {
+      const release = { 
+        build: '5.1.2.25216563202', 
+        version: '5.1.2', 
+        time: '2026-05-01T13:48:56.868Z', 
+        base_version: '5.1.2' 
+      };
+      expect(component.potentiallyIncompatible(release)).to.be.false;
+    });
+
+    it('should return true for an older release', () => {
+      const release = { 
+        build: '4.22.0.18399126672', 
+        version: '4.22.0', 
+        time: '2025-10-10T07:11:45.528Z', 
+        base_version: '4.22.0' 
+      };
+      expect(component.potentiallyIncompatible(release)).to.be.true;
+    });
+
+    it('should return true for a branch with unparseable version', () => {
+      const branch = { build: '5.1.0-master.123', version: 'master', time: '2026-05-13T06:27:07.661Z' };
+      expect(component.potentiallyIncompatible(branch)).to.be.true;
+    });
   });
   describe('DOM', () => {
     it('should show loader when loadingPageStatus is true', () => {
@@ -176,6 +233,55 @@ describe('UpgradeComponent', () => {
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('p')).to.exist;
+    });
+
+    it('should render releases section when loadingError is false', async () => {
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const sections = compiled.querySelectorAll('.section');
+      expect(sections.length).to.be.greaterThan(1);
+    });
+
+    it('should render stage button for each release', async () => {
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const releasesSection = compiled.querySelectorAll('.section')[1];
+      const buttons = releasesSection.querySelectorAll('.btn-default');
+      expect(buttons.length).to.equal(MOCK_VERSION_GROUPS.releases.length);
+    });
+
+    it('should render a row for each release', async () => {
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const releasesSection = compiled.querySelectorAll('.section')[1];
+      const rows = releasesSection.querySelectorAll('.row:not(.selection-heading)');
+      expect(rows.length).to.equal(MOCK_VERSION_GROUPS.releases.length);
+    });
+
+    it('should render warning icon for potentially incompatible release', async () => {
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.fa-exclamation-triangle')).to.exist;
+    });
+
+    it('should render pre-releases accordion panel', async () => {
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.panel-group')).to.exist;
+    });
+
+    it('should render version badge for each release', async () => {
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const releasesSection = compiled.querySelectorAll('.section')[1];
+      const badges = releasesSection.querySelectorAll('.label-info');
+      expect(badges.length).to.equal(MOCK_VERSION_GROUPS.releases.length);
     });
   });
 });

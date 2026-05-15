@@ -21,3 +21,52 @@ dl.horizontal {
     text-align: right;
   }
 }
+
+p.description {
+  margin-bottom: 3rem;
+}
+
+.row {
+  border-bottom: 0.0625rem solid @gray-light;
+  padding: 0.75rem 0;
+  align-items: center;
+  display: flex;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.selection-heading {
+  font-weight: bold;
+  border-bottom: 0.25rem solid @gray-light;
+  padding: 0.75rem 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.label-info {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.panel-heading a {
+  display: inline-block;
+  text-decoration: none;
+  color: @gray-ultra-dark;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  .fa-chevron-right {
+    margin-right: 0.5rem;
+    transition: transform 0.2s;
+  }
+}
+
+.panel-heading a[aria-expanded="true"] .fa-chevron-right {
+  transform: rotate(90deg);
+}

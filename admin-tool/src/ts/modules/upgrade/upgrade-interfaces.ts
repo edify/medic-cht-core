@@ -22,3 +22,52 @@ export interface DeployInfo {
   namespace?: string;
   schema_version?: number;
 }
+
+/**
+ * Represents a single available build returned by the builds database.
+ * version is the human-readable identifier shown in the UI.
+ * For releases: clean semver (e.g. '5.1.2').
+ * For betas: semver with beta suffix (e.g. '5.1.2-beta.2').
+ * For branches: branch name (e.g. 'master', '10695-interaction-log').
+ * build is the full internal build identifier.
+ * time is the ISO date string of when the build was created.
+ * base_version is the clean semver used for compatibility checks, optional
+ * because old builds may not include it.
+ */
+export interface Build {
+  build: string;
+  version: string;
+  time: string;
+  base_version?: string;
+}
+
+/**
+ * Groups available builds by type for display in the upgrade page.
+ * releases are stable tagged versions (e.g. 5.1.2).
+ * betas are pre-release versions (e.g. 5.1.2-beta.2).
+ * branches are CI builds from active branches.
+ * featureReleases are builds from Feature Release branches, only present
+ * when the current deploy is running a Feature Release version.
+ */
+export interface VersionGroups {
+  releases: Build[];
+  betas: Build[];
+  branches: Build[];
+  featureReleases: Build[];
+}
+
+/**
+ * Represents a parsed semantic version string.
+ * Used internally by VersionService to compare and calculate minimum next releases.
+ * major, minor and patch are always present when the version string is valid.
+ * beta is only present for pre-release versions (e.g. 5.1.2-beta.2).
+ * featureRelease is only present for Feature Release versions (e.g. 5.1.0-FR-myfeature).
+ * For a Feature Release beta, featureRelease includes the '-beta' suffix (e.g. 'FR-myfeature-beta').
+ */
+export interface ParsedVersion {
+  major: number;
+  minor: number;
+  patch: number;
+  beta?: number;
+  featureRelease?: string;
+}
