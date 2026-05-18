@@ -27,6 +27,7 @@ describe('UpgradeComponent', () => {
     upgradeService = {
       getDeployInfo: sinon.stub().resolves(mockDeployInfo),
       getCanUpgrade: sinon.stub().resolves(false),
+      getBuilds: sinon.stub().resolves(MOCK_VERSION_GROUPS),
     };
 
     return TestBed.configureTestingModule({
@@ -69,6 +70,10 @@ describe('UpgradeComponent', () => {
 
     it('should call getCanUpgrade on init', () => {
       expect(upgradeService.getCanUpgrade.calledOnce).to.be.true;
+    });
+
+    it('should call getBuilds on init', () => {
+      expect(upgradeService.getBuilds.calledOnce).to.be.true;
     });
 
     it('should set deployInfo after init', async () => {
@@ -131,6 +136,17 @@ describe('UpgradeComponent', () => {
     it('should set branches after init', async () => {
       await fixture.whenStable();
       expect(component.versionGroups.branches).to.deep.equal(MOCK_VERSION_GROUPS.branches);
+    });
+    it('should call getBuilds with deployInfo', async () => {
+      await fixture.whenStable();
+      expect(upgradeService.getBuilds.calledWith(mockDeployInfo)).to.be.true;
+    });
+
+    it('should set loadingError to true if getBuilds fails', async () => {
+      sinon.stub(console, 'error');
+      upgradeService.getBuilds.rejects(new Error('error'));
+      await component.ngOnInit();
+      expect(component.loadingError).to.be.true;
     });
   });
   describe('potentiallyIncompatible', () => {
@@ -282,6 +298,36 @@ describe('UpgradeComponent', () => {
       const releasesSection = compiled.querySelectorAll('.section')[1];
       const badges = releasesSection.querySelectorAll('.label-info');
       expect(badges.length).to.equal(MOCK_VERSION_GROUPS.releases.length);
+    });
+    
+    it('should not show feature releases section when featureReleases is empty', async () => {
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const panelBody = compiled.querySelector('.panel-body');
+      const sections = panelBody!.querySelectorAll('.section');
+      expect(sections.length).to.equal(2);
+    });
+
+    it('should show feature releases section when featureReleases exist', async () => {
+      await fixture.whenStable();
+      component.versionGroups = { ...MOCK_VERSION_GROUPS, featureReleases: [MOCK_VERSION_GROUPS.releases[0]] };
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const panelBody = compiled.querySelector('.panel-body');
+      const sections = panelBody!.querySelectorAll('.section');
+      expect(sections.length).to.equal(3);
+    });
+
+    it('should render a row for each feature release', async () => {
+      await fixture.whenStable();
+      component.versionGroups = { ...MOCK_VERSION_GROUPS, featureReleases: [MOCK_VERSION_GROUPS.releases[0]] };
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const panelBody = compiled.querySelector('.panel-body');
+      const featureSection = panelBody!.querySelectorAll('.section')[0];
+      const rows = featureSection.querySelectorAll('.row:not(.selection-heading)');
+      expect(rows.length).to.equal(1);
     });
   });
 });

@@ -68,6 +68,35 @@
                 <p class="alert alert-warning">
                   {{ 'instance.upgrade.pre_releases_warning' | translate }}
                 </p>
+                @if (versionGroups.featureReleases.length) {
+                  <div class="section">
+                    <legend>{{ 'instance.upgrade.feature_releases' | translate }}</legend>
+                    <div class="row selection-heading">
+                      <div class="col-sm-5">{{ 'instance.upgrade.version' | translate }}</div>
+                      <div class="col-sm-3">{{ 'instance.upgrade.date' | translate }}</div>
+                      <div class="col-sm-2"></div>
+                      <div class="col-sm-2"></div>
+                    </div>
+                    @for (featureRelease of versionGroups.featureReleases; track featureRelease.build) {
+                      <div class="row">
+                        <div class="col-sm-5">
+                          <span class="label label-info">{{ featureRelease.version }}</span>
+                        </div>
+                        <div class="col-sm-3">{{ featureRelease.time | date:'mediumDate' }}</div>
+                        <div class="col-sm-2">
+                          @if (potentiallyIncompatible(featureRelease)) {
+                            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                          }
+                        </div>
+                        <div class="col-sm-2">
+                          <button type="button" class="btn btn-default">
+                            {{ 'instance.upgrade.stage' | translate }}
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
                 <div class="section">
                   <legend>{{ 'instance.upgrade.betas' | translate }}</legend>
                   @if (!versionGroups.betas.length) {
