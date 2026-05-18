@@ -26,7 +26,14 @@ describe('UpgradeService', () => {
 
   const mockBuildsResponse = {
     rows: [
-      { value: { build: '5.1.2.25216563202', version: '5.1.2', time: '2026-05-01T13:48:56.868Z', base_version: '5.1.2' } },
+      { value: 
+        { 
+          build: '5.1.2.25216563202', 
+          version: '5.1.2', 
+          time: '2026-05-01T13:48:56.868Z', 
+          base_version: '5.1.2' 
+        } 
+      },
     ]
   };
 
