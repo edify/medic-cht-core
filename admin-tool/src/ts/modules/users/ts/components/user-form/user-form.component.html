@@ -17,7 +17,7 @@
           >
             <span aria-hidden="true">&times;</span>
           </button>
-          <h4 class="modal-title">{{ 'Add User' | translate }}</h4>
+          <h4 class="modal-title">{{ title | translate }}</h4>
         </div>
 
         <!-- Body -->
@@ -34,17 +34,26 @@
             </p>
           }
 
-          <!-- Username -->
-          <div class="form-group required" [class.has-error]="errors.username">
-            <label for="username">{{ 'User Name' | translate }}</label>
+          <!-- Username — editable on create, read-only on edit -->
+          <div
+            class="form-group"
+            [class.required]="!isEditMode"
+            [class.has-error]="errors.username"
+          >
+            <label for="username">{{ "User Name" | translate }}</label>
             <input
               id="username"
               type="text"
               class="form-control"
               [(ngModel)]="model.username"
+              [disabled]="isEditMode"
               autocomplete="off"
             />
-            <span class="help-block text-muted">{{ 'user.username.help' | translate }}</span>
+            @if (!isEditMode) {
+              <span class="help-block text-muted">{{
+                "user.username.help" | translate
+              }}</span>
+            }
             @if (errors.username) {
               <span class="help-block">{{ errors.username | translate }}</span>
             }
@@ -52,19 +61,21 @@
 
           <!-- Full Name -->
           <div class="form-group">
-            <label for="fullname">{{ 'Full Name' | translate }}</label>
+            <label for="fullname">{{ "Full Name" | translate }}</label>
             <input
               id="fullname"
               type="text"
               class="form-control"
               [(ngModel)]="model.fullname"
             />
-            <span class="help-block text-muted">{{ 'user.fullname.help' | translate }}</span>
+            <span class="help-block text-muted">{{
+              "user.fullname.help" | translate
+            }}</span>
           </div>
 
           <!-- Email -->
           <div class="form-group" [class.has-error]="errors.email">
-            <label for="email">{{ 'Email Address' | translate }}</label>
+            <label for="email">{{ "Email Address" | translate }}</label>
             <input
               id="email"
               type="text"
@@ -82,14 +93,16 @@
             [class.required]="model.token_login"
             [class.has-error]="errors.phone"
           >
-            <label for="phone">{{ 'Phone Number' | translate }}</label>
+            <label for="phone">{{ "Phone Number" | translate }}</label>
             <input
               id="phone"
               type="text"
               class="form-control"
               [(ngModel)]="model.phone"
             />
-            <span class="help-block text-muted">{{ 'user.phone.help' | translate }}</span>
+            <span class="help-block text-muted">{{
+              "user.phone.help" | translate
+            }}</span>
             @if (errors.phone) {
               <span class="help-block">{{ errors.phone | translate }}</span>
             }
@@ -97,7 +110,7 @@
 
           <!-- Roles -->
           <div class="form-group required" [class.has-error]="errors.roles">
-            <label>{{ 'configuration.role' | translate }}</label> *
+            <label>{{ "configuration.role" | translate }}</label> *
             <ul class="list-unstyled">
               @for (role of availableRoles; track role.key) {
                 <li class="checkbox">
@@ -124,13 +137,15 @@
             [class.required]="isOfflineRole"
             [class.has-error]="errors.place"
           >
-            <label for="facility-select">{{ 'Facility' | translate }}</label>
+            <label for="facility-select">{{ "Facility" | translate }}</label>
             <select
               id="facility-select"
               class="form-control"
               #facilitySelect
             ></select>
-            <span class="help-block text-muted">{{ 'user.place.help' | translate }}</span>
+            <span class="help-block text-muted">{{
+              "user.place.help" | translate
+            }}</span>
             @if (errors.place) {
               <span class="help-block">{{ errors.place | translate }}</span>
             }
@@ -142,8 +157,12 @@
             [class.required]="isOfflineRole"
             [class.has-error]="errors.contact"
           >
-            <label for="contact-select">{{ 'associated.contact' | translate }}</label>
-            <span class="help-block text-muted">{{ 'associated.contact.help' | translate }}</span>
+            <label for="contact-select">{{
+              "associated.contact" | translate
+            }}</label>
+            <span class="help-block text-muted">{{
+              "associated.contact.help" | translate
+            }}</span>
             <select
               id="contact-select"
               class="form-control"
@@ -157,19 +176,27 @@
           <!-- SSO Username -->
           @if (allowSSOLogin && !model.token_login) {
             <div class="form-group">
-              <label for="sso-login">{{ 'user.sso.username' | translate }}</label>
+              <label for="sso-login">{{
+                "user.sso.username" | translate
+              }}</label>
               <input
                 id="sso-login"
                 type="text"
                 class="form-control"
                 [(ngModel)]="model.oidc_username"
               />
-              <span class="help-block text-muted">{{ 'user.sso.username.help' | translate }}</span>
+              <span class="help-block text-muted">{{
+                "user.sso.username.help" | translate
+              }}</span>
             </div>
           }
 
-          <!-- Token Login -->
-          @if (allowTokenLogin && !(allowSSOLogin && model.oidc_username)) {
+          <!-- Token Login — enable (shown in both modes when not already enabled) -->
+          @if (
+            allowTokenLogin &&
+            !model.tokenLoginEnabled &&
+            !(allowSSOLogin && model.oidc_username)
+          ) {
             <div class="form-group">
               <input
                 type="checkbox"
@@ -177,18 +204,97 @@
                 [(ngModel)]="model.token_login"
               />
               <label for="token-login" class="form-check-label">
-                {{ 'configuration.enable.token.login' | translate }}
+                {{ "configuration.enable.token.login" | translate }}
               </label>
               <div class="help-block text-muted">
-                {{ 'configuration.enable.token.login.help' | translate }}
+                {{ "configuration.enable.token.login.help" | translate }}
+              </div>
+            </div>
+          }
+
+          <!-- Token Login — manage (shown in edit mode when already enabled) -->
+          @if (
+            isEditMode &&
+            allowTokenLogin &&
+            model.tokenLoginEnabled &&
+            !(allowSSOLogin && model.oidc_username)
+          ) {
+            <div class="form-group">
+              <p>
+                <label class="form-check-label">
+                  @if (
+                    model.tokenLoginEnabled.active &&
+                    model.tokenLoginEnabled.expiration_date > 0
+                  ) {
+                    <span>{{
+                      "configuration.enable.token.login.enabled.active"
+                        | translate
+                    }}</span>
+                  } @else if (
+                    model.tokenLoginEnabled.active &&
+                    !model.tokenLoginEnabled.expiration_date
+                  ) {
+                    <span>{{
+                      "configuration.enable.token.login.enabled.expired"
+                        | translate
+                    }}</span>
+                  } @else {
+                    <span>{{
+                      "configuration.enable.token.login.enabled.inactive"
+                        | translate
+                    }}</span>
+                  }
+                </label>
+              </p>
+              <div>
+                <input
+                  type="radio"
+                  id="unmodified-token-login"
+                  [value]="null"
+                  [(ngModel)]="model.token_login"
+                />
+                <label for="unmodified-token-login" class="form-check-label">
+                  {{ "configuration.enable.token.login.no.modify" | translate }}
+                </label>
+              </div>
+              <div>
+                <input
+                  type="radio"
+                  id="disable-token-login"
+                  [value]="false"
+                  [(ngModel)]="model.token_login"
+                />
+                <label for="disable-token-login" class="form-check-label">
+                  {{ "configuration.enable.token.login.disable" | translate }}
+                </label>
+              </div>
+              <div>
+                <input
+                  type="radio"
+                  id="refresh-token-login"
+                  [value]="true"
+                  [(ngModel)]="model.token_login"
+                />
+                <label for="refresh-token-login" class="form-check-label">
+                  {{ "configuration.enable.token.login.refresh" | translate }}
+                </label>
+              </div>
+              <div class="help-block text-muted">
+                {{
+                  "configuration.enable.token.login.refresh.help" | translate
+                }}
               </div>
             </div>
           }
 
           <!-- Password -->
           @if (!passwordHidden) {
-            <div class="form-group required" [class.has-error]="errors.password">
-              <label for="password">{{ 'Password' | translate }}</label>
+            <div
+              class="form-group"
+              [class.required]="!isEditMode"
+              [class.has-error]="errors.password"
+            >
+              <label for="password">{{ "Password" | translate }}</label>
               <div class="input-group">
                 <input
                   id="password"
@@ -202,7 +308,10 @@
                     type="button"
                     class="btn btn-default"
                     (click)="togglePassword()"
-                    [attr.aria-label]="(model.showPassword ? 'password.hide' : 'password.show') | translate"
+                    [attr.aria-label]="
+                      (model.showPassword ? 'password.hide' : 'password.show')
+                        | translate
+                    "
                   >
                     <i
                       class="fa fa-eye"
@@ -211,18 +320,27 @@
                   </button>
                 </span>
               </div>
-              <span class="help-block text-muted">{{ 'update.password.help' | translate }}</span>
+              @if (!isEditMode) {
+                <span class="help-block text-muted">{{
+                  "update.password.help" | translate
+                }}</span>
+              }
               @if (errors.password) {
-                <span class="help-block">{{ errors.password | translate }}</span>
+                <span class="help-block">{{
+                  errors.password | translate
+                }}</span>
               }
             </div>
 
             <!-- Confirm Password -->
             <div
-              class="form-group required"
+              class="form-group"
+              [class.required]="!isEditMode"
               [class.has-error]="errors.passwordConfirm"
             >
-              <label for="password-confirm">{{ 'Confirm Password' | translate }}</label>
+              <label for="password-confirm">{{
+                "Confirm Password" | translate
+              }}</label>
               <input
                 id="password-confirm"
                 [type]="model.showPassword ? 'text' : 'password'"
@@ -231,7 +349,9 @@
                 autocomplete="new-password"
               />
               @if (errors.passwordConfirm) {
-                <span class="help-block">{{ errors.passwordConfirm | translate }}</span>
+                <span class="help-block">{{
+                  errors.passwordConfirm | translate
+                }}</span>
               }
             </div>
           }
@@ -245,7 +365,7 @@
             (click)="cancel()"
             [disabled]="loading"
           >
-            {{ 'Cancel' | translate }}
+            {{ "Cancel" | translate }}
           </button>
           <button
             type="button"
@@ -255,9 +375,9 @@
           >
             @if (loading) {
               <i class="fa fa-spinner fa-spin"></i>
-              {{ 'Submitting' | translate }}
+              {{ "Submitting" | translate }}
             } @else {
-              {{ 'Add User' | translate }}
+              {{ submitLabel | translate }}
             }
           </button>
         </div>
