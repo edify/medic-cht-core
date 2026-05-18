@@ -34,8 +34,8 @@ export class UpgradeComponent implements OnInit {
   /** Controls visibility of the loader while deployment information is being fetched */
   loadingPageStatus = false;
 
-  /** Set to true when the initial data load fails, shows the error alert and hides the content */
-  loadingError = false;
+  /** Translation key for the error message shown when a request fails, null when no error */
+  errorKey: string | null = null;
 
   /** Available builds grouped by type, loaded from the external builds database */
   versionGroups: VersionGroups = {
@@ -60,10 +60,15 @@ export class UpgradeComponent implements OnInit {
     try {
       this.deployInfo = await this.upgradeService.getDeployInfo();
       this.canUpgrade = await this.upgradeService.getCanUpgrade();
-      this.versionGroups = await this.upgradeService.getBuilds(this.deployInfo!);
+      this.versionGroups = await this.upgradeService.getBuilds(this.deployInfo!)
+        .catch((error) => {
+          console.error('Error fetching builds', error);
+          this.errorKey = 'instance.upgrade.error.version_fetch';
+          return { releases: [], betas: [], branches: [], featureReleases: [] };
+        });
     } catch (error) {
       console.error('Error fetching upgrade information', error);
-      this.loadingError = true;
+      this.errorKey = 'instance.upgrade.error.deploy_info_fetch';
     } finally {
       this.loadingPageStatus = false;
     }
