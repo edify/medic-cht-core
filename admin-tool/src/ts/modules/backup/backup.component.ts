@@ -63,7 +63,7 @@ export class BackupComponent implements AfterViewInit, OnDestroy {
   private loadBackup(): void {
     this.settingsService.get()
       .then(settings => {
-        const json = JSON.stringify(settings, null, 4);  // ← add null, 4
+        const json = JSON.stringify(settings, null, 4); 
         const blob = new Blob([json], { type: 'application/json' });
         this.backup = {
           name: 'settings_' + moment().format('YYYY-MM-DD') + '.json',
