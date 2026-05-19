@@ -1,7 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { DeployInfo, Build, VersionGroups } from '@admin-tool-modules/upgrade/upgrade-interfaces';
+import { 
+  DeployInfo, 
+  Build, 
+  VersionGroups, 
+  IndexingDifference, 
+  UpgradeDoc, 
+  IndexerProgress 
+} from '@admin-tool-modules/upgrade/upgrade-interfaces';
 import { VersionService } from '@admin-tool-services/version.service';
 
 const UPGRADE_URL = '/api/v2/upgrade';
@@ -61,15 +68,27 @@ export class UpgradeService {
    *
    * @returns {Promise<string>} the builds database URL
    */
-  async getCurrentUpgrade(): Promise<string> {
+  async getCurrentUpgrade(): Promise<{ 
+    buildsUrl: string; 
+    upgradeDoc: UpgradeDoc | null; 
+    indexers: IndexerProgress[] 
+  }> {
     try {
       const response = await firstValueFrom(
-        this.http.get<{ buildsUrl?: string }>(`${UPGRADE_URL}`)
+        this.http.get<{ buildsUrl?: string; upgradeDoc?: UpgradeDoc; indexers?: IndexerProgress[] }>(`${UPGRADE_URL}`)
       );
-      return response.buildsUrl ?? DEFAULT_BUILDS_URL;
+      return {
+        buildsUrl: response.buildsUrl ?? DEFAULT_BUILDS_URL,
+        upgradeDoc: response.upgradeDoc ?? null,
+        indexers: response.indexers ?? [],
+      };
     } catch (error) {
       console.error('Error fetching current upgrade state', error);
-      return DEFAULT_BUILDS_URL;
+      return {
+        buildsUrl: DEFAULT_BUILDS_URL,
+        upgradeDoc: null,
+        indexers: [],
+      };
     }
   }
 
@@ -108,7 +127,7 @@ export class UpgradeService {
    * @returns {Promise<VersionGroups>}
    */
   async getBuilds(deployInfo: any): Promise<VersionGroups> {
-    const buildsUrl = await this.getCurrentUpgrade();
+    const { buildsUrl } = await this.getCurrentUpgrade();
     const buildsDb = new window.PouchDB(buildsUrl);
 
     const minVersion = this.versionService.minimumNextRelease(deployInfo.version);
@@ -152,4 +171,38 @@ export class UpgradeService {
     }
     return { branches, betas, releases, featureReleases };
   }
+
+  async compareReleases(build: Build): Promise<void> {
+    if (build.compare) {
+      return;
+    }
+    try {
+      const differences = await firstValueFrom(
+        this.http.post<IndexingDifference[]>(`${UPGRADE_URL}/compare`, { build })
+      );
+      build.compare = differences;
+      build.requiresIndexing = differences.some(difference => difference.indexing);
+    } catch (error) {
+      console.error('Failed to compare releases', error);
+    }
+  }
+
+  async stage(build: Build): Promise<void> {
+    await firstValueFrom(
+      this.http.post<void>(`${UPGRADE_URL}/stage`, { build })
+    );
+  }
+
+  async abortUpgrade(): Promise<void> {
+    await firstValueFrom(
+      this.http.delete<void>(UPGRADE_URL)
+    );
+  }
+
+  async completeInstall(build: Build): Promise<void> {
+    await firstValueFrom(
+      this.http.post<void>(`${UPGRADE_URL}/complete`, { build })
+    );
+  }
+
 }

@@ -39,6 +39,35 @@ export interface Build {
   version: string;
   time: string;
   base_version?: string;
+  compare?: IndexingDifference[];
+  requiresIndexing?: boolean;
+}
+
+export interface IndexingDifference {
+  db: string;
+  ddoc: string;
+  type: string[];
+  size: number;
+  indexing: boolean;
+}
+
+export interface UpgradeHistoryEntry {
+  state: string;
+  date: string;
+}
+
+export interface UpgradeDoc {
+  action: string;
+  state: string;
+  state_history: UpgradeHistoryEntry[];
+  to: Build;
+}
+
+export interface IndexerProgress {
+  database: string;
+  ddoc: string;
+  progress: number;
+  type?: string;
 }
 
 /**
