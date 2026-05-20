@@ -11,7 +11,6 @@ import {
   IndexerProgress 
 } from '@admin-tool-modules/upgrade/upgrade-interfaces';
 import { UpgradeConfirmComponent } from '@admin-tool-modules/upgrade/upgrade-confirm/upgrade-confirm.component';
-import { UpgradeAbortComponent } from '@admin-tool-modules/upgrade/upgrade-abort/upgrade-abort.component';
 
 /**
  * Component for managing CHT instance upgrades.
@@ -19,15 +18,15 @@ import { UpgradeAbortComponent } from '@admin-tool-modules/upgrade/upgrade-abort
  * Loads the current deployment information, upgrade availability and available
  * builds on init. Displays the current version details and a list of available
  * releases organized by type — stable releases, betas, branches and feature releases.
- * Builds are loaded from the external builds database via UpgradeService.
- * Further functionality for staging, installing and monitoring upgrade progress
- * will be added in subsequent stories.
+ * If an upgrade is already in progress on init, skips loading builds and starts
+ * polling the upgrade state every 2 seconds instead.
+ * Allows administrators to stage, install or abort upgrades via confirmation modals.
  *
  * Part of the Upgrade module.
  */
 @Component({
   selector: 'upgrade',
-  imports: [TranslatePipe, DatePipe, UpgradeConfirmComponent, UpgradeAbortComponent],
+  imports: [TranslatePipe, DatePipe, UpgradeConfirmComponent],
   templateUrl: './upgrade.component.html',
   styleUrl: './upgrade.component.less'
 })
@@ -53,16 +52,35 @@ export class UpgradeComponent implements OnInit, OnDestroy {
     featureReleases: [],
   };
 
+  /** The in-progress upgrade document, null when no upgrade is active */
   upgradeDoc: UpgradeDoc | null = null;
+
+  /** Real-time indexer progress entries shown as progress bars during indexing */
   indexerProgress: IndexerProgress[] = [];
+
+  /** Set to true when an upgrade completes successfully, shows the success banner */
   upgraded = false;
+
+  /** Controls visibility of the confirmation modal for stage, install and abort actions */
   showConfirmModal= false;
-  showAbortModal= false;
+
+  /** The build being confirmed in the modal, passed as input to the modal */
   confirmBuild: Build | null = null;
+
+  /** Whether the confirmation modal should show stage-specific text */
   confirmStageOnly = false;
+
+  /** The function the confirmation modal will execute when the user confirms */
   confirmCallback: (() => Promise<void>) | null = null;
+
+  /** Reference to the polling timeout, used to cancel it in ngOnDestroy */
   private pollingTimeout: ReturnType<typeof setTimeout> | null = null;
-  abortCallback: (() => Promise<void>) | null = null;
+
+  /** Whether the confirmation modal is being used for an abort action */
+  confirmIsAbort = false;
+
+  /** Translation key for the error message emitted by the confirmation modal if the action fails */
+  confirmErrorKey = 'instance.upgrade.error.deploy';
   
   constructor(
     private upgradeService: UpgradeService,
@@ -70,8 +88,10 @@ export class UpgradeComponent implements OnInit, OnDestroy {
   ){}
 
   /**
-   * Fetches the current deployment information, upgrade availability and available
-   * builds from the external builds database on init.
+   * Fetches the current deployment information, upgrade availability and current upgrade state on init.
+   * If no upgrade is in progress, loads available builds and starts the compare process.
+   * If an upgrade is already in progress, skips loading builds and starts polling instead.
+   * Sets errorKey with the appropriate translation key if any request fails.
    */
   async ngOnInit(): Promise<void> {
     this.loadingPageStatus = true;
@@ -112,8 +132,12 @@ export class UpgradeComponent implements OnInit, OnDestroy {
     return this.versionService.potentiallyIncompatible(release, this.deployInfo);
   }
 
+  /**
+   * Fetches the current upgrade state from the service and updates upgradeDoc and indexerProgress.
+   * Starts polling if an upgrade is in progress.
+   */
   private async loadCurrentUpgrade(): Promise<void> {
-    const { buildsUrl, upgradeDoc, indexers } = await this.upgradeService.getCurrentUpgrade();
+    const { upgradeDoc, indexers } = await this.upgradeService.getCurrentUpgrade();
     this.upgradeDoc = upgradeDoc;
     this.indexerProgress = indexers;
     
@@ -122,6 +146,12 @@ export class UpgradeComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Calls compareReleases for all releases and betas sequentially.
+   * Branches and feature releases are excluded — branches change too frequently
+   * and feature releases are only compared on demand when the user opens the modal.
+   * Does not await — runs in the background so the UI is not blocked.
+   */
   private async loadBuildsCompare(): Promise<void> {
     for (const release of this.versionGroups.releases) {
       await this.upgradeService.compareReleases(release);
@@ -132,15 +162,37 @@ export class UpgradeComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Schedules a polling call to getCurrentUpgrade every 2 seconds while an upgrade is active.
+   * When the upgradeDoc disappears, verifies whether the upgrade succeeded by comparing
+   * the expected build with the freshly deployed version.
+   * Sets upgraded to true on success or errorKey on failure.
+   * Reloads builds and compare data after the upgrade completes or fails.
+   */
   private startPolling(): void {
-    this.pollingTimeout = setTimeout( async () => {
+    this.pollingTimeout = setTimeout(async () => {
       const { upgradeDoc, indexers } = await this.upgradeService.getCurrentUpgrade();
+      
+      const hadUpgradeDoc = !!this.upgradeDoc;
       this.upgradeDoc = upgradeDoc;
       this.indexerProgress = indexers;
 
       if (upgradeDoc) {
         this.startPolling();
       } else {
+        const expectedBuild = this.upgradeDoc?.to?.build;
+        this.upgradeDoc = upgradeDoc;
+        this.indexerProgress = indexers;
+
+        if (hadUpgradeDoc) {
+          const freshDeployInfo = await this.upgradeService.getDeployInfo();
+          if (freshDeployInfo.build === expectedBuild) {
+            this.upgraded = true;
+          } else {
+            this.errorKey = 'instance.upgrade.error.deploy';
+          }
+        }
+
         this.versionGroups = await this.upgradeService.getBuilds(this.deployInfo!)
           .catch((error) => {
             console.error('Error fetching builds', error);
@@ -152,31 +204,62 @@ export class UpgradeComponent implements OnInit, OnDestroy {
     }, 2000);
   }
 
+  /**
+   * Cancels the polling timeout when the component is destroyed
+   * to prevent memory leaks and errors from callbacks running after destruction.
+   */
   ngOnDestroy(): void {
     if (this.pollingTimeout) {
       clearTimeout(this.pollingTimeout);
     }
   }
 
-  async upgrade(build: Build, action: 'stage' | 'complete'): Promise<void> {
+  /**
+   * Opens the confirmation modal for a stage, install or direct install action.
+   * Calls compareReleases first to populate indexing information in the modal.
+   * Sets confirmIsAbort to false and confirmErrorKey to the deploy error key.
+   *
+   * @param {Build} build - the build to stage or install
+   * @param {'stage' | 'complete' | undefined} action - the action to perform
+   */
+  async upgrade(build: Build, action: 'stage' | 'complete' | undefined): Promise<void> {
     await this.upgradeService.compareReleases(build);
     this.confirmBuild = build;
     this.confirmStageOnly = action === 'stage';
+    this.confirmIsAbort = false;
+    this.confirmErrorKey = 'instance.upgrade.error.deploy';
     this.confirmCallback = () => this.confirmUpgrade(build, action);
     this.showConfirmModal = true;
   }
 
-  private async confirmUpgrade(build: Build, action: 'stage' | 'complete'): Promise<void> {
+  /**
+   * Executes the upgrade action after the user confirms in the modal.
+   * Delegates to stage, completeInstall or install on UpgradeService depending on the action.
+   * Calls loadCurrentUpgrade after the action to refresh the upgrade state and start polling.
+   *
+   * @param {Build} build - the build to upgrade to
+   * @param {'stage' | 'complete' | undefined} action - the action to perform
+   */
+  private async confirmUpgrade(build: Build, action: 'stage' | 'complete' | undefined): Promise<void> {
     if (action === 'stage') {
       await this.upgradeService.stage(build);
-    } else {
+    } else if (action === 'complete') {
       await this.upgradeService.completeInstall(build);
+    } else {
+      await this.upgradeService.install(build);
     }
     await this.loadCurrentUpgrade();
   }
 
+  /**
+   * Opens the confirmation modal configured for an abort action.
+   * Sets confirmIsAbort to true and confirmErrorKey to the abort error key.
+   * The callback aborts the upgrade, refreshes the state and reloads builds.
+   */
   abortUpgrade(): void {
-    this.abortCallback = async () => {
+    this.confirmIsAbort = true;
+    this.confirmErrorKey = 'instance.upgrade.error.abort';
+    this.confirmCallback = async () => {
       await this.upgradeService.abortUpgrade();
       await this.loadCurrentUpgrade();
       this.versionGroups = await this.upgradeService.getBuilds(this.deployInfo!)
@@ -187,9 +270,14 @@ export class UpgradeComponent implements OnInit, OnDestroy {
         });
       await this.loadBuildsCompare();
     };
-    this.showAbortModal = true;
+    this.showConfirmModal = true;
   }
 
+  /**
+   * Retries the interrupted upgrade using the same action as the original.
+   * Does nothing if there is no upgrade document in progress.
+   * Delegates to upgrade() which opens the confirmation modal.
+   */
   retryUpgrade(): void {
     if (!this.upgradeDoc) {
       return;

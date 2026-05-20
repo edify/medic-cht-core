@@ -3,29 +3,11 @@
     <div class="loader"></div>
   } @else {
     <div class="tab-content container-fluid">
-      @if (errorKey) {
-        <p class="alert alert-danger" role="alert">
-          {{ errorKey | translate }}
-        </p>
-      }
       @if (upgraded) {
         <div class="alert alert-success">
           {{ 'instance.upgrade.complete' | translate }}
         </div>
       }
-      <div class="section">
-        <legend>{{ 'instance.upgrade.current_version' | translate }}</legend>
-        <dl class="horizontal">
-          <dt>{{ 'instance.upgrade.version' | translate }}</dt>
-          <dd>{{ deployInfo?.base_version }}</dd>
-          <dt>{{ 'instance.upgrade.build.version' | translate }}</dt>
-          <dd>{{ deployInfo?.version }}</dd>
-          <dt>{{ 'instance.upgrade.deployed_by' | translate }}</dt>
-          <dd>{{ deployInfo?.user }}</dd>
-          <dt>{{ 'instance.upgrade.at' | translate }}</dt>
-          <dd>{{ deployInfo?.time | date:'mediumDate' }}</dd>
-        </dl>
-      </div>
       @if (upgradeDoc) {
         <div class="section">
           <legend>
@@ -68,27 +50,46 @@
             }
           </ul>
           @if (upgradeDoc.state === 'indexed' && upgradeDoc.action === 'stage') {
-            <div>
-              <p>{{ 'instance.stage.complete' | translate }}</p>
+            <p>{{ 'instance.stage.complete' | translate }}</p>
+          }
+          <div class="upgrade-actions">
+            <button type="button" class="btn btn-danger" (click)="abortUpgrade()">
+              {{ 'instance.upgrade.cancel' | translate }}
+            </button>
+            @if (upgradeDoc.state === 'interrupted') {
+              <button type="button" class="btn btn-default" (click)="retryUpgrade()">
+                {{ 'instance.upgrade.retry' | translate }}
+              </button>
+            }
+            @if (upgradeDoc.state === 'indexed' && upgradeDoc.action === 'stage') {
               @if (canUpgrade) {
                 <button type="button" class="btn btn-primary" (click)="upgrade(upgradeDoc.to, 'complete')">
                   {{ 'instance.upgrade.install' | translate }}
                 </button>
               }
-            </div>
-          }
-          @if (upgradeDoc.state === 'interrupted') {
-            <p class="alert alert-warning">{{ 'instance.upgrade.interrupted' | translate }}</p>
-            <button type="button" class="btn btn-default" (click)="retryUpgrade()">
-              {{ 'instance.upgrade.retry' | translate }}
-            </button>
-          }
-          <button type="button" class="btn btn-danger" (click)="abortUpgrade()">
-            {{ 'instance.upgrade.cancel' | translate }}
-          </button>
+            }
+          </div>
         </div>
       }
       @if (!upgradeDoc) {
+        @if (errorKey) {
+          <p class="alert alert-danger" role="alert">
+            {{ errorKey | translate }}
+          </p>
+        }
+        <div class="section">
+          <legend>{{ 'instance.upgrade.current_version' | translate }}</legend>
+            <dl class="horizontal">
+              <dt>{{ 'instance.upgrade.version' | translate }}</dt>
+              <dd>{{ deployInfo?.base_version }}</dd>
+              <dt>{{ 'instance.upgrade.build.version' | translate }}</dt>
+              <dd>{{ deployInfo?.version }}</dd>
+              <dt>{{ 'instance.upgrade.deployed_by' | translate }}</dt>
+              <dd>{{ deployInfo?.user }}</dd>
+              <dt>{{ 'instance.upgrade.at' | translate }}</dt>
+            <dd>{{ deployInfo?.time | date:'mediumDate' }}</dd>
+          </dl>
+        </div>
         <p class="description">{{ 'upgrade.description' | translate }}</p>
         <div class="section">
           <legend>{{ 'instance.upgrade.releases' | translate }}</legend>
@@ -120,7 +121,7 @@
                     {{ 'instance.upgrade.stage' | translate }}
                   </button>
                   @if (canUpgrade) {
-                    <button type="button" class="btn btn-primary" (click)="upgrade(release, 'complete')">
+                    <button type="button" class="btn btn-primary" (click)="upgrade(release, undefined)">
                       {{ 'instance.upgrade.install' | translate }}
                     </button>
                   }
@@ -172,7 +173,7 @@
                             {{ 'instance.upgrade.stage' | translate }}
                           </button>
                           @if (canUpgrade) {
-                            <button type="button" class="btn btn-primary" (click)="upgrade(featureRelease, 'complete')">
+                            <button type="button" class="btn btn-primary" (click)="upgrade(featureRelease, undefined)">
                               {{ 'instance.upgrade.install' | translate }}
                             </button>
                           }
@@ -212,7 +213,7 @@
                             {{ 'instance.upgrade.stage' | translate }}
                           </button>
                           @if (canUpgrade) {
-                            <button type="button" class="btn btn-primary" (click)="upgrade(beta, 'complete')">
+                            <button type="button" class="btn btn-primary" (click)="upgrade(beta, undefined)">
                               {{ 'instance.upgrade.install' | translate }}
                             </button>
                           }
@@ -249,7 +250,7 @@
                             {{ 'instance.upgrade.stage' | translate }}
                           </button>
                           @if (canUpgrade) {
-                            <button type="button" class="btn btn-primary" (click)="upgrade(branch, 'complete')">
+                            <button type="button" class="btn btn-primary" (click)="upgrade(branch, undefined)">
                               {{ 'instance.upgrade.install' | translate }}
                             </button>
                           }
@@ -270,15 +271,11 @@
     [stageOnly]="confirmStageOnly"
     [build]="confirmBuild"
     [before]="deployInfo?.version ?? ''"
-    [after]="confirmBuild?.version ?? ''"
+    [after]="confirmIsAbort ? (upgradeDoc?.to?.version ?? '') : (confirmBuild?.version ?? '')"
     [confirmCallback]="confirmCallback"
+    [isAbort]="confirmIsAbort"
+    [errorKey]="confirmErrorKey"
     (closed)="showConfirmModal = false"
+    (errorOccurred)="errorKey = $event"
   ></upgrade-confirm>
-  <upgrade-abort
-    [visible]="showAbortModal"
-    [before]="deployInfo?.version ?? ''"
-    [after]="upgradeDoc?.to?.version ?? ''"
-    [confirmCallback]="abortCallback"
-    (closed)="showAbortModal = false"
-  ></upgrade-abort>
 </div>
