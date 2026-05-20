@@ -72,9 +72,9 @@
         </div>
       }
       @if (!upgradeDoc) {
-        @if (errorKey) {
+        @if (upgradeError) {
           <p class="alert alert-danger" role="alert">
-            {{ errorKey | translate }}
+            {{ upgradeError.key | translate }}
           </p>
         }
         <div class="section">
@@ -276,6 +276,6 @@
     [isAbort]="confirmIsAbort"
     [errorKey]="confirmErrorKey"
     (closed)="showConfirmModal = false"
-    (errorOccurred)="errorKey = $event"
+    (errorOccurred)="upgradeError = $event"
   ></upgrade-confirm>
 </div>

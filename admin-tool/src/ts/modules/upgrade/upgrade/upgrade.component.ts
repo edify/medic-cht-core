@@ -8,7 +8,8 @@ import {
   VersionGroups, 
   Build, 
   UpgradeDoc, 
-  IndexerProgress 
+  IndexerProgress, 
+  UpgradeError
 } from '@admin-tool-modules/upgrade/upgrade-interfaces';
 import { UpgradeConfirmComponent } from '@admin-tool-modules/upgrade/upgrade-confirm/upgrade-confirm.component';
 
@@ -42,7 +43,7 @@ export class UpgradeComponent implements OnInit, OnDestroy {
   loadingPageStatus = false;
 
   /** Translation key for the error message shown when a request fails, null when no error */
-  errorKey: string | null = null;
+  upgradeError: UpgradeError | null = null;
 
   /** Available builds grouped by type, loaded from the external builds database */
   versionGroups: VersionGroups = {
@@ -104,14 +105,14 @@ export class UpgradeComponent implements OnInit, OnDestroy {
         this.versionGroups = await this.upgradeService.getBuilds(this.deployInfo!)
           .catch((error) => {
             console.error('Error fetching builds', error);
-            this.errorKey = 'instance.upgrade.error.version_fetch';
+            this.upgradeError = { key: 'instance.upgrade.error.version_fetch' };
             return { releases: [], betas: [], branches: [], featureReleases: [] };
           });
         this.loadBuildsCompare();
       }
     } catch (error) {
       console.error('Error fetching upgrade information', error);
-      this.errorKey = 'instance.upgrade.error.deploy_info_fetch';
+      this.upgradeError = { key: 'instance.upgrade.error.deploy_info_fetch' };
     } finally {
       this.loadingPageStatus = false;
     }
@@ -189,14 +190,14 @@ export class UpgradeComponent implements OnInit, OnDestroy {
           if (freshDeployInfo.build === expectedBuild) {
             this.upgraded = true;
           } else {
-            this.errorKey = 'instance.upgrade.error.deploy';
+            this.upgradeError = { key: 'instance.upgrade.error.deploy' };
           }
         }
 
         this.versionGroups = await this.upgradeService.getBuilds(this.deployInfo!)
           .catch((error) => {
             console.error('Error fetching builds', error);
-            this.errorKey = 'instance.upgrade.error.version_fetch';
+            this.upgradeError = { key: 'instance.upgrade.error.version_fetch' };
             return { releases: [], betas: [], branches: [], featureReleases: [] };
           });
         await this.loadBuildsCompare();
@@ -265,7 +266,7 @@ export class UpgradeComponent implements OnInit, OnDestroy {
       this.versionGroups = await this.upgradeService.getBuilds(this.deployInfo!)
         .catch((error) => {
           console.error('Error fetching builds', error);
-          this.errorKey = 'instance.upgrade.error.version_fetch';
+          this.upgradeError = { key: 'instance.upgrade.error.version_fetch' };
           return { releases: [], betas: [], branches: [], featureReleases: [] };
         });
       await this.loadBuildsCompare();

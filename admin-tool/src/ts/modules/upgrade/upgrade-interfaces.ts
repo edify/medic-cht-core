@@ -131,3 +131,12 @@ export interface ParsedVersion {
   beta?: number;
   featureRelease?: string;
 }
+
+/**
+ * Represents an error state in the upgrade page.
+ * key is the translation key of the error message to display.
+ * Additional properties can be added here as needed for future error handling requirements.
+ */
+export interface UpgradeError {
+  key: string;
+}

@@ -61,8 +61,8 @@ describe('UpgradeComponent', () => {
       expect(component.loadingPageStatus).to.be.false;
     });
 
-    it('should start with errorKey null', () => {
-      expect(component.errorKey).to.be.null;
+    it('should start with upgradeError null', () => {
+      expect(component.upgradeError).to.be.null;
     });
 
     it('should start with canUpgrade false', () => {
@@ -104,11 +104,11 @@ describe('UpgradeComponent', () => {
       expect(component.loadingPageStatus).to.be.false;
     });
 
-    it('should set errorKey when getDeployInfo fails', async () => {
+    it('should set upgradeError when getDeployInfo fails', async () => {
       sinon.stub(console, 'error');
       upgradeService.getDeployInfo.rejects(new Error('error'));
       await component.ngOnInit();
-      expect(component.errorKey).to.equal('instance.upgrade.error.deploy_info_fetch');
+      expect(component.upgradeError?.key).to.equal('instance.upgrade.error.deploy_info_fetch');
     });
 
     it('should call console.error if getDeployInfo fails', async () => {
@@ -118,10 +118,10 @@ describe('UpgradeComponent', () => {
       expect(consoleStub.calledWith('Error fetching upgrade information', sinon.match.any)).to.be.true;
     });
 
-    it('should not set errorKey if only getCanUpgrade fails', async () => {
+    it('should not set upgradeError if only getCanUpgrade fails', async () => {
       upgradeService.getCanUpgrade.resolves(false);
       await component.ngOnInit();
-      expect(component.errorKey).to.be.null;
+      expect(component.upgradeError).to.be.null;
     });
 
     it('should set versionGroups after init', async () => {
@@ -148,11 +148,11 @@ describe('UpgradeComponent', () => {
       expect(upgradeService.getBuilds.calledWith(mockDeployInfo)).to.be.true;
     });
 
-    it('should set errorKey when getBuilds fails', async () => {
+    it('should set upgradeError when getBuilds fails', async () => {
       sinon.stub(console, 'error');
       upgradeService.getBuilds.rejects(new Error('error'));
       await component.ngOnInit();
-      expect(component.errorKey).to.equal('instance.upgrade.error.version_fetch');
+      expect(component.upgradeError?.key).to.equal('instance.upgrade.error.version_fetch');
     });
   });
   describe('potentiallyIncompatible', () => {
@@ -279,7 +279,7 @@ describe('UpgradeComponent', () => {
       await fixture.whenStable();
     });
 
-    it('should not open modal if upgradeDoc is null', async () => {
+    it('should not open modal if upgradeDoc is null', () => {
       component.upgradeDoc = null;
       component.retryUpgrade();
       expect(component.showConfirmModal).to.be.false;
@@ -349,15 +349,15 @@ describe('UpgradeComponent', () => {
     });
 
     it('should show error alert when loadingError is true', () => {
-      component.errorKey = 'instance.upgrade.error.deploy_info_fetch';
+      component.upgradeError = { key: 'instance.upgrade.error.deploy_info_fetch' };
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.alert-danger')).to.exist;
     });
 
-    it('should not show error alert when errorKey is null', async () => {
+    it('should not show error alert when upgradeError is null', async () => {
       await fixture.whenStable();
-      component.errorKey = null;
+      component.upgradeError = null;
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.alert-danger')).to.not.exist;
@@ -553,7 +553,7 @@ describe('UpgradeComponent', () => {
       expect(compiled.querySelector('.alert-success')).to.exist;
     });
 
-    it('should not show success banner when upgraded is false', async () => {
+    it('should not show success banner when upgraded is false', () => {
       component.upgraded = false;
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;

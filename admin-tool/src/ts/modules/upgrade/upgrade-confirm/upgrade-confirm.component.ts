@@ -40,7 +40,7 @@ export class UpgradeConfirmComponent implements OnChanges {
   /** The target version shown in the confirmation summary */
   @Input() after = '';
 
-   /** When true shows abort-specific text and danger button styling, when false shows stage or install confirmation */
+  /** When true shows abort-specific text and danger button styling, when false shows stage or install confirmation */
   @Input() isAbort = false;
 
   /** The function to execute when the user confirms, provided by the parent */
