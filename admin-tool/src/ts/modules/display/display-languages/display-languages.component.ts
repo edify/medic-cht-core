@@ -76,6 +76,9 @@ export class DisplayLanguagesComponent implements OnInit, OnDestroy{
   /** Error for the language that failed to enable/disable, contains the code and message */
   languageError: { code: string, message: string } | null = null;
 
+  /** Language code to expand in the accordion after a reload */
+  expandedLanguageCode: string | null = null;
+
   /** Subscription to CouchDB changes feed, cleaned up on destroy */
   private changesSubscription: { unsubscribe: () => void } | null = null;
 
@@ -151,7 +154,7 @@ export class DisplayLanguagesComponent implements OnInit, OnDestroy{
   async disableLanguage(doc: LanguageDoc): Promise<void> {
     try {
       await this.languageService.disableLanguage(doc);
-      await this.ngOnInit();
+      this.expandedLanguageCode = doc.code;
     } catch (error) {
       console.error('Error disabling language', error);
       this.languageError = { code: doc.code, message: 'Error disabling language' };
@@ -167,7 +170,7 @@ export class DisplayLanguagesComponent implements OnInit, OnDestroy{
   async enableLanguage(doc: LanguageDoc): Promise<void> {
     try {
       await this.languageService.enableLanguage(doc);
-      await this.ngOnInit();
+      this.expandedLanguageCode = doc.code;;
     } catch (error) {
       console.error('Error enabling language', error);
       this.languageError = { code: doc.code, message: 'Error enabling language' };
@@ -182,6 +185,7 @@ export class DisplayLanguagesComponent implements OnInit, OnDestroy{
    */
   async editLanguage(doc: LanguageDoc): Promise<void> {
     this.selectedDoc = doc;
+    this.expandedLanguageCode = doc.code;
     this.showEditModal = true;
   }
 
@@ -192,6 +196,7 @@ export class DisplayLanguagesComponent implements OnInit, OnDestroy{
    */
   async uploadLanguage(doc: LanguageDoc): Promise<void> {
     this.selectedDoc = doc;
+    this.expandedLanguageCode = doc.code;
     this.showUploadModal = true;
   }
 
