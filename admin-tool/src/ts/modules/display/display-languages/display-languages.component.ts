@@ -170,7 +170,7 @@ export class DisplayLanguagesComponent implements OnInit, OnDestroy{
   async enableLanguage(doc: LanguageDoc): Promise<void> {
     try {
       await this.languageService.enableLanguage(doc);
-      this.expandedLanguageCode = doc.code;;
+      this.expandedLanguageCode = doc.code;
     } catch (error) {
       console.error('Error enabling language', error);
       this.languageError = { code: doc.code, message: 'Error enabling language' };
