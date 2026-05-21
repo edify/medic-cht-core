@@ -276,6 +276,6 @@
     [isAbort]="confirmIsAbort"
     [errorKey]="confirmErrorKey"
     (closed)="showConfirmModal = false"
-    (errorOccurred)="upgradeError = $event"
+    (errorOccurred)="upgradeError = { key: $event }"
   ></upgrade-confirm>
 </div>
