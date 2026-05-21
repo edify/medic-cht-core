@@ -27,7 +27,13 @@ describe('UpgradeComponent', () => {
     upgradeService = {
       getDeployInfo: sinon.stub().resolves(mockDeployInfo),
       getCanUpgrade: sinon.stub().resolves(false),
+      getCurrentUpgrade: sinon.stub().resolves({ 
+        buildsUrl: 'https://staging.dev.medicmobile.org/_couch/builds_4',
+        upgradeDoc: null,
+        indexers: []
+      }),
       getBuilds: sinon.stub().resolves(MOCK_VERSION_GROUPS),
+      compareReleases: sinon.stub().resolves(),
     };
 
     return TestBed.configureTestingModule({
@@ -55,8 +61,8 @@ describe('UpgradeComponent', () => {
       expect(component.loadingPageStatus).to.be.false;
     });
 
-    it('should start with errorKey null', () => {
-      expect(component.errorKey).to.be.null;
+    it('should start with upgradeError null', () => {
+      expect(component.upgradeError).to.be.null;
     });
 
     it('should start with canUpgrade false', () => {
@@ -98,11 +104,11 @@ describe('UpgradeComponent', () => {
       expect(component.loadingPageStatus).to.be.false;
     });
 
-    it('should set errorKey when getDeployInfo fails', async () => {
+    it('should set upgradeError when getDeployInfo fails', async () => {
       sinon.stub(console, 'error');
       upgradeService.getDeployInfo.rejects(new Error('error'));
       await component.ngOnInit();
-      expect(component.errorKey).to.equal('instance.upgrade.error.deploy_info_fetch');
+      expect(component.upgradeError?.key).to.equal('instance.upgrade.error.deploy_info_fetch');
     });
 
     it('should call console.error if getDeployInfo fails', async () => {
@@ -112,10 +118,10 @@ describe('UpgradeComponent', () => {
       expect(consoleStub.calledWith('Error fetching upgrade information', sinon.match.any)).to.be.true;
     });
 
-    it('should not set errorKey if only getCanUpgrade fails', async () => {
+    it('should not set upgradeError if only getCanUpgrade fails', async () => {
       upgradeService.getCanUpgrade.resolves(false);
       await component.ngOnInit();
-      expect(component.errorKey).to.be.null;
+      expect(component.upgradeError).to.be.null;
     });
 
     it('should set versionGroups after init', async () => {
@@ -142,11 +148,11 @@ describe('UpgradeComponent', () => {
       expect(upgradeService.getBuilds.calledWith(mockDeployInfo)).to.be.true;
     });
 
-    it('should set errorKey when getBuilds fails', async () => {
+    it('should set upgradeError when getBuilds fails', async () => {
       sinon.stub(console, 'error');
       upgradeService.getBuilds.rejects(new Error('error'));
       await component.ngOnInit();
-      expect(component.errorKey).to.equal('instance.upgrade.error.version_fetch');
+      expect(component.upgradeError?.key).to.equal('instance.upgrade.error.version_fetch');
     });
   });
   describe('potentiallyIncompatible', () => {
@@ -185,6 +191,148 @@ describe('UpgradeComponent', () => {
       expect(component.potentiallyIncompatible(branch)).to.be.true;
     });
   });
+  describe('upgrade', () => {
+    beforeEach(async () => {
+      upgradeService.compareReleases = sinon.stub().resolves();
+      await fixture.whenStable();
+    });
+
+    it('should call compareReleases with the build', async () => {
+      const release = MOCK_VERSION_GROUPS.releases[0];
+      await component.upgrade(release, 'stage');
+      expect(upgradeService.compareReleases.calledWith(release)).to.be.true;
+    });
+
+    it('should set confirmBuild to the build', async () => {
+      const release = MOCK_VERSION_GROUPS.releases[0];
+      await component.upgrade(release, 'stage');
+      expect(component.confirmBuild).to.equal(release);
+    });
+
+    it('should set confirmStageOnly to true when action is stage', async () => {
+      await component.upgrade(MOCK_VERSION_GROUPS.releases[0], 'stage');
+      expect(component.confirmStageOnly).to.be.true;
+    });
+
+    it('should set confirmStageOnly to false when action is complete', async () => {
+      await component.upgrade(MOCK_VERSION_GROUPS.releases[0], 'complete');
+      expect(component.confirmStageOnly).to.be.false;
+    });
+
+    it('should set confirmStageOnly to false when action is undefined', async () => {
+      await component.upgrade(MOCK_VERSION_GROUPS.releases[0], undefined);
+      expect(component.confirmStageOnly).to.be.false;
+    });
+
+    it('should set confirmCallback', async () => {
+      await component.upgrade(MOCK_VERSION_GROUPS.releases[0], 'stage');
+      expect(component.confirmCallback).to.be.a('function');
+    });
+
+    it('should set showConfirmModal to true', async () => {
+      await component.upgrade(MOCK_VERSION_GROUPS.releases[0], 'stage');
+      expect(component.showConfirmModal).to.be.true;
+    });
+  });
+  describe('abortUpgrade', () => {
+    beforeEach(async () => {
+      upgradeService.abortUpgrade = sinon.stub().resolves();
+      await fixture.whenStable();
+    });
+
+    it('should set showConfirmModal to true', () => {
+      component.abortUpgrade();
+      expect(component.showConfirmModal).to.be.true;
+    });
+
+    it('should set confirmIsAbort to true', () => {
+      component.abortUpgrade();
+      expect(component.confirmIsAbort).to.be.true;
+    });
+
+    it('should set confirmCallback', () => {
+      component.abortUpgrade();
+      expect(component.confirmCallback).to.be.a('function');
+    });
+
+    it('should call abortUpgrade service when confirmCallback is executed', async () => {
+      component.abortUpgrade();
+      await component.confirmCallback!();
+      expect(upgradeService.abortUpgrade.calledOnce).to.be.true;
+    });
+
+    it('should call getCurrentUpgrade after abort', async () => {
+      component.abortUpgrade();
+      await component.confirmCallback!();
+      expect(upgradeService.getCurrentUpgrade.callCount).to.be.greaterThan(1);
+    });
+
+    it('should call getBuilds after abort', async () => {
+      component.abortUpgrade();
+      await component.confirmCallback!();
+      expect(upgradeService.getBuilds.callCount).to.be.greaterThan(1);
+    });
+  });
+  describe('retryUpgrade', () => {
+    beforeEach(async () => {
+      upgradeService.compareReleases = sinon.stub().resolves();
+      await fixture.whenStable();
+    });
+
+    it('should not open modal if upgradeDoc is null', () => {
+      component.upgradeDoc = null;
+      component.retryUpgrade();
+      expect(component.showConfirmModal).to.be.false;
+    });
+
+    it('should call upgrade with stage action when upgradeDoc action is stage', async () => {
+      component.upgradeDoc = {
+        action: 'stage',
+        state: 'interrupted',
+        state_history: [],
+        to: MOCK_VERSION_GROUPS.releases[0]
+      };
+      component.retryUpgrade();
+      await fixture.whenStable();
+      expect(component.confirmStageOnly).to.be.true;
+    });
+
+    it('should call upgrade with complete action when upgradeDoc action is not stage', async () => {
+      component.upgradeDoc = {
+        action: 'upgrade',
+        state: 'interrupted',
+        state_history: [],
+        to: MOCK_VERSION_GROUPS.releases[0]
+      };
+      component.retryUpgrade();
+      await fixture.whenStable();
+      expect(component.confirmStageOnly).to.be.false;
+    });
+
+    it('should set confirmBuild to upgradeDoc.to', async () => {
+      component.upgradeDoc = {
+        action: 'stage',
+        state: 'interrupted',
+        state_history: [],
+        to: MOCK_VERSION_GROUPS.releases[0]
+      };
+      component.retryUpgrade();
+      await fixture.whenStable();
+      expect(component.confirmBuild).to.equal(MOCK_VERSION_GROUPS.releases[0]);
+    });
+
+    it('should set showConfirmModal to true', async () => {
+      component.upgradeDoc = {
+        action: 'stage',
+        state: 'interrupted',
+        state_history: [],
+        to: MOCK_VERSION_GROUPS.releases[0]
+      };
+      component.retryUpgrade();
+      await fixture.whenStable();
+      expect(component.showConfirmModal).to.be.true;
+    });
+  });
   describe('DOM', () => {
     it('should show loader when loadingPageStatus is true', () => {
       component.loadingPageStatus = true;
@@ -201,14 +349,15 @@ describe('UpgradeComponent', () => {
     });
 
     it('should show error alert when loadingError is true', () => {
-      component.errorKey = 'instance.upgrade.error.deploy_info_fetch';
+      component.upgradeError = { key: 'instance.upgrade.error.deploy_info_fetch' };
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.alert-danger')).to.exist;
     });
 
-    it('should not show error alert when loadingError is false', async () => {
+    it('should not show error alert when upgradeError is null', async () => {
       await fixture.whenStable();
+      component.upgradeError = null;
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.alert-danger')).to.not.exist;
@@ -221,8 +370,9 @@ describe('UpgradeComponent', () => {
       expect(compiled.querySelector('.section')).to.exist;
     });
 
-    it('should show current version section even when errorKey is set', () => {
-      component.errorKey = 'instance.upgrade.error.deploy_info_fetch';
+    it('should show current version section when upgradeDoc is null', async () => {
+      await fixture.whenStable();
+      component.upgradeDoc = null;
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.section')).to.exist;
@@ -328,6 +478,100 @@ describe('UpgradeComponent', () => {
       const featureSection = panelBody!.querySelectorAll('.section')[0];
       const rows = featureSection.querySelectorAll('.row:not(.selection-heading)');
       expect(rows.length).to.equal(1);
+    });
+  });
+  describe('DOM — upgrade in progress', () => {
+    const mockUpgradeDoc = {
+      action: 'stage',
+      state: 'staged',
+      state_history: [
+        { state: 'initiated', date: '2026-05-20T09:00:00.000Z' },
+        { state: 'staged', date: '2026-05-20T09:00:01.000Z' },
+      ],
+      to: MOCK_VERSION_GROUPS.releases[0]
+    };
+
+    beforeEach(async () => {
+      await fixture.whenStable();
+    });
+
+    it('should show upgrade in progress section when upgradeDoc exists', () => {
+      component.upgradeDoc = mockUpgradeDoc;
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.section legend')).to.exist;
+    });
+
+    it('should hide releases section when upgradeDoc exists', () => {
+      component.upgradeDoc = mockUpgradeDoc;
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('p.description')).to.not.exist;
+    });
+
+    it('should show state history entries', () => {
+      component.upgradeDoc = mockUpgradeDoc;
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const rows = compiled.querySelectorAll('ul.table li.row');
+      expect(rows.length).to.equal(mockUpgradeDoc.state_history.length);
+    });
+
+    it('should show cancel button when upgradeDoc exists', () => {
+      component.upgradeDoc = mockUpgradeDoc;
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.btn-danger')).to.exist;
+    });
+
+    it('should show retry button when state is interrupted', () => {
+      component.upgradeDoc = { ...mockUpgradeDoc, state: 'interrupted' };
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.btn-default')).to.exist;
+    });
+
+    it('should not show retry button when state is not interrupted', () => {
+      component.upgradeDoc = mockUpgradeDoc;
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.btn-default')).to.not.exist;
+    });
+
+    it('should show staging title when action is stage', () => {
+      component.upgradeDoc = { ...mockUpgradeDoc, action: 'stage' };
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('legend')).to.exist;
+    });
+
+    it('should show success banner when upgraded is true', () => {
+      component.upgradeDoc = null;
+      component.upgraded = true;
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.alert-success')).to.exist;
+    });
+
+    it('should not show success banner when upgraded is false', () => {
+      component.upgraded = false;
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.alert-success')).to.not.exist;
+    });
+
+    it('should show current version section when upgradeDoc is null', () => {
+      component.upgradeDoc = null;
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('dl.horizontal')).to.exist;
+    });
+
+    it('should hide current version section when upgradeDoc exists', () => {
+      component.upgradeDoc = mockUpgradeDoc;
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('dl.horizontal')).to.not.exist;
     });
   });
 });

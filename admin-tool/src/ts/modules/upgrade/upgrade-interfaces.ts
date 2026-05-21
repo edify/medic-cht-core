@@ -39,6 +39,66 @@ export interface Build {
   version: string;
   time: string;
   base_version?: string;
+  compare?: IndexingDifference[];
+  requiresIndexing?: boolean;
+}
+
+/**
+ * Represents a single view difference returned by the compare endpoint.
+ * Used to display indexing requirements in the confirmation modal.
+ * db is the CouchDB database containing the changed design document.
+ * ddoc is the name of the design document that changed.
+ * type is the array of index types affected, e.g. views, indexes.
+ * size is the estimated disk space in bytes required for reindexing.
+ * indexing is true if this difference requires reindexing.
+ */
+export interface IndexingDifference {
+  db: string;
+  ddoc: string;
+  type: string[];
+  size: number;
+  indexing: boolean;
+}
+
+/**
+ * Represents a single entry in the upgrade state history.
+ * state is the name of the state at that point in time,
+ * e.g. initiated, staged, indexing, indexed, completing, interrupted.
+ * date is the ISO date string of when the upgrade entered that state.
+ */
+export interface UpgradeHistoryEntry {
+  state: string;
+  date: string;
+}
+
+/**
+ * Represents the in-progress upgrade document returned by GET /api/v2/upgrade.
+ * Present only when an upgrade is currently in progress.
+ * action is the type of operation being performed — stage, upgrade or complete.
+ * state is the current state of the upgrade process.
+ * state_history is the ordered list of states the upgrade has passed through with their dates.
+ * to is the target build being installed.
+ */
+export interface UpgradeDoc {
+  action: string;
+  state: string;
+  state_history: UpgradeHistoryEntry[];
+  to: Build;
+}
+
+/**
+ * Represents the real-time progress of a single CouchDB indexer during an upgrade.
+ * Returned as part of the indexers array in GET /api/v2/upgrade while state is 'indexing'.
+ * database is the CouchDB database being indexed.
+ * ddoc is the design document being rebuilt.
+ * progress is a number between 0 and 100 representing the percentage of completion.
+ * type is optional and set to 'search_indexer' for Nouveau full-text search indexers.
+ */
+export interface IndexerProgress {
+  database: string;
+  ddoc: string;
+  progress: number;
+  type?: string;
 }
 
 /**
@@ -70,4 +130,13 @@ export interface ParsedVersion {
   patch: number;
   beta?: number;
   featureRelease?: string;
+}
+
+/**
+ * Represents an error state in the upgrade page.
+ * key is the translation key of the error message to display.
+ * Additional properties can be added here as needed for future error handling requirements.
+ */
+export interface UpgradeError {
+  key: string;
 }
