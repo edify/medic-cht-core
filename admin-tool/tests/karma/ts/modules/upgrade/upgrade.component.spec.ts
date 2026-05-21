@@ -27,6 +27,7 @@ describe('UpgradeComponent', () => {
     upgradeService = {
       getDeployInfo: sinon.stub().resolves(mockDeployInfo),
       getCanUpgrade: sinon.stub().resolves(false),
+      getBuilds: sinon.stub().resolves(MOCK_VERSION_GROUPS),
     };
 
     return TestBed.configureTestingModule({
@@ -54,8 +55,8 @@ describe('UpgradeComponent', () => {
       expect(component.loadingPageStatus).to.be.false;
     });
 
-    it('should start with loadingError false', () => {
-      expect(component.loadingError).to.be.false;
+    it('should start with errorKey null', () => {
+      expect(component.errorKey).to.be.null;
     });
 
     it('should start with canUpgrade false', () => {
@@ -69,6 +70,10 @@ describe('UpgradeComponent', () => {
 
     it('should call getCanUpgrade on init', () => {
       expect(upgradeService.getCanUpgrade.calledOnce).to.be.true;
+    });
+
+    it('should call getBuilds on init', () => {
+      expect(upgradeService.getBuilds.calledOnce).to.be.true;
     });
 
     it('should set deployInfo after init', async () => {
@@ -93,11 +98,11 @@ describe('UpgradeComponent', () => {
       expect(component.loadingPageStatus).to.be.false;
     });
 
-    it('should set loadingError to true if getDeployInfo fails', async () => {
+    it('should set errorKey when getDeployInfo fails', async () => {
       sinon.stub(console, 'error');
       upgradeService.getDeployInfo.rejects(new Error('error'));
       await component.ngOnInit();
-      expect(component.loadingError).to.be.true;
+      expect(component.errorKey).to.equal('instance.upgrade.error.deploy_info_fetch');
     });
 
     it('should call console.error if getDeployInfo fails', async () => {
@@ -107,10 +112,10 @@ describe('UpgradeComponent', () => {
       expect(consoleStub.calledWith('Error fetching upgrade information', sinon.match.any)).to.be.true;
     });
 
-    it('should not set loadingError if only getCanUpgrade fails', async () => {
+    it('should not set errorKey if only getCanUpgrade fails', async () => {
       upgradeService.getCanUpgrade.resolves(false);
       await component.ngOnInit();
-      expect(component.loadingError).to.be.false;
+      expect(component.errorKey).to.be.null;
     });
 
     it('should set versionGroups after init', async () => {
@@ -131,6 +136,17 @@ describe('UpgradeComponent', () => {
     it('should set branches after init', async () => {
       await fixture.whenStable();
       expect(component.versionGroups.branches).to.deep.equal(MOCK_VERSION_GROUPS.branches);
+    });
+    it('should call getBuilds with deployInfo', async () => {
+      await fixture.whenStable();
+      expect(upgradeService.getBuilds.calledWith(mockDeployInfo)).to.be.true;
+    });
+
+    it('should set errorKey when getBuilds fails', async () => {
+      sinon.stub(console, 'error');
+      upgradeService.getBuilds.rejects(new Error('error'));
+      await component.ngOnInit();
+      expect(component.errorKey).to.equal('instance.upgrade.error.version_fetch');
     });
   });
   describe('potentiallyIncompatible', () => {
@@ -185,7 +201,7 @@ describe('UpgradeComponent', () => {
     });
 
     it('should show error alert when loadingError is true', () => {
-      component.loadingError = true;
+      component.errorKey = 'instance.upgrade.error.deploy_info_fetch';
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.alert-danger')).to.exist;
@@ -205,11 +221,11 @@ describe('UpgradeComponent', () => {
       expect(compiled.querySelector('.section')).to.exist;
     });
 
-    it('should not show current version section when loadingError is true', () => {
-      component.loadingError = true;
+    it('should show current version section even when errorKey is set', () => {
+      component.errorKey = 'instance.upgrade.error.deploy_info_fetch';
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.querySelector('.section')).to.not.exist;
+      expect(compiled.querySelector('.section')).to.exist;
     });
 
     it('should render base_version in the dl', async () => {
@@ -282,6 +298,36 @@ describe('UpgradeComponent', () => {
       const releasesSection = compiled.querySelectorAll('.section')[1];
       const badges = releasesSection.querySelectorAll('.label-info');
       expect(badges.length).to.equal(MOCK_VERSION_GROUPS.releases.length);
+    });
+    
+    it('should not show feature releases section when featureReleases is empty', async () => {
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const panelBody = compiled.querySelector('.panel-body');
+      const sections = panelBody!.querySelectorAll('.section');
+      expect(sections.length).to.equal(2);
+    });
+
+    it('should show feature releases section when featureReleases exist', async () => {
+      await fixture.whenStable();
+      component.versionGroups = { ...MOCK_VERSION_GROUPS, featureReleases: [MOCK_VERSION_GROUPS.releases[0]] };
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const panelBody = compiled.querySelector('.panel-body');
+      const sections = panelBody!.querySelectorAll('.section');
+      expect(sections.length).to.equal(3);
+    });
+
+    it('should render a row for each feature release', async () => {
+      await fixture.whenStable();
+      component.versionGroups = { ...MOCK_VERSION_GROUPS, featureReleases: [MOCK_VERSION_GROUPS.releases[0]] };
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const panelBody = compiled.querySelector('.panel-body');
+      const featureSection = panelBody!.querySelectorAll('.section')[0];
+      const rows = featureSection.querySelectorAll('.row:not(.selection-heading)');
+      expect(rows.length).to.equal(1);
     });
   });
 });

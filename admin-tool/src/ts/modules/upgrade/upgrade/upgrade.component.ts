@@ -4,7 +4,6 @@ import { DatePipe } from '@angular/common';
 import { UpgradeService } from '@admin-tool-services/upgrade.service';
 import { VersionService } from '@admin-tool-services/version.service';
 import { DeployInfo, VersionGroups, Build } from '@admin-tool-modules/upgrade/upgrade-interfaces';
-import { MOCK_VERSION_GROUPS } from '@admin-tool-modules/upgrade/upgrade-mock-data';
 
 /**
  * Component for managing CHT instance upgrades.
@@ -12,8 +11,7 @@ import { MOCK_VERSION_GROUPS } from '@admin-tool-modules/upgrade/upgrade-mock-da
  * Loads the current deployment information, upgrade availability and available
  * builds on init. Displays the current version details and a list of available
  * releases organized by type — stable releases, betas, branches and feature releases.
- * Builds are loaded from mock data in this story and will be replaced with real
- * builds from the builds database in a subsequent story.
+ * Builds are loaded from the external builds database via UpgradeService.
  * Further functionality for staging, installing and monitoring upgrade progress
  * will be added in subsequent stories.
  *
@@ -36,10 +34,10 @@ export class UpgradeComponent implements OnInit {
   /** Controls visibility of the loader while deployment information is being fetched */
   loadingPageStatus = false;
 
-  /** Set to true when the initial data load fails, shows the error alert and hides the content */
-  loadingError = false;
+  /** Translation key for the error message shown when a request fails, null when no error */
+  errorKey: string | null = null;
 
-  /** Available builds grouped by type, loaded from mock data until real builds are connected */
+  /** Available builds grouped by type, loaded from the external builds database */
   versionGroups: VersionGroups = {
     releases: [],
     betas: [],
@@ -53,7 +51,8 @@ export class UpgradeComponent implements OnInit {
   ){}
 
   /**
-   * Fetches the current deployment information and upgrade availability on init.
+   * Fetches the current deployment information, upgrade availability and available
+   * builds from the external builds database on init.
    */
   async ngOnInit(): Promise<void> {
     this.loadingPageStatus = true;
@@ -61,10 +60,15 @@ export class UpgradeComponent implements OnInit {
     try {
       this.deployInfo = await this.upgradeService.getDeployInfo();
       this.canUpgrade = await this.upgradeService.getCanUpgrade();
-      this.versionGroups = MOCK_VERSION_GROUPS;
+      this.versionGroups = await this.upgradeService.getBuilds(this.deployInfo!)
+        .catch((error) => {
+          console.error('Error fetching builds', error);
+          this.errorKey = 'instance.upgrade.error.version_fetch';
+          return { releases: [], betas: [], branches: [], featureReleases: [] };
+        });
     } catch (error) {
       console.error('Error fetching upgrade information', error);
-      this.loadingError = true;
+      this.errorKey = 'instance.upgrade.error.deploy_info_fetch';
     } finally {
       this.loadingPageStatus = false;
     }
