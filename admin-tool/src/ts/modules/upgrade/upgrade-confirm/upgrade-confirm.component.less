@@ -1,0 +1,54 @@
+@import (reference) "../../../../css/variables.less";
+@import "../../../../css/base-modal.less";
+
+.modal {
+  .modal-dialog {
+    max-width: 60rem;
+    width: 60rem;
+    margin: 12rem auto;
+    max-height: calc(100vh - 14rem);
+    overflow-y: auto;
+  }
+
+  .modal-body {
+    .alert {
+      margin-bottom: 1rem;
+    }
+
+    .panel-collapse {
+      padding: 0 1rem;
+    }
+
+    table.table {
+      margin-top: 1rem;
+      width: 100%;
+
+      th {
+        font-weight: bold;
+        padding: 0.5rem;
+        border-bottom: 0.125rem solid @gray-light;
+      }
+
+      td {
+        padding: 0.5rem;
+        border-bottom: 0.0625rem solid @gray-light;
+      }
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    a[aria-expanded="true"] {
+      .fa-chevron-right {
+        transform: rotate(90deg);
+      }
+    }
+
+    .fa-chevron-right {
+      transition: transform 0.2s;
+    }
+  }
+}

@@ -3,168 +3,279 @@
     <div class="loader"></div>
   } @else {
     <div class="tab-content container-fluid">
-      @if (errorKey) {
-        <p class="alert alert-danger" role="alert">
-          {{ errorKey | translate }}
-        </p>
+      @if (upgraded) {
+        <div class="alert alert-success">
+          {{ 'instance.upgrade.complete' | translate }}
+        </div>
       }
-      <div class="section">
-        <legend>{{ 'instance.upgrade.current_version' | translate }}</legend>
-        <dl class="horizontal">
-          <dt>{{ 'instance.upgrade.version' | translate }}</dt>
-          <dd>{{ deployInfo?.base_version }}</dd>
-          <dt>{{ 'instance.upgrade.build.version' | translate }}</dt>
-          <dd>{{ deployInfo?.version }}</dd>
-          <dt>{{ 'instance.upgrade.deployed_by' | translate }}</dt>
-          <dd>{{ deployInfo?.user }}</dd>
-          <dt>{{ 'instance.upgrade.at' | translate }}</dt>
-          <dd>{{ deployInfo?.time | date:'mediumDate' }}</dd>
-        </dl>
-      </div>
-      <p class="description">{{ 'upgrade.description' | translate }}</p>
-      <div class="section">
-        <legend>{{ 'instance.upgrade.releases' | translate }}</legend>
-        @if (!versionGroups.releases.length) {
-          <p>{{ 'instance.upgrade.no_new_releases' | translate }}</p>
-        } @else {
-          <div class="row selection-heading">
-            <div class="col-sm-5">{{ 'instance.upgrade.version' | translate }}</div>
-            <div class="col-sm-3">{{ 'instance.upgrade.date' | translate }}</div>
-            <div class="col-sm-2"></div>
-            <div class="col-sm-2"></div>
-          </div>
-          @for (release of versionGroups.releases; track release.build) {
-            <div class="row">
-              <div class="col-sm-5">
-                <span class="label label-info">{{ release.version }}</span>
-              </div>
-              <div class="col-sm-3">{{ release.time | date:'mediumDate' }}</div>
-              <div class="col-sm-2">
-                @if (potentiallyIncompatible(release)) {
-                  <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-                }
-              </div>
-              <div class="col-sm-2">
-                <button type="button" class="btn btn-default">
-                  {{ 'instance.upgrade.stage' | translate }}
-                </button>
-              </div>
-            </div>
-          }
-        }
-      </div>
-      <div class="panel-group section">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h4 class="panel-title">
-              <a data-toggle="collapse" data-target="#pre-releases-body">
-                <i class="fa fa-chevron-right" aria-hidden="true"></i>
-                {{ 'instance.upgrade.pre_releases' | translate }}
-              </a>
-            </h4>
-          </div>
-          <div id="pre-releases-body" class="panel-collapse collapse">
-            <div class="panel-body">
-              <p class="alert alert-warning">
-                {{ 'instance.upgrade.pre_releases_warning' | translate }}
-              </p>
-              @if (versionGroups.featureReleases.length) {
-                <div class="section">
-                  <legend>{{ 'instance.upgrade.feature_releases' | translate }}</legend>
-                  <div class="row selection-heading">
-                    <div class="col-sm-5">{{ 'instance.upgrade.version' | translate }}</div>
-                    <div class="col-sm-3">{{ 'instance.upgrade.date' | translate }}</div>
-                    <div class="col-sm-2"></div>
-                    <div class="col-sm-2"></div>
+      @if (upgradeDoc) {
+        <div class="section">
+          <legend>
+            {{ (upgradeDoc.action === 'stage' ? 'instance.stage.deployment' : 'instance.upgrade.deployment') | translate }}
+          </legend>
+          <p>{{ 'instance.upgrade.upgrading' | translate: { before: deployInfo?.version, after: upgradeDoc.to.version } }}</p>
+          <ul class="table table-striped">
+            @for (entry of upgradeDoc.state_history; track entry.date) {
+              <li class="row">
+                <div>
+                  <div class="col-sm-3">{{ entry.date | date:'medium' }}</div>
+                  <div class="col-sm-9">{{ 'instance.upgrade.state.' + entry.state | translate }}</div>
+                </div>
+                @if (entry.state === 'indexing') {
+                  <div>
+                    @for (indexer of indexerProgress; track indexer.ddoc) {
+                      <div class="col-sm-12">
+                        <div class="col-sm-3">
+                          {{ indexer.database }}/{{ indexer.ddoc }}
+                          @if (indexer.type === 'search_indexer') {
+                            <span>{{ 'instance.upgrade.nouveau' | translate }}</span>
+                          }
+                        </div>
+                        <div class="col-sm-9 progress">
+                          <div
+                            class="progress-bar"
+                            role="progressbar"
+                            [style.width.%]="indexer.progress"
+                            [attr.aria-valuenow]="indexer.progress"
+                            aria-valuemin="0"
+                            aria-valuemax="100">
+                            {{ indexer.progress }}%
+                          </div>
+                        </div>
+                      </div>
+                    }
                   </div>
-                  @for (featureRelease of versionGroups.featureReleases; track featureRelease.build) {
-                    <div class="row">
-                      <div class="col-sm-5">
-                        <span class="label label-info">{{ featureRelease.version }}</span>
-                      </div>
-                      <div class="col-sm-3">{{ featureRelease.time | date:'mediumDate' }}</div>
-                      <div class="col-sm-2">
-                        @if (potentiallyIncompatible(featureRelease)) {
-                          <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-                        }
-                      </div>
-                      <div class="col-sm-2">
-                        <button type="button" class="btn btn-default">
-                          {{ 'instance.upgrade.stage' | translate }}
-                        </button>
-                      </div>
-                    </div>
+                }
+              </li>
+            }
+          </ul>
+          @if (upgradeDoc.state === 'indexed' && upgradeDoc.action === 'stage') {
+            <p>{{ 'instance.stage.complete' | translate }}</p>
+          }
+          <div class="upgrade-actions">
+            <button type="button" class="btn btn-danger" (click)="abortUpgrade()">
+              {{ 'instance.upgrade.cancel' | translate }}
+            </button>
+            @if (upgradeDoc.state === 'interrupted') {
+              <button type="button" class="btn btn-default" (click)="retryUpgrade()">
+                {{ 'instance.upgrade.retry' | translate }}
+              </button>
+            }
+            @if (upgradeDoc.state === 'indexed' && upgradeDoc.action === 'stage') {
+              @if (canUpgrade) {
+                <button type="button" class="btn btn-primary" (click)="upgrade(upgradeDoc.to, 'complete')">
+                  {{ 'instance.upgrade.install' | translate }}
+                </button>
+              }
+            }
+          </div>
+        </div>
+      }
+      @if (!upgradeDoc) {
+        @if (upgradeError) {
+          <p class="alert alert-danger" role="alert">
+            {{ upgradeError.key | translate }}
+          </p>
+        }
+        <div class="section">
+          <legend>{{ 'instance.upgrade.current_version' | translate }}</legend>
+            <dl class="horizontal">
+              <dt>{{ 'instance.upgrade.version' | translate }}</dt>
+              <dd>{{ deployInfo?.base_version }}</dd>
+              <dt>{{ 'instance.upgrade.build.version' | translate }}</dt>
+              <dd>{{ deployInfo?.version }}</dd>
+              <dt>{{ 'instance.upgrade.deployed_by' | translate }}</dt>
+              <dd>{{ deployInfo?.user }}</dd>
+              <dt>{{ 'instance.upgrade.at' | translate }}</dt>
+            <dd>{{ deployInfo?.time | date:'mediumDate' }}</dd>
+          </dl>
+        </div>
+        <p class="description">{{ 'upgrade.description' | translate }}</p>
+        <div class="section">
+          <legend>{{ 'instance.upgrade.releases' | translate }}</legend>
+          @if (!versionGroups.releases.length) {
+            <p>{{ 'instance.upgrade.no_new_releases' | translate }}</p>
+          } @else {
+            <div class="row selection-heading">
+              <div class="col-sm-5">{{ 'instance.upgrade.version' | translate }}</div>
+              <div class="col-sm-3">{{ 'instance.upgrade.date' | translate }}</div>
+              <div class="col-sm-2"></div>
+              <div class="col-sm-2"></div>
+            </div>
+            @for (release of versionGroups.releases; track release.build) {
+              <div class="row">
+                <div class="col-sm-5">
+                  <span class="label label-info">{{ release.version }}</span>
+                </div>
+                <div class="col-sm-3">{{ release.time | date:'mediumDate' }}</div>
+                <div class="col-sm-2">
+                  @if (potentiallyIncompatible(release)) {
+                    <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                  }
+                  @if (release.requiresIndexing === false) {
+                    <span class="label label-success">{{ 'instance.upgrade.indexing.not_required.short' | translate }}</span>
                   }
                 </div>
-              }
-              <div class="section">
-                <legend>{{ 'instance.upgrade.betas' | translate }}</legend>
-                @if (!versionGroups.betas.length) {
-                  <p>{{ 'instance.upgrade.no_betas' | translate }}</p>
-                } @else {
-                  <div class="row selection-heading">
-                    <div class="col-sm-5">{{ 'instance.upgrade.version' | translate }}</div>
-                    <div class="col-sm-3">{{ 'instance.upgrade.date' | translate }}</div>
-                    <div class="col-sm-2">{{ 'instance.upgrade.base_version' | translate }}</div>
-                    <div class="col-sm-2"></div>
-                  </div>
-                  @for (beta of versionGroups.betas; track beta.build) {
-                    <div class="row">
-                      <div class="col-sm-5">
-                        <span class="label label-info">{{ beta.version }}</span>
-                      </div>
-                      <div class="col-sm-3">{{ beta.time | date:'mediumDate' }}</div>
-                      <div class="col-sm-2">
-                        {{ beta.base_version }}
-                        @if (potentiallyIncompatible(beta)) {
-                          <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-                        }
-                      </div>
-                      <div class="col-sm-2">
-                        <button type="button" class="btn btn-default">
-                          {{ 'instance.upgrade.stage' | translate }}
-                        </button>
-                      </div>
-                    </div>
+                <div class="col-sm-2">
+                  <button type="button" class="btn btn-default" (click)="upgrade(release, 'stage')">
+                    {{ 'instance.upgrade.stage' | translate }}
+                  </button>
+                  @if (canUpgrade) {
+                    <button type="button" class="btn btn-primary" (click)="upgrade(release, undefined)">
+                      {{ 'instance.upgrade.install' | translate }}
+                    </button>
                   }
-                }
+                </div>
               </div>
-              <div class="section">
-                <legend>{{ 'instance.upgrade.branches' | translate }}</legend>
-                @if (!versionGroups.branches.length) {
-                  <p>{{ 'instance.upgrade.no_branches' | translate }}</p>
-                } @else {
-                  <div class="row selection-heading">
-                    <div class="col-sm-5">{{ 'instance.upgrade.version' | translate }}</div>
-                    <div class="col-sm-3">{{ 'instance.upgrade.date' | translate }}</div>
-                    <div class="col-sm-2">{{ 'instance.upgrade.base_version' | translate }}</div>
-                    <div class="col-sm-2"></div>
-                  </div>
-                  @for (branch of versionGroups.branches; track branch.build) {
-                    <div class="row">
-                      <div class="col-sm-5">
-                        <span class="label label-info">{{ branch.version }}</span>
-                      </div>
-                      <div class="col-sm-3">{{ branch.time | date:'medium' }}</div>
-                      <div class="col-sm-2">
-                        {{ branch.base_version }}
-                        @if (potentiallyIncompatible(branch)) {
-                          <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-                        }
-                      </div>
-                      <div class="col-sm-2">
-                        <button type="button" class="btn btn-default">
-                          {{ 'instance.upgrade.stage' | translate }}
-                        </button>
-                      </div>
+            }
+          }
+        </div>
+        <div class="panel-group section">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a data-toggle="collapse" data-target="#pre-releases-body">
+                  <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                  {{ 'instance.upgrade.pre_releases' | translate }}
+                </a>
+              </h4>
+            </div>
+            <div id="pre-releases-body" class="panel-collapse collapse">
+              <div class="panel-body">
+                <p class="alert alert-warning">
+                  {{ 'instance.upgrade.pre_releases_warning' | translate }}
+                </p>
+                @if (versionGroups.featureReleases.length) {
+                  <div class="section">
+                    <legend>{{ 'instance.upgrade.feature_releases' | translate }}</legend>
+                    <div class="row selection-heading">
+                      <div class="col-sm-5">{{ 'instance.upgrade.version' | translate }}</div>
+                      <div class="col-sm-3">{{ 'instance.upgrade.date' | translate }}</div>
+                      <div class="col-sm-2"></div>
+                      <div class="col-sm-2"></div>
                     </div>
-                  }
+                    @for (featureRelease of versionGroups.featureReleases; track featureRelease.build) {
+                      <div class="row">
+                        <div class="col-sm-5">
+                          <span class="label label-info">{{ featureRelease.version }}</span>
+                        </div>
+                        <div class="col-sm-3">{{ featureRelease.time | date:'mediumDate' }}</div>
+                        <div class="col-sm-2">
+                          @if (potentiallyIncompatible(featureRelease)) {
+                            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                          }
+                          @if (featureRelease.requiresIndexing === false) {
+                            <span class="label label-success">{{ 'instance.upgrade.indexing.not_required.short' | translate }}</span>
+                          }
+                        </div>
+                        <div class="col-sm-2">
+                          <button type="button" class="btn btn-default" (click)="upgrade(featureRelease, 'stage')">
+                            {{ 'instance.upgrade.stage' | translate }}
+                          </button>
+                          @if (canUpgrade) {
+                            <button type="button" class="btn btn-primary" (click)="upgrade(featureRelease, undefined)">
+                              {{ 'instance.upgrade.install' | translate }}
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
                 }
+                <div class="section">
+                  <legend>{{ 'instance.upgrade.betas' | translate }}</legend>
+                  @if (!versionGroups.betas.length) {
+                    <p>{{ 'instance.upgrade.no_betas' | translate }}</p>
+                  } @else {
+                    <div class="row selection-heading">
+                      <div class="col-sm-5">{{ 'instance.upgrade.version' | translate }}</div>
+                      <div class="col-sm-3">{{ 'instance.upgrade.date' | translate }}</div>
+                      <div class="col-sm-2">{{ 'instance.upgrade.base_version' | translate }}</div>
+                      <div class="col-sm-2"></div>
+                    </div>
+                    @for (beta of versionGroups.betas; track beta.build) {
+                      <div class="row">
+                        <div class="col-sm-5">
+                          <span class="label label-info">{{ beta.version }}</span>
+                        </div>
+                        <div class="col-sm-3">{{ beta.time | date:'mediumDate' }}</div>
+                        <div class="col-sm-2">
+                          {{ beta.base_version }}
+                          @if (potentiallyIncompatible(beta)) {
+                            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                          }
+                          @if (beta.requiresIndexing === false) {
+                            <span class="label label-success">{{ 'instance.upgrade.indexing.not_required.short' | translate }}</span>
+                          }
+                        </div>
+                        <div class="col-sm-2">
+                          <button type="button" class="btn btn-default" (click)="upgrade(beta, 'stage')">
+                            {{ 'instance.upgrade.stage' | translate }}
+                          </button>
+                          @if (canUpgrade) {
+                            <button type="button" class="btn btn-primary" (click)="upgrade(beta, undefined)">
+                              {{ 'instance.upgrade.install' | translate }}
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    }
+                  }
+                </div>
+                <div class="section">
+                  <legend>{{ 'instance.upgrade.branches' | translate }}</legend>
+                  @if (!versionGroups.branches.length) {
+                    <p>{{ 'instance.upgrade.no_branches' | translate }}</p>
+                  } @else {
+                    <div class="row selection-heading">
+                      <div class="col-sm-5">{{ 'instance.upgrade.version' | translate }}</div>
+                      <div class="col-sm-3">{{ 'instance.upgrade.date' | translate }}</div>
+                      <div class="col-sm-2">{{ 'instance.upgrade.base_version' | translate }}</div>
+                      <div class="col-sm-2"></div>
+                    </div>
+                    @for (branch of versionGroups.branches; track branch.build) {
+                      <div class="row">
+                        <div class="col-sm-5">
+                          <span class="label label-info">{{ branch.version }}</span>
+                        </div>
+                        <div class="col-sm-3">{{ branch.time | date:'medium' }}</div>
+                        <div class="col-sm-2">
+                          {{ branch.base_version }}
+                          @if (potentiallyIncompatible(branch)) {
+                            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                          }
+                        </div>
+                        <div class="col-sm-2">
+                          <button type="button" class="btn btn-default" (click)="upgrade(branch, 'stage')">
+                            {{ 'instance.upgrade.stage' | translate }}
+                          </button>
+                          @if (canUpgrade) {
+                            <button type="button" class="btn btn-primary" (click)="upgrade(branch, undefined)">
+                              {{ 'instance.upgrade.install' | translate }}
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    }
+                  }
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      }
     </div>
   }
+  <upgrade-confirm
+    [visible]="showConfirmModal"
+    [stageOnly]="confirmStageOnly"
+    [build]="confirmBuild"
+    [before]="deployInfo?.version ?? ''"
+    [after]="confirmIsAbort ? (upgradeDoc?.to?.version ?? '') : (confirmBuild?.version ?? '')"
+    [confirmCallback]="confirmCallback"
+    [isAbort]="confirmIsAbort"
+    [errorKey]="confirmErrorKey"
+    (closed)="showConfirmModal = false"
+    (errorOccurred)="upgradeError = { key: $event }"
+  ></upgrade-confirm>
 </div>

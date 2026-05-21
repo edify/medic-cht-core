@@ -1,0 +1,103 @@
+<div>
+  <div
+    class="modal fade"
+    [class.in]="visible"
+    [style.display]="visible ? 'block' : 'none'"
+    role="dialog"
+  >
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" (click)="cancel()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title">
+            @if (isAbort) {
+              {{ 'instance.upgrade.cancel' | translate }}
+            } @else {
+              {{ (stageOnly ? 'instance.stage.confirm' : 'instance.upgrade.confirm') | translate }}
+            }
+          </h4>
+        </div>
+        <div class="modal-body">
+          @if (isAbort) {
+            <p>{{ 'instance.upgrade.cancel.summary' | translate: { before: before, after: after } }}</p>
+            <p>{{ 'instance.upgrade.cancel.note' | translate }}</p>
+          } @else {
+            <p>{{ 'instance.upgrade.confirm.summary' | translate: { before: before, after: after } }}</p>
+            @if (build?.compare !== undefined) {
+              @if (!build?.compare?.length) {
+                <p class="alert alert-info">
+                  {{ 'instance.upgrade.indexing.not_required' | translate }}
+                </p>
+              } @else {
+                <div>
+                  <a class="alert alert-warning btn" data-toggle="collapse" data-target="#indexing-details">
+                    <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                    {{ 'instance.upgrade.indexing.required' | translate }}
+                  </a>
+                  <div id="indexing-details" class="panel-collapse collapse">
+                    <table class="table">
+                      <tr>
+                        <th>{{ 'instance.upgrade.indexing.db' | translate }}</th>
+                        <th>{{ 'instance.upgrade.indexing.ddoc' | translate }}</th>
+                        <th>{{ 'instance.upgrade.indexing.type' | translate }}</th>
+                        <th>{{ 'instance.upgrade.indexing.size' | translate }}</th>
+                      </tr>
+                      @for (difference of build?.compare; track difference.ddoc) {
+                        <tr>
+                          <td>{{ difference.db }}</td>
+                          <td>{{ difference.ddoc }}</td>
+                          <td>
+                            @for (type of difference.type; track type) {
+                              <span>{{ 'instance.upgrade.indexing.type.' + type | translate }}</span>
+                            }
+                          </td>
+                          <td>{{ difference.size | bytes }}</td>
+                        </tr>
+                      }
+                    </table>
+                    <div class="alert alert-warning">
+                      {{ 'instance.upgrade.indexing.size.warning' | translate }}
+                    </div>
+                  </div>
+                </div>
+              }
+              <p>
+                <a href="https://docs.communityhealthtoolkit.org/hosting/cht/upgrade-troubleshooting/" target="_blank" rel="noopener noreferrer">
+                  {{ 'instance.upgrade.indexing.documentation' | translate }}
+                </a>
+              </p>
+            }
+            @if (stageOnly) {
+              <p>{{ 'instance.stage.confirm.note' | translate }}</p>
+            } @else {
+              <p class="alert alert-info">
+                {{ 'instance.upgrade.confirm.warning.text' | translate }}
+              </p>
+            }
+          }
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-link" (click)="cancel()" [disabled]="loadingModalState">
+            {{ 'Cancel' | translate }}
+          </button>
+          <button
+            type="button"
+            [class]="isAbort ? 'btn btn-danger' : 'btn btn-primary'"
+            (click)="submit()"
+            [disabled]="loadingModalState">
+            @if (isAbort) {
+              {{ loadingModalState ? ('instance.upgrade.cancelling' | translate) : ('Confirm' | translate) }}
+            } @else {
+              {{ loadingModalState ? ('instance.upgrade.confirming' | translate) : ('Confirm' | translate) }}
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  @if (visible) {
+    <div class="modal-backdrop fade in"></div>
+  }
+</div>

@@ -5,6 +5,7 @@ import sinon from 'sinon';
 import { of, throwError } from 'rxjs';
 import { UpgradeService } from '@admin-tool-services/upgrade.service';
 import { VersionService } from '@admin-tool-services/version.service';
+import { Build } from '@admin-tool-modules/upgrade/upgrade-interfaces';
 
 describe('UpgradeService', () => {
   let service: UpgradeService;
@@ -132,20 +133,48 @@ describe('UpgradeService', () => {
     it('should return buildsUrl from response', async () => {
       http.get.returns(of({ buildsUrl: 'https://staging.dev.medicmobile.org/_couch/builds_4' }));
       const result = await service.getCurrentUpgrade();
-      expect(result).to.equal('https://staging.dev.medicmobile.org/_couch/builds_4');
+      expect(result.buildsUrl).to.equal('https://staging.dev.medicmobile.org/_couch/builds_4');
     });
 
-    it('should return default builds url when buildsUrl is not in response', async () => {
+    it('should return upgradeDoc from response', async () => {
+      const mockUpgradeDoc = { action: 'stage', state: 'staged', state_history: [], to: {} };
+      http.get.returns(of({ upgradeDoc: mockUpgradeDoc }));
+      const result = await service.getCurrentUpgrade();
+      expect(result.upgradeDoc).to.deep.equal(mockUpgradeDoc);
+    });
+
+    it('should return indexers from response', async () => {
+      const mockIndexers = [{ database: 'medic', ddoc: '_design/medic', progress: 50 }];
+      http.get.returns(of({ indexers: mockIndexers }));
+      const result = await service.getCurrentUpgrade();
+      expect(result.indexers).to.deep.equal(mockIndexers);
+    });
+
+    it('should return default buildsUrl when not in response', async () => {
       http.get.returns(of({}));
       const result = await service.getCurrentUpgrade();
-      expect(result).to.equal('https://staging.dev.medicmobile.org/_couch/builds_4');
+      expect(result.buildsUrl).to.equal('https://staging.dev.medicmobile.org/_couch/builds_4');
     });
 
-    it('should return default builds url if GET fails', async () => {
+    it('should return null upgradeDoc when not in response', async () => {
+      http.get.returns(of({}));
+      const result = await service.getCurrentUpgrade();
+      expect(result.upgradeDoc).to.be.null;
+    });
+
+    it('should return empty indexers when not in response', async () => {
+      http.get.returns(of({}));
+      const result = await service.getCurrentUpgrade();
+      expect(result.indexers).to.deep.equal([]);
+    });
+
+    it('should return default values if GET fails', async () => {
       http.get.returns(throwError(() => new Error('error')));
       sinon.stub(console, 'error');
       const result = await service.getCurrentUpgrade();
-      expect(result).to.equal('https://staging.dev.medicmobile.org/_couch/builds_4');
+      expect(result.buildsUrl).to.equal('https://staging.dev.medicmobile.org/_couch/builds_4');
+      expect(result.upgradeDoc).to.be.null;
+      expect(result.indexers).to.deep.equal([]);
     });
 
     it('should call console.error if GET fails', async () => {
@@ -257,6 +286,144 @@ describe('UpgradeService', () => {
     it('should propagate error if query fails', async () => {
       pouchDbStub.query.rejects(new Error('query error'));
       await expect(service.getBuilds(mockDeployInfo)).to.be.rejected;
+    });
+  });
+  describe('compareReleases', () => {
+    it('should call POST /api/v2/upgrade/compare', async () => {
+      http.post = sinon.stub().returns(of([]));
+      const build: Build = { build: '5.1.2', version: '5.1.2', time: '2026-05-01T00:00:00.000Z' };
+      await service.compareReleases(build);
+      expect(http.post.calledWith('/api/v2/upgrade/compare', { build })).to.be.true;
+    });
+
+    it('should set build.compare from response', async () => {
+      const differences = [{ db: 'medic', ddoc: '_design/medic', type: ['views'], size: 100, indexing: true }];
+      http.post = sinon.stub().returns(of(differences));
+      const build: Build = { build: '5.1.2', version: '5.1.2', time: '2026-05-01T00:00:00.000Z' };
+      await service.compareReleases(build);
+      expect(build.compare).to.deep.equal(differences);
+    });
+
+    it('should set build.requiresIndexing to true when any difference has indexing true', async () => {
+      const differences = [{ db: 'medic', ddoc: '_design/medic', type: ['views'], size: 100, indexing: true }];
+      http.post = sinon.stub().returns(of(differences));
+      const build: Build = { build: '5.1.2', version: '5.1.2', time: '2026-05-01T00:00:00.000Z' };
+      await service.compareReleases(build);
+      expect(build.requiresIndexing).to.be.true;
+    });
+
+    it('should set build.requiresIndexing to false when no differences have indexing', async () => {
+      const differences = [{ db: 'medic', ddoc: '_design/medic', type: ['views'], size: 100, indexing: false }];
+      http.post = sinon.stub().returns(of(differences));
+      const build: Build = { build: '5.1.2', version: '5.1.2', time: '2026-05-01T00:00:00.000Z' };
+      await service.compareReleases(build);
+      expect(build.requiresIndexing).to.be.false;
+    });
+
+    it('should not call POST if build.compare already exists', async () => {
+      http.post = sinon.stub().returns(of([]));
+      const build: Build = { build: '5.1.2', version: '5.1.2', time: '2026-05-01T00:00:00.000Z', compare: [] };
+      await service.compareReleases(build);
+      expect(http.post.called).to.be.false;
+    });
+
+    it('should not throw if POST fails', async () => {
+      http.post = sinon.stub().returns(throwError(() => new Error('error')));
+      sinon.stub(console, 'error');
+      const build: Build = { build: '5.1.2', version: '5.1.2', time: '2026-05-01T00:00:00.000Z' };
+      await expect(service.compareReleases(build)).to.not.be.rejected;
+    });
+
+    it('should call console.error if POST fails', async () => {
+      http.post = sinon.stub().returns(throwError(() => new Error('error')));
+      const consoleStub = sinon.stub(console, 'error');
+      const build: Build = { build: '5.1.2', version: '5.1.2', time: '2026-05-01T00:00:00.000Z' };
+      await service.compareReleases(build);
+      expect(consoleStub.calledWith('Failed to compare releases', sinon.match.any)).to.be.true;
+    });
+  });
+  describe('stage', () => {
+    it('should call POST /api/v2/upgrade/stage', async () => {
+      http.post = sinon.stub().returns(of(void 0));
+      const build: Build = { build: '5.1.2', version: '5.1.2', time: '2026-05-01T00:00:00.000Z' };
+      await service.stage(build);
+      expect(http.post.calledWith('/api/v2/upgrade/stage', { build })).to.be.true;
+    });
+
+    it('should propagate error if POST fails', async () => {
+      http.post = sinon.stub().returns(throwError(() => new Error('error')));
+      const build: Build = { build: '5.1.2', version: '5.1.2', time: '2026-05-01T00:00:00.000Z' };
+      await expect(service.stage(build)).to.be.rejected;
+    });
+  });
+  describe('abortUpgrade', () => {
+    it('should call DELETE /api/v2/upgrade', async () => {
+      http.delete = sinon.stub().returns(of(void 0));
+      await service.abortUpgrade();
+      expect(http.delete.calledWith('/api/v2/upgrade')).to.be.true;
+    });
+
+    it('should propagate error if DELETE fails', async () => {
+      http.delete = sinon.stub().returns(throwError(() => new Error('error')));
+      await expect(service.abortUpgrade()).to.be.rejected;
+    });
+  });
+
+  describe('install', () => {
+    it('should call POST /api/v2/upgrade', async () => {
+      http.post = sinon.stub().returns(of(void 0));
+      const build: Build = { build: '5.1.2', version: '5.1.2', time: '2026-05-01T00:00:00.000Z' };
+      await service.install(build);
+      expect(http.post.calledWith('/api/v2/upgrade', { build })).to.be.true;
+    });
+
+    it('should propagate error if POST fails', async () => {
+      http.post = sinon.stub().returns(throwError(() => new Error('error')));
+      const build: Build = { build: '5.1.2', version: '5.1.2', time: '2026-05-01T00:00:00.000Z' };
+      await expect(service.install(build)).to.be.rejected;
+    });
+  });
+  describe('completeInstall', () => {
+    it('should call POST /api/v2/upgrade/complete', async () => {
+      http.post = sinon.stub().returns(of(void 0));
+      const build: Build = { build: '5.1.2', version: '5.1.2', time: '2026-05-01T00:00:00.000Z' };
+      await service.completeInstall(build);
+      expect(http.post.calledWith('/api/v2/upgrade/complete', { build })).to.be.true;
+    });
+
+    it('should propagate error if POST fails with non-502-503 status', async () => {
+      http.post = sinon.stub().returns(throwError(() => ({ status: 500 })));
+      const build: Build = { build: '5.1.2', version: '5.1.2', time: '2026-05-01T00:00:00.000Z' };
+      await expect(service.completeInstall(build)).to.be.rejected;
+    });
+
+    it('should not propagate error if POST fails with 502', async () => {
+      http.post = sinon.stub().returns(throwError(() => ({ status: 502 })));
+      http.get = sinon.stub().returns(of(void 0));
+      const build: Build = { build: '5.1.2', version: '5.1.2', time: '2026-05-01T00:00:00.000Z' };
+      await expect(service.completeInstall(build)).to.not.be.rejected;
+    });
+
+    it('should not propagate error if POST fails with 503', async () => {
+      http.post = sinon.stub().returns(throwError(() => ({ status: 503 })));
+      http.get = sinon.stub().returns(of(void 0));
+      const build: Build = { build: '5.1.2', version: '5.1.2', time: '2026-05-01T00:00:00.000Z' };
+      await expect(service.completeInstall(build)).to.not.be.rejected;
+    });
+
+    it('should not propagate error if POST fails with status -1', async () => {
+      http.post = sinon.stub().returns(throwError(() => ({ status: -1 })));
+      http.get = sinon.stub().returns(of(void 0));
+      const build: Build = { build: '5.1.2', version: '5.1.2', time: '2026-05-01T00:00:00.000Z' };
+      await expect(service.completeInstall(build)).to.not.be.rejected;
+    });
+
+    it('should call waitUntilApiStarts polling /setup/poll when POST fails with 502', async () => {
+      http.post = sinon.stub().returns(throwError(() => ({ status: 502 })));
+      http.get = sinon.stub().returns(of(void 0));
+      const build: Build = { build: '5.1.2', version: '5.1.2', time: '2026-05-01T00:00:00.000Z' };
+      await service.completeInstall(build);
+      expect(http.get.calledWith('/setup/poll')).to.be.true;
     });
   });
 });
