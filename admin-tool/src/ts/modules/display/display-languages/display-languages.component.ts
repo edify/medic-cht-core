@@ -147,7 +147,7 @@ export class DisplayLanguagesComponent implements OnInit, OnDestroy{
 
   /**
    * Disables a language by updating its enabled state in settings.languages.
-   * Reloads the language list after success.
+   * Sets expandedLanguageCode so the accordion reopens for this language after the changes feed reloads the list.
    *
    * @param {LanguageDoc} doc - the language document to disable
    */
@@ -163,7 +163,7 @@ export class DisplayLanguagesComponent implements OnInit, OnDestroy{
 
   /**
    * Enables a language by updating its enabled state in settings.languages.
-   * Reloads the language list after success.
+   * Sets expandedLanguageCode so the accordion reopens for this language after the changes feed reloads the list.
    *
    * @param {LanguageDoc} doc - the language document to enable
    */
@@ -180,6 +180,7 @@ export class DisplayLanguagesComponent implements OnInit, OnDestroy{
 
   /**
    * Opens the edit modal with the selected language document.
+   * Sets expandedLanguageCode so the accordion reopens for this language after the modal saves.
    *
    * @param {LanguageDoc} doc - the language document to edit
    */
@@ -191,6 +192,7 @@ export class DisplayLanguagesComponent implements OnInit, OnDestroy{
 
   /**
    * Opens the upload modal with the selected language document.
+   * Sets expandedLanguageCode so the accordion reopens for this language after the modal saves.
    *
    * @param {LanguageDoc} doc - the language document to import translations into
    */
