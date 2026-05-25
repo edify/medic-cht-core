@@ -5,8 +5,14 @@
     </div>
     <ul class="nav navbar-nav navbar-right">
       <li>
+        <a [href]="webAppUrl">
+          <i class="fa fa-fw fa-home" aria-hidden="true"></i>
+          <span>{{ 'app.name' | translate }}</span>
+        </a>
+      </li>
+      <li>
         <a href="/medic/_session" class="btn btn-link">
-          <i class="fa fa-sign-out"></i> {{ 'Log Out' | translate }}
+          <i class="fa fa-fw fa-power-off" aria-hidden="true"></i> {{ 'Log Out' | translate }}
         </a>
       </li>
     </ul>

@@ -4,10 +4,12 @@ import { of } from 'rxjs';
 import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { HeaderComponent } from '@admin-tool-components/header/header.component';
+import { LocationService } from '@admin-tool-services/location.service';
 
 const TRANSLATIONS = {
   'admin.app.name': 'Community Health Toolkits Admin',
   'Log Out': 'Log Out',
+  'app.name': 'Application',
 };
 
 describe('HeaderComponent', () => {
@@ -22,6 +24,9 @@ describe('HeaderComponent', () => {
           TranslateModule.forRoot({
             loader: { provide: TranslateLoader, useValue: { getTranslation: () => of(TRANSLATIONS) } },
           }),
+        ],
+        providers: [
+          { provide: LocationService, useValue: { path: '/' } }
         ],
       })
       .compileComponents()
@@ -60,5 +65,33 @@ describe('HeaderComponent', () => {
   it('should render a navbar-right section for the logout action', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.navbar-right')).to.exist;
+  });
+
+  it('should set webAppUrl from LocationService', () => {
+    expect(component.webAppUrl).to.equal('/');
+  });
+
+  it('should render the application link', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const links = compiled.querySelectorAll('a');
+    const appLink = Array.from(links).find(a => a.textContent!.trim().toLowerCase().includes('application'));
+    expect(appLink).to.exist;
+  });
+
+  it('should render application link with correct href', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const links = compiled.querySelectorAll('a');
+    const appLink = Array.from(links).find(a => a.textContent!.trim().toLowerCase().includes('application'));
+    expect(appLink!.getAttribute('href')).to.equal('/');
+  });
+
+  it('should render fa-home icon in application link', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.fa-home')).to.exist;
+  });
+
+  it('should render fa-power-off icon in logout link', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.fa-power-off')).to.exist;
   });
 });
