@@ -1,18 +1,17 @@
 <form class="custom-form">
   <div class="form-group">
     <label id="date-format-label" class="date-label">{{ 'Date display format' | translate }}</label>
-    <div class="dropdown dropdown-date">
-      <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-labelledby="date-format-label">
-        {{ dateFormatSelection }} <span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu">
-        @for (date of standardDateFormats; track $index) {
-          <li>
-            <button (click)="onDateFormatSelected(date)">{{ date }}</button>
-          </li>
-        }
-      </ul>
-    </div>
+    <select
+      id="date-format"
+      name="date-format"
+      class="form-control"
+      aria-labelledby="date-format-label"
+      [(ngModel)]="dateFormatSelection"
+      (ngModelChange)="onDateFormatSelected()">
+      @for (date of standardDateFormats; track $index) {
+        <option [value]="date">{{ date }}</option>
+      }
+    </select>
     <div class="help-block"></div>
     <p class="help-block">
       <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank" rel="noopener">{{ 'configuration.date.format.help' | translate }}</a>
@@ -20,18 +19,17 @@
     </p>
 
     <label id="datetime-format-label" class="date-label second-label">{{ 'Datetime display format' | translate }}</label>
-    <div class="dropdown dropdown-datetime">
-      <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-labelledby="datetime-format-label">
-        {{ dateTimeFormatSelection }} <span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu">
-        @for (date of standardDatetimeFormats; track $index) {
-          <li>
-            <button (click)="onDateTimeFormatSelected(date)">{{ date }}</button>
-          </li>
-        }
-      </ul>
-    </div>
+    <select
+      id="datetime-format"
+      name="datetime-format"
+      class="form-control"
+      aria-labelledby="datetime-format-label"
+      [(ngModel)]="dateTimeFormatSelection"
+      (ngModelChange)="onDateTimeFormatSelected()">
+      @for (date of standardDatetimeFormats; track $index) {
+        <option [value]="date">{{ date }}</option>
+      }
+    </select>
     <div class="help-block"></div>
     <p class="help-block">
       <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank" rel="noopener">{{ 'configuration.date.format.help' | translate }}</a>
