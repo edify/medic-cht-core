@@ -41,3 +41,27 @@ h1, h2, h3, h4, h5, h6 {
 .hidden {
   display: none !important;
 }
+
+// --- Layout ---
+.body {
+  flex-wrap: nowrap;
+}
+
+.navigation {
+  display: block !important;
+  flex-shrink: 1;
+  width: auto;
+  max-width: 13.75rem;
+  min-width: 5rem;
+
+  li a {
+    white-space: normal;
+    word-break: break-word;
+  }
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+}

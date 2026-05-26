@@ -1,4 +1,4 @@
-<div class="navigation">
+<div class="navigation" [class.open]="isOpen">
   <ul>
     <li routerLinkActive="active-nav" [mmAuth]="'can_configure'">
       <a routerLink="/display">{{ 'admin.display' | translate }}</a>
