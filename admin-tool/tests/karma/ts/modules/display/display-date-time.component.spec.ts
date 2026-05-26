@@ -189,35 +189,25 @@ describe('DisplayDateTimeComponent', () => {
   });
 
   describe('onDataFormSelected', () => {
-    it('should update dataFormatSelection', () => {
-      component.onDateFormatSelected('MM/DD/YYYY');
-      expect(component.dateFormatSelection).to.equal('MM/DD/YYYY');
-    });
-
     it('should update dateFormatExample', () => {
-      component.onDateFormatSelected('MM/DD/YYYY');
+      component.onDateFormatSelected();
       expect(component.dateFormatExample).to.exist;
     });
-
-    it('should update dataFormatExample with new format', () => {
-      component.onDateFormatSelected('MM/DD/YYYY');
+    it('should update dateFormatExample when format changes', () => {
+      component.dateFormatSelection = 'MM/DD/YYYY';
+      component.onDateFormatSelected();
       expect(component.dateFormatExample).to.equal(moment().format('MM/DD/YYYY'));
     });
   });
 
   describe('onDateTimeFormatSelected', () => {
-    it('should update dateTimeFormatSelection', () => {
-      component.onDateTimeFormatSelected('MM/DD/YYYY HH:mm:ss');
-      expect(component.dateTimeFormatSelection).to.equal('MM/DD/YYYY HH:mm:ss');
-    });
-
     it('should update dateTimeFormatExample', () => {
-      component.onDateTimeFormatSelected('MM/DD/YYYY HH:mm:ss');
+      component.onDateTimeFormatSelected();
       expect(component.dateTimeFormatExample).to.exist;
     });
-
-    it('should update dateTimeFormatExample with new format', () => {
-      component.onDateTimeFormatSelected('MM/DD/YYYY HH:mm:ss');
+    it('should update dateTimeFormatExample when format changes', () => {
+      component.dateTimeFormatSelection = 'MM/DD/YYYY HH:mm:ss';
+      component.onDateTimeFormatSelected();
       expect(component.dateTimeFormatExample).to.equal(moment().format('MM/DD/YYYY HH:mm:ss'));
     });
   });
@@ -336,15 +326,13 @@ describe('DisplayDateTimeComponent', () => {
 
     it('should render 3 date format options', () => {
       const compiled = fixture.nativeElement as HTMLElement;
-      const dropdowns = compiled.querySelectorAll('.dropdown-menu');
-      const options = dropdowns[0].querySelectorAll('li');
+      const options = compiled.querySelectorAll('#date-format option');
       expect(options.length).to.equal(3);
     });
 
     it('should render 3 datetime format options', () => {
       const compiled = fixture.nativeElement as HTMLElement;
-      const dropdowns = compiled.querySelectorAll('.dropdown-menu');
-      const options = dropdowns[1].querySelectorAll('li');
+      const options = compiled.querySelectorAll('#datetime-format option');
       expect(options.length).to.equal(3);
     });
   });
