@@ -77,7 +77,9 @@ export class DisplayTranslationsEditComponent implements OnChanges{
   /**
    * Resets the modal state when it becomes visible.
    * In edit mode, preloads newKey and translationValues from the existing documents.
-   * Resets textarea sizes and scrolls the modal body to the top on every open.
+   * Custom values take precedence over generic values. If a custom value is null,
+   * falls back to the generic value. Resets textarea sizes and scrolls 
+   * the modal body to the top on every open.
    */
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['visible']?.currentValue === true) {
@@ -92,8 +94,9 @@ export class DisplayTranslationsEditComponent implements OnChanges{
       if (this.key) {
         this.newKey = this.key;
         this.docs.forEach(doc => {
-          const values = { ...doc.generic, ...doc.custom };
-          this.translationValues[doc.code] = values[this.key!] ?? '';
+          const custom = doc.custom || {};
+          const generic = doc.generic || {};
+          this.translationValues[doc.code] = custom[this.key!] || generic[this.key!] || '';
         });
       }
       this.textareas.forEach(textarea => {
