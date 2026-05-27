@@ -1,9 +1,23 @@
 <nav class="header navbar navbar-fixed-top">
   <div class="container">
     <div class="navbar-header">
+      <button
+        type="button"
+        class="navbar-toggle hamburger-btn"
+        (click)="toggleMenu()"
+        [attr.aria-label]="'Toggle navigation' | translate"
+        [attr.aria-expanded]="menuOpen"
+      >
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
       <span class="navbar-brand">{{ 'admin.app.name' | translate }}</span>
     </div>
-    <ul class="nav navbar-nav navbar-right">
+    <ul
+      class="nav navbar-nav navbar-right"
+      [class.open]="menuOpen"
+    >
       <li>
         <a [href]="webAppUrl">
           <i class="fa fa-fw fa-home" aria-hidden="true"></i>

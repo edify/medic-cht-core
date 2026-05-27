@@ -20,10 +20,11 @@ import { ResponseStatus } from '../../global-modules-interfaces';
   styleUrl: './display-date-time.component.less',
 })
 export class DisplayDateTimeComponent implements OnInit {
-  /** Standard date formats available in the dropdown */
+
+  /** Standard date formats available in the select */
   standardDateFormats: string[] = ['DD-MMM-YYYY', 'DD/MM/YYYY', 'MM/DD/YYYY'];
 
-  /** Standard datetime formats available in the dropdown */
+  /** Standard datetime formats available in the select */
   standardDatetimeFormats: string[] = ['DD-MMM-YYYY HH:mm:ss', 'DD/MM/YYYY HH:mm:ss', 'MM/DD/YYYY HH:mm:ss'];
 
   /** Currently selected date format */
@@ -50,7 +51,7 @@ export class DisplayDateTimeComponent implements OnInit {
    * Loads the saved date and datetime formats from the API and resolves
    * them against the standard format lists. If a saved format is valid
    * but not in the standard list, it gets added dynamically so the
-   * dropdown reflects the current configuration.
+   * select reflects the current configuration.
    */
   async ngOnInit(): Promise<void> {
     try {
@@ -104,20 +105,16 @@ export class DisplayDateTimeComponent implements OnInit {
   }
 
   /**
-   * Updates the selected date format and refreshes the live example.
-   * @param {string} date - the date format selected by the user
+   * Refreshes the live date format example when the selection changes.
    */
-  onDateFormatSelected(date: string) {
-    this.dateFormatSelection = date;
+  onDateFormatSelected() {
     this.dateFormatExample = moment().format(this.dateFormatSelection);
   }
 
   /**
-   * Updates the selected datetime format and refreshes the live example.
-   * @param {string} date - the datetime format selected by the user
+   * Refreshes the live datetime format example when the selection changes.
    */
-  onDateTimeFormatSelected(date: string) {
-    this.dateTimeFormatSelection = date;
+  onDateTimeFormatSelected() {
     this.dateTimeFormatExample = moment().format(this.dateTimeFormatSelection);
   }
 
