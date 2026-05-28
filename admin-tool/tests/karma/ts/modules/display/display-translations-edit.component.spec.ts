@@ -188,6 +188,25 @@ describe('DisplayTranslationsEditComponent', () => {
       });
       expect(component.translationValues).to.deep.equal({});
     });
+    
+    it('should fall back to generic value when custom key is null', () => {
+      component.key = 'Submit';
+      component.docs = [
+        {
+          _id: 'messages-en',
+          _rev: '1-abc',
+          code: 'en',
+          name: 'English',
+          type: 'translations',
+          generic: { Submit: 'Submit' },
+          custom: { Submit: null },
+        }
+      ] as any;
+      component.ngOnChanges({
+        visible: { currentValue: true, previousValue: false, firstChange: false, isFirstChange: () => false }
+      });
+      expect(component.translationValues['en']).to.equal('Submit');
+    });
   });
   describe('validate', () => {
     it('should return false and set keyError when newKey is empty in add mode', () => {
