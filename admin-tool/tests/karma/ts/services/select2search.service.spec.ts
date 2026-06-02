@@ -32,12 +32,6 @@ const mockPersonDoc = (overrides: any = {}) => ({
   ...overrides,
 });
 
-const mockQueryRow = (doc: any, typeId: string) => ({
-  id: doc._id,
-  key: [typeId],
-  value: `false false 1 ${doc.name.toLowerCase()}`,
-  doc,
-});
 
 describe('Select2SearchService', () => {
   let service: Select2SearchService;

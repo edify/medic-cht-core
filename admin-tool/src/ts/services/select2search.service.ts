@@ -194,7 +194,7 @@ export class Select2SearchService {
    * Renders a Select2 result row matching the original format.sender() output:
    * name + phone + parent name in gray lineage block.
    */
-  private renderResult(item: any): JQuery | string {
+  private renderResult(item: any): any {
     if (!item.doc) {
       return $('<span>' + (item.text || '&nbsp;') + '</span>');
     }
